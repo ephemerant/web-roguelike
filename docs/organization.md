@@ -1,9 +1,26 @@
 ### Coding
 
 * Clayton - 25%
+	* Initial rot.js framework set up
+	* Player experience (movement, camera, combat calls, pick up items, enter doors)
 * Stephen - 25%
+	* GUI
+	* HUD
+	* Lighting
 * Cody - 25%
+	* Design interactables (objects, creatures, etc) 
+	* Combat/poison/etc functionality
 * Jason - 25%
+	* Design interactables (objects, creatures, etc)
+
+### Features for grabs:
+
+* AI
+* Inventory system
+* Equipment slots
+* Randomly spawning NPCs (shopkeeper, etc?) and items
+* Leveling system
+* Character customization
 
 ### Testing
 
