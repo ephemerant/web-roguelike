@@ -1,10 +1,20 @@
-# Coding
+### Coding
 
+* Clayton - 25%
+* Stephen - 25%
+* Cody - 25%
+* Jason - 25%
 
+### Testing
 
-# Testing
+* Clayton - 25%
+* Stephen - 25%
+* Cody - 25%
+* Jason - 25%
 
+### Documentation
 
-
-# Documentation
-
+* Clayton - 25%
+* Stephen - 25%
+* Cody - 25%
+* Jason - 25%
