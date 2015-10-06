@@ -23,6 +23,10 @@
 * Randomly spawning NPCs (shopkeeper, etc?) and items
 * Leveling system
 * Character customization
+* Save files
+* Menus
+* Leaderboards
+* Game styles (endless, story)
 
 ### Testing
 
