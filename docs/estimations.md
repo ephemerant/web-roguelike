@@ -9,3 +9,4 @@
 | Item design                                 | 8                 |                       | Jason/Cody    |
 | Leveling system                             | 8                 |                       | Jason/Stephen |
 | Random spawning (enemies, items, landscape) | 8                 |                       | Cody          |
+| Menus/Screens                               | 8                 |                       | Stephen       |
