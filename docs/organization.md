@@ -7,11 +7,13 @@
 	* GUI
 	* HUD
 	* Lighting
+	* Menus/Screens
 * Cody - 25%
 	* Design interactables (objects, creatures, etc) 
 	* Combat/poison/etc functionality
 * Jason - 25%
 	* Design interactables (objects, creatures, etc)
+	* Combat/Stats
 
 ### Features for grabs:
 
