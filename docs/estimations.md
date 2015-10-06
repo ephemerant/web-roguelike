@@ -10,3 +10,4 @@
 | Leveling system                             | 8                 |                       | Jason/Stephen |
 | Random spawning (enemies, items, landscape) | 8                 |                       | Cody          |
 | Menus/Screens                               | 8                 |                       | Stephen       |
+| Save files (local)                          | 8                 |                       | Clayton       |

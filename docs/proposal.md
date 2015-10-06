@@ -19,3 +19,5 @@ Upon loading the game, a player will choose their name and place a few stats. Th
 * Stairs to progress to the next level
 * Stat/leveling system
 * Interactable menus 
+* Save files (local)
+* If time, save speedrun and character data to a Firebase server
