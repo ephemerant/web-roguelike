@@ -33,22 +33,13 @@ Game.Screen.startScreen = {
 // Define our playing screen
 Game.Screen.playScreen = {
     _map: null,
-    _centerX: 0,
-    _centerY: 0,
+    _player: null,
     move: function (dX, dY) {
         'use strict';
-        // Positive dX means movement right
-        // negative means movement left
-        // 0 means none
-        this._centerX = Math.max(0,
-                                 Math.min(this._map.getWidth() - 1,
-                                          this._centerX + dX));
-        // Positive dY means movement down
-        // negative means movement up
-        // 0 means none
-        this._centerY = Math.max(0,
-                                 Math.min(this._map.getHeight() - 1,
-                                          this._centerY + dY));
+        var newX = this._player.getX() + dX,
+            newY = this._player.getY() + dY;
+        // Try to move to the new cell
+        this._player.tryMove(newX, newY, this._map);
     },
     enter: function () {
         'use strict';
@@ -58,7 +49,8 @@ Game.Screen.playScreen = {
             mapHeight = 250,
             x,
             y,
-            generator;
+            generator,
+            position;
         for (x = 0; x < mapWidth; x = x + 1) {
             // Create the nested array for the y values
             map.push([]);
@@ -80,6 +72,11 @@ Game.Screen.playScreen = {
         });
         // Create our map from the tiles
         this._map = new Game.Map(map);
+        // Create our player and set the position
+        this._player = new Game.Entity(Game.PlayerTemplate);
+        position = this._map.getRandomFloorPosition();
+        this._player.setX(position.x);
+        this._player.setY(position.y);
     },
     exit: function () {
         'use strict';
@@ -90,12 +87,12 @@ Game.Screen.playScreen = {
         var screenWidth = Game.getScreenWidth(),
             screenHeight = Game.getScreenHeight(),
         // Make sure the x-axis doesn't go to the left of the left bound
-            topLeftX = Math.max(0, this._centerX - (screenWidth / 2)),
+            topLeftX = Math.max(0, this._player.getX() - (screenWidth / 2)),
         // Make sure the y-axis doesn't above the top bound
-            topLeftY = Math.max(0, this._centerY - (screenHeight / 2)),
+            topLeftY = Math.max(0, this._player.getY() - (screenHeight / 2)),
             x,
             y,
-            glyph;
+            tile;
         // Make sure we still have enough space to fit an entire game screen
         topLeftX = Math.min(topLeftX, this._map.getWidth() - screenWidth);
         // Make sure we still have enough space to fit an entire game screen
@@ -105,23 +102,23 @@ Game.Screen.playScreen = {
             for (y = topLeftY; y < topLeftY + screenHeight; y = y + 1) {
                 // Fetch the glyph for the tile and render it to the screen
                 // at the offset position.
-                glyph = this._map.getTile(x, y).getGlyph();
+                tile = this._map.getTile(x, y);
                 display.draw(
                     x - topLeftX,
                     y - topLeftY,
-                    glyph.getChar(),
-                    glyph.getForeground(),
-                    glyph.getBackground()
+                    tile.getChar(),
+                    tile.getForeground(),
+                    tile.getBackground()
                 );
             }
         }
-        // Render the cursor
+        // Render the player
         display.draw(
-            this._centerX - topLeftX,
-            this._centerY - topLeftY,
-            '@',
-            'white',
-            'black'
+            this._player.getX() - topLeftX,
+            this._player.getY() - topLeftY,
+            this._player.getChar(),
+            this._player.getForeground(),
+            this._player.getBackground()
         );
     },
     handleInput: function (inputType, inputData) {
