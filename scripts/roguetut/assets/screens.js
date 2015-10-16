@@ -37,9 +37,7 @@ Game.Screen.playScreen = {
         var map = [],
             x,
             y,
-            generator,
-            totalIterations,
-            i;
+            generator;
         for (x = 0; x < 80; x = x + 1) {
             // Create the nested array for the y values
             map.push([]);
@@ -49,14 +47,8 @@ Game.Screen.playScreen = {
             }
         }
         // Setup the map generator
-        generator = new ROT.Map.Cellular(80, 24);
-        generator.randomize(0.5);
-        totalIterations = 3;
-        // Iteratively smoothen the map
-        for (i = 0; i < totalIterations - 1; i = i + 1) {
-            generator.create();
-        }
-        // Smoothen it one last time and then update our map
+        generator = new ROT.Map.Uniform(80, 24);
+        // update our map
         generator.create(function (x, y, v) {
             if (v === 1) {
                 map[x][y] = Game.Tile.floorTile;
