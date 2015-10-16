@@ -1,12 +1,13 @@
 /*global Game */
 /*jslint nomen: true*/
 
-Game.Glyph = function (chr, foreground, background) {
+Game.Glyph = function (properties) {
     'use strict';
     // Instantiate properties to default if they weren't passed
-    this._char = chr || ' ';
-    this._foreground = foreground || 'white';
-    this._background = background || 'black';
+    properties = properties || {};
+    this._char = properties.character || ' ';
+    this._foreground = properties.foreground || 'white';
+    this._background = properties.background || 'black';
 };
 
 // Create standard getters for glyphs
