@@ -32,25 +32,47 @@ Game.Screen.startScreen = {
 
 // Define our playing screen
 Game.Screen.playScreen = {
+    _map: null,
+    _centerX: 0,
+    _centerY: 0,
+    move: function (dX, dY) {
+        'use strict';
+        // Positive dX means movement right
+        // negative means movement left
+        // 0 means none
+        this._centerX = Math.max(0,
+                                 Math.min(this._map.getWidth() - 1,
+                                          this._centerX + dX));
+        // Positive dY means movement down
+        // negative means movement up
+        // 0 means none
+        this._centerY = Math.max(0,
+                                 Math.min(this._map.getHeight() - 1,
+                                          this._centerY + dY));
+    },
     enter: function () {
         'use strict';
+        // Create a map based on our size parameters
         var map = [],
+            mapWidth = 250,
+            mapHeight = 250,
             x,
             y,
             generator;
-        for (x = 0; x < 80; x = x + 1) {
+        for (x = 0; x < mapWidth; x = x + 1) {
             // Create the nested array for the y values
             map.push([]);
             // Add all the tiles
-            for (y = 0; y < 24; y = y + 1) {
+            for (y = 0; y < mapHeight; y = y + 1) {
                 map[x].push(Game.Tile.nullTile);
             }
         }
         // Setup the map generator
-        generator = new ROT.Map.Uniform(80, 24);
-        // update our map
+        generator = new ROT.Map.Uniform(mapWidth, mapHeight,
+            {timeLimit: 5000});
+        // Smoothen it one last time and then update our map
         generator.create(function (x, y, v) {
-            if (v === 1) {
+            if (v === 0) {
                 map[x][y] = Game.Tile.floorTile;
             } else {
                 map[x][y] = Game.Tile.wallTile;
@@ -65,20 +87,42 @@ Game.Screen.playScreen = {
     },
     render: function (display) {
         'use strict';
-        // Iterate through all map cells
-        var x,
+        var screenWidth = Game.getScreenWidth(),
+            screenHeight = Game.getScreenHeight(),
+        // Make sure the x-axis doesn't go to the left of the left bound
+            topLeftX = Math.max(0, this._centerX - (screenWidth / 2)),
+        // Make sure the y-axis doesn't above the top bound
+            topLeftY = Math.max(0, this._centerY - (screenHeight / 2)),
+            x,
             y,
             glyph;
-        for (x = 0; x < this._map.getWidth(); x = x + 1) {
-            for (y = 0; y < this._map.getHeight(); y = y + 1) {
+        // Make sure we still have enough space to fit an entire game screen
+        topLeftX = Math.min(topLeftX, this._map.getWidth() - screenWidth);
+        // Make sure we still have enough space to fit an entire game screen
+        topLeftY = Math.min(topLeftY, this._map.getHeight() - screenHeight);
+        // Iterate through all visible map cells
+        for (x = topLeftX; x < topLeftX + screenWidth; x = x + 1) {
+            for (y = topLeftY; y < topLeftY + screenHeight; y = y + 1) {
                 // Fetch the glyph for the tile and render it to the screen
+                // at the offset position.
                 glyph = this._map.getTile(x, y).getGlyph();
-                display.draw(x, y,
+                display.draw(
+                    x - topLeftX,
+                    y - topLeftY,
                     glyph.getChar(),
                     glyph.getForeground(),
-                    glyph.getBackground());
+                    glyph.getBackground()
+                );
             }
         }
+        // Render the cursor
+        display.draw(
+            this._centerX - topLeftX,
+            this._centerY - topLeftY,
+            '@',
+            'white',
+            'black'
+        );
     },
     handleInput: function (inputType, inputData) {
         'use strict';
@@ -89,6 +133,16 @@ Game.Screen.playScreen = {
                 Game.switchScreen(Game.Screen.winScreen);
             } else if (inputData.keyCode === ROT.VK_ESCAPE) {
                 Game.switchScreen(Game.Screen.loseScreen);
+            }
+            // Movement
+            if (inputData.keyCode === ROT.VK_A) {
+                this.move(-1, 0);
+            } else if (inputData.keyCode === ROT.VK_D) {
+                this.move(1, 0);
+            } else if (inputData.keyCode === ROT.VK_W) {
+                this.move(0, -1);
+            } else if (inputData.keyCode === ROT.VK_S) {
+                this.move(0, 1);
             }
         }
     }
