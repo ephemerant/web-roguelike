@@ -1,12 +1,16 @@
 define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT) {
 
+  // Dictionary of tilesheet indexes
   var tiles = dungeon.tiles;
 
+  // How wide / tall each tile is
   var TILE_SIZE = dungeon.TILE_SIZE;
 
+  // Our ROT-based dungeon model
   dungeon = dungeon.dungeon;
 
-  // get dimensions of the window considering retina displays
+  // Width / height of the actual window
+  // TODO: Completely fill window with game screen?
   var SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio;
   var SCREEN_HEIGHT = window.innerHeight * window.devicePixelRatio;
 
@@ -20,31 +24,33 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     render: render
   });
 
+  // Import assets
   function preload() {
-
     game.load.image('dungeon', 'assets/Wall.png');
     game.load.spritesheet('warrior', 'assets/Warrior.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('engineer', 'assets/Engineer.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('mage', 'assets/Mage.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('paladin', 'assets/Paladin.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('rogue', 'assets/Rogue.png', TILE_SIZE, TILE_SIZE);
-
   }
 
+  // Phaser map where tiles are drawn
   var map;
+  // A distinct graphical layer on the map
+  // TODO: Use multiple layers for tiles, objects, and creatures
   var layer;
 
+  // Arrow keys
   var cursors;
+  // Key to start a new game [R]
   var reset_key;
+  // Key that when held, moves the player towards the end of the level [A]
   var autopilot_key;
 
+  // The player sprite
   var player;
 
   function create() {
-
-
-    // // Zoom camera in
-    game.camera.scale.set(1);
     // // Increase bounds so camera can move around
     game.world.setBounds(-DUNGEON_WIDTH, -DUNGEON_HEIGHT, DUNGEON_WIDTH * 3, DUNGEON_HEIGHT * 3);
 
@@ -69,17 +75,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
     reset_key = game.input.keyboard.addKey(Phaser.Keyboard.R);
     reset_key.onDown.add(createWorld, this);
-
   }
 
+  // Move player one step towards the stairs (used to test pathing)
   function autoPilot() {
-
     if (player.isMoving) return;
 
     // Input callback informs about map structure
     var passableCallback = function(x, y) {
       return (dungeon.tiles[x + "," + y] !== undefined);
-    }
+    };
 
     // Prepare path to stairs
     var astar = new ROT.Path.AStar(dungeon.stairs.x, dungeon.stairs.y, passableCallback, {
@@ -99,7 +104,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         _y = y - dungeon.player.y;
 
       movePlayer(_x, _y);
-    })
+    });
   }
 
   function createWorld() {
@@ -136,10 +141,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   }
 
   function createPlayer() {
+    // In the case you're starting a new game, delete the old player sprite
     if (player) {
       player.destroy();
     }
 
+    // TODO: Fully implement class system
     var playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
 
     player = game.add.sprite(0, 0, playerClass, 0);
@@ -157,6 +164,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     map.putTile(tile, x, y, layer);
   }
 
+  // Clear the map of all tiles
   function removeTiles() {
     // Tiles
     _.each(dungeon.tiles, function(tile, key) {
@@ -177,8 +185,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     });
   }
 
+  // Add (x, y) to the player's positions if it is a valid move
   function movePlayer(x, y) {
-
     if (player.isMoving) return;
 
     if (x === 0 && y === 0) return;
@@ -218,11 +226,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         player.isMoving = false;
       }, this);
     }
-
   }
 
+  // Handle input / animations
   function update() {
-
     if (cursors.left.isDown) {
       movePlayer(-1, 0);
       player.play('left');
@@ -242,16 +249,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         player.animations.stop();
       }
     }
-
   }
 
+  // Where each frame is rendered
   function render() {
-
     game.debug.text('Level ' + dungeon.level, 16, 30);
 
     game.debug.text('Use the ARROW KEYS to move', 16, game.height - 90);
     game.debug.text('Press R to start a new game', 16, game.height - 60);
     game.debug.text('Hold A for auto-pilot', 16, game.height - 30);
-
   }
 });

@@ -2,9 +2,7 @@ define(['ROT', 'lodash'], function(ROT, _) {
 
   var TILESHEET_WIDTH = 640;
   var TILE_SIZE = 32;
-
   var TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE;
-
   var WALL_GROUP_UNIT = TILE_UNIT * 3;
 
   // Use the 4th set of walls going down (blue stone)
@@ -30,8 +28,10 @@ define(['ROT', 'lodash'], function(ROT, _) {
     wall_cross: 24 + WALL_GROUP_UNIT
   };
 
+  // List of cross tiles, used for auto-joining
   var crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
 
+  // The main dungeon object
   var dungeon = {
 
     width: 60,
@@ -87,7 +87,6 @@ define(['ROT', 'lodash'], function(ROT, _) {
 
     // Analyze rooms and place doors
     _placeDoors: function() {
-
       var doors = [];
 
       _.each(this.digger.getRooms(), function(room, key) {
@@ -109,13 +108,11 @@ define(['ROT', 'lodash'], function(ROT, _) {
           }
         });
       });
-
       this.doors = doors;
     },
 
     // Place and autojoin walls around tiles
     _placeWalls: function() {
-
       var walls = {};
 
       var myTiles = this.tiles;
@@ -149,7 +146,6 @@ define(['ROT', 'lodash'], function(ROT, _) {
 
       // Join walls
       _.each(walls, function(tile, key) {
-
         var xy = key.split(',');
 
         var x = +(xy[0]),
@@ -201,7 +197,7 @@ define(['ROT', 'lodash'], function(ROT, _) {
         }
       });
 
-      // Smooth out cross stacking (optional)
+      // Smooth out cross stacking (optional, but looks ugly without)
       _.each(walls, function(tile, key) {
         if (_.contains(crosses, tile)) {
           var xy = key.split(',');
@@ -240,6 +236,7 @@ define(['ROT', 'lodash'], function(ROT, _) {
     }
   };
 
+  // Export data
   return {
     TILE_SIZE: TILE_SIZE,
     tiles: tiles,
