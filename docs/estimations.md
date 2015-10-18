@@ -4,7 +4,8 @@
 | Movement/collision detection                 | 5                 | 5                     | Clayton           |
 | Combat/stats                                 | 8                 |                       | Everyone          |
 | Graphics                                     | 13                | 5 (ongoing)           | Stephen / Clayton |
-| Camera                                       | 8                 |                       | Clayton           |
+| Basic camera                                 | 2                 | 2                     | Clayton           |
+| Lighting / Vision                            | 6                 |                       | Clayton           |
 | Enemy design                                 | 8                 |                       | Jason/Cody        |
 | Item design                                  | 8                 |                       | Jason/Cody        |
 | Leveling system                              | 8                 |                       | Jason/Stephen     |
