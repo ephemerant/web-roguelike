@@ -185,13 +185,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     });
   }
 
-  // Add (x, y) to the player's positions if it is a valid move
+  // Add (x, y) to the player's position if it is a valid move
   function movePlayer(x, y) {
     if (player.isMoving) return;
 
     if (x === 0 && y === 0) return;
 
-    var key = (dungeon.player.x + x) + ',' + (dungeon.player.y + y);
+    var newX = dungeon.player.x + x,
+      newY = dungeon.player.y + y;
+
+    var key = newX + ',' + newY;
 
     if (x === 1) {
       player.play('right');
@@ -208,6 +211,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     if (dungeon.tiles[key] !== undefined) {
 
       player.isMoving = true;
+
+      if (_.contains(dungeon.doors, key)) {
+        // Remove the door
+        dungeon.doors.splice(dungeon.doors.indexOf(key), 1);
+        // Overwrite door tile
+        // TODO: Use sprites for doors
+        placeTile(tiles.floor, newX, newY);
+        // Add delay to move again
+        setTimeout(function() {
+          player.isMoving = false;
+        }, 100)
+        return;
+      }
 
       dungeon.player.x += x;
       dungeon.player.y += y;
