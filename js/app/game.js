@@ -37,8 +37,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     game.load.spritesheet('rogue', 'assets/Rogue.png', TILE_SIZE, TILE_SIZE);
     game.load.audio('SND_door_open', 'assets/Sounds/Door.wav');
     game.load.audio('SND_teleport', 'assets/Sounds/Teleport.ogg');
-    game.load.audio('MUS_dungeon1', ['assets/Music/Adventure_Meme.mp3', 'assets/Music/Adventure_Meme.ogg']);
-    game.load.audio('MUS_dungeon2', ['assets/Music/Wonderful_Nightmare.mp3', 'assets/Music/Wonderful_Nightmare.ogg']);
+    game.load.audio('MUS_dungeon1', 'assets/Music/Adventure_Meme.ogg');
+    game.load.audio('MUS_dungeon2', 'assets/Music/Wonderful_Nightmare.ogg');
   }
 
   // Phaser map where tiles are drawn
@@ -267,8 +267,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         dungeon.level += 1;
         createDungeon();
 
-        if (dungeon.level >5){
-          if(MUS_dungeon2.isPlaying=== false){
+        if (dungeon.level > 5) {
+          if (MUS_dungeon2.isPlaying === false) {
             MUS_dungeon1.stop();
             MUS_dungeon2.play();
           }
