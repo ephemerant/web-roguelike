@@ -266,9 +266,17 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         SND_teleport.play();
         dungeon.level += 1;
         createDungeon();
+<<<<<<< HEAD
         if (dungeon.level > 5) {
           MUS_dungeon1.stop();
           MUS_dungeon2.play();
+=======
+        if (dungeon.level >5){
+          if(MUS_dungeon2.isPlaying=== false){
+            MUS_dungeon1.stop();
+            MUS_dungeon2.play();
+          }
+>>>>>>> origin/master
         }
       }
 
