@@ -32,6 +32,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     game.load.spritesheet('mage', 'assets/Mage.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('paladin', 'assets/Paladin.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('rogue', 'assets/Rogue.png', TILE_SIZE, TILE_SIZE);
+    game.load.audio('SND_door_open', 'assets/Sounds/Door.wav');
+    game.load.audio('MUS_dungeon1',['assets/Music/Adventure_Meme.mp3','assets/Music/Adventure_Meme.ogg']);
+    game.load.audio('MUS_dungeon2',['assets/Music/Wonderful_Nightmare.mp3','assets/Music/Wonderful_Nightmare.ogg']);
   }
 
   // Phaser map where tiles are drawn
@@ -49,6 +52,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // The player sprite
   var player;
+
+  //These variables are for volume control.
+  //TODO: Allow user to choose volume.
+  var sound_volume = 1;
+  var music_volume = .4;
+  //Sounds
+  var SND_door_open;
+  //Music
+  var MUS_dungeon1;
+  var MUS_dungeon2;
 
   function create() {
     // // Increase bounds so camera can move around
@@ -75,6 +88,18 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
     reset_key = game.input.keyboard.addKey(Phaser.Keyboard.R);
     reset_key.onDown.add(createWorld, this);
+
+    //create Sounds
+    SND_door_open = game.add.audio('SND_door_open');
+    SND_door_open.volume = sound_volume;
+    //create Music
+    MUS_dungeon1 = game.add.audio('MUS_dungeon1');
+    MUS_dungeon1.loop = true;
+    MUS_dungeon1.volume = music_volume;
+    MUS_dungeon1.play();
+    MUS_dungeon2 = game.add.audio('MUS_dungeon2');
+    MUS_dungeon2.loop = true;
+    MUS_dungeon2.volume = music_volume;
   }
 
   // Move player one step towards the stairs (used to test pathing)
@@ -218,6 +243,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         // Overwrite door tile
         // TODO: Use sprites for doors
         placeTile(tiles.floor, newX, newY);
+        SND_door_open.play();
         // Add delay to move again
         setTimeout(function() {
           player.isMoving = false;
@@ -232,6 +258,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
         dungeon.level += 1;
         createDungeon();
+        if (dungeon.level >5){
+          MUS_dungeon1.stop();
+          MUS_dungeon2.play();
+        }
       }
 
       // Slide the player to their new position
