@@ -17,6 +17,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   var DUNGEON_WIDTH = dungeon.width * TILE_SIZE;
   var DUNGEON_HEIGHT = dungeon.width * TILE_SIZE;
 
+  var INPUT_DELAY = 80;
+
   var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'screen', {
     preload: preload,
     create: create,
@@ -26,6 +28,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // Import assets
   function preload() {
+    // TODO: Loading screen?
     game.load.image('dungeon', 'assets/Wall.png');
     game.load.spritesheet('warrior', 'assets/Warrior.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('engineer', 'assets/Engineer.png', TILE_SIZE, TILE_SIZE);
@@ -33,8 +36,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     game.load.spritesheet('paladin', 'assets/Paladin.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('rogue', 'assets/Rogue.png', TILE_SIZE, TILE_SIZE);
     game.load.audio('SND_door_open', 'assets/Sounds/Door.wav');
-    game.load.audio('MUS_dungeon1',['assets/Music/Adventure_Meme.mp3','assets/Music/Adventure_Meme.ogg']);
-    game.load.audio('MUS_dungeon2',['assets/Music/Wonderful_Nightmare.mp3','assets/Music/Wonderful_Nightmare.ogg']);
+    game.load.audio('SND_teleport', 'assets/Sounds/Teleport.ogg');
+    game.load.audio('MUS_dungeon1', ['assets/Music/Adventure_Meme.mp3', 'assets/Music/Adventure_Meme.ogg']);
+    game.load.audio('MUS_dungeon2', ['assets/Music/Wonderful_Nightmare.mp3', 'assets/Music/Wonderful_Nightmare.ogg']);
   }
 
   // Phaser map where tiles are drawn
@@ -55,10 +59,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   //These variables are for volume control.
   //TODO: Allow user to choose volume.
-  var sound_volume = 1;
-  var music_volume = .4;
+  var sound_volume = .75;
+  var music_volume = .15;
   //Sounds
   var SND_door_open;
+  var SND_teleport;
   //Music
   var MUS_dungeon1;
   var MUS_dungeon2;
@@ -91,7 +96,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
     //create Sounds
     SND_door_open = game.add.audio('SND_door_open');
-    SND_door_open.volume = sound_volume;
+    SND_teleport = game.add.audio('SND_teleport');
+    SND_teleport.volume = SND_door_open.volume = sound_volume;
     //create Music
     MUS_dungeon1 = game.add.audio('MUS_dungeon1');
     MUS_dungeon1.loop = true;
@@ -247,7 +253,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         // Add delay to move again
         setTimeout(function() {
           player.isMoving = false;
-        }, 100)
+        }, INPUT_DELAY)
         return;
       }
 
@@ -256,9 +262,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
       // Entering stairs
       if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
+        // TODO: Swap stairs out with a portal?
+        SND_teleport.play();
         dungeon.level += 1;
         createDungeon();
-        if (dungeon.level >5){
+        if (dungeon.level > 5) {
           MUS_dungeon1.stop();
           MUS_dungeon2.play();
         }
@@ -268,7 +276,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       game.add.tween(player).to({
         x: dungeon.player.x * TILE_SIZE,
         y: dungeon.player.y * TILE_SIZE
-      }, 80, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function() {
+      }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function() {
         player.isMoving = false;
       }, this);
     }
