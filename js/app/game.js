@@ -259,8 +259,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         dungeon.level += 1;
         createDungeon();
         if (dungeon.level >5){
-          MUS_dungeon1.stop();
-          MUS_dungeon2.play();
+          if(MUS_dungeon2.isPlaying=== false){
+            MUS_dungeon1.stop();
+            MUS_dungeon2.play();
+          }
         }
       }
 
