@@ -36,9 +36,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     game.load.spritesheet('paladin', 'assets/Paladin.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('rogue', 'assets/Rogue.png', TILE_SIZE, TILE_SIZE);
     game.load.audio('SND_door_open', 'assets/Sounds/Door.wav');
-    game.load.audio('SND_teleport', 'assets/Sounds/Teleport.ogg');
-    game.load.audio('MUS_dungeon1', 'assets/Music/Adventure_Meme.ogg');
-    game.load.audio('MUS_dungeon2', 'assets/Music/Wonderful_Nightmare.ogg');
+    game.load.audio('SND_teleport', ['assets/Sounds/Teleport.ogg', 'assets/Sounds/Teleport.wav']);
+    game.load.audio('MUS_dungeon1', ['assets/Music/Adventure_Meme.ogg', 'assets/Music/Adventure_Meme.mp3']);
+    game.load.audio('MUS_dungeon2', ['assets/Music/Wonderful_Nightmare.ogg', 'assets/Music/Wonderful_Nightmare.mp3']);
   }
 
   // Phaser map where tiles are drawn
@@ -59,8 +59,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   //These variables are for volume control.
   //TODO: Allow user to choose volume.
-  var sound_volume = .75;
-  var music_volume = .15;
+  var sound_volume = 0.75;
+  var music_volume = 0.15;
   //Sounds
   var SND_door_open;
   var SND_teleport;
@@ -253,7 +253,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         // Add delay to move again
         setTimeout(function() {
           player.isMoving = false;
-        }, INPUT_DELAY)
+        }, INPUT_DELAY);
         return;
       }
 
