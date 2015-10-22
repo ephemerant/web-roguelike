@@ -3,30 +3,32 @@ define(['ROT', 'lodash'], function(ROT, _) {
   var TILESHEET_WIDTH = 640;
   var TILE_SIZE = 32;
   var TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE;
-  var WALL_GROUP_UNIT = TILE_UNIT * 3;
+  // Wall group to use from Wall.png
+  var WALL_GROUP_UNIT;
 
-  // Use the 4th set of walls going down (blue stone)
-  WALL_GROUP_UNIT *= 3;
+  function calculateTiles() {
+    return {
+      floor: 15,
+      door: 30,
+      stairs: 34,
+      wall_vertical: 20 + WALL_GROUP_UNIT,
+      wall_horizontal: 1 + WALL_GROUP_UNIT,
+      // Corner pieces
+      wall_top_right: 2 + WALL_GROUP_UNIT,
+      wall_bottom_right: 42 + WALL_GROUP_UNIT,
+      wall_top_left: 0 + WALL_GROUP_UNIT,
+      wall_bottom_left: 40 + WALL_GROUP_UNIT,
+      // Cross pieces
+      wall_cross_bottom: 44 + WALL_GROUP_UNIT,
+      wall_cross_top: 4 + WALL_GROUP_UNIT,
+      wall_cross_left: 23 + WALL_GROUP_UNIT,
+      wall_cross_right: 25 + WALL_GROUP_UNIT,
+      wall_cross: 24 + WALL_GROUP_UNIT
+    };
+  }
 
   // List of tiles and their corresponding position in the tile sheet
-  var tiles = {
-    floor: 15,
-    door: 30,
-    stairs: 34,
-    wall_vertical: 20 + WALL_GROUP_UNIT,
-    wall_horizontal: 1 + WALL_GROUP_UNIT,
-    // Corner pieces
-    wall_top_right: 2 + WALL_GROUP_UNIT,
-    wall_bottom_right: 42 + WALL_GROUP_UNIT,
-    wall_top_left: 0 + WALL_GROUP_UNIT,
-    wall_bottom_left: 40 + WALL_GROUP_UNIT,
-    // Cross pieces
-    wall_cross_bottom: 44 + WALL_GROUP_UNIT,
-    wall_cross_top: 4 + WALL_GROUP_UNIT,
-    wall_cross_left: 23 + WALL_GROUP_UNIT,
-    wall_cross_right: 25 + WALL_GROUP_UNIT,
-    wall_cross: 24 + WALL_GROUP_UNIT
-  };
+  var tiles = calculateTiles();
 
   // List of cross tiles, used for auto-joining
   var crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
@@ -40,6 +42,13 @@ define(['ROT', 'lodash'], function(ROT, _) {
     level: 1,
 
     _init: function() {
+
+      WALL_GROUP_UNIT = TILE_UNIT * 3 * _.random(1, 8);
+
+      tiles = calculateTiles();
+
+      crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
+
       ROT.RNG.setSeed(ROT.RNG.getUniform());
 
       console.log('Using RNG seed:', ROT.RNG.getSeed());
