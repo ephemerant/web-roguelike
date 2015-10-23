@@ -3,12 +3,12 @@ define(['ROT', 'lodash'], function(ROT, _) {
   var TILESHEET_WIDTH = 640;
   var TILE_SIZE = 32;
   var TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE;
-  // Wall group to use from Wall.png
-  var WALL_GROUP_UNIT;
 
-  function calculateTiles() {
+  // Wall group to use from Wall.png
+
+  function calculateTiles(WALL_GROUP_UNIT) {
     return {
-      floor: 15,
+      floor: 5 + WALL_GROUP_UNIT,
       door: 30,
       stairs: 34,
       wall_vertical: 20 + WALL_GROUP_UNIT,
@@ -28,7 +28,7 @@ define(['ROT', 'lodash'], function(ROT, _) {
   }
 
   // List of tiles and their corresponding position in the tile sheet
-  var tiles = calculateTiles();
+  var tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
 
   // List of cross tiles, used for auto-joining
   var crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
@@ -41,11 +41,9 @@ define(['ROT', 'lodash'], function(ROT, _) {
 
     level: 1,
 
-    _init: function() {
+    _init: function() {      
 
-      WALL_GROUP_UNIT = TILE_UNIT * 3 * _.random(1, 8);
-
-      tiles = calculateTiles();
+      tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
 
       crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
 
@@ -248,7 +246,7 @@ define(['ROT', 'lodash'], function(ROT, _) {
   // Export data
   return {
     TILE_SIZE: TILE_SIZE,
-    tiles: tiles,
-    dungeon: dungeon
+    dungeon: dungeon,
+    tiles: tiles
   };
 });

@@ -30,6 +30,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   function preload() {
     // TODO: Loading screen?
     game.load.image('dungeon', 'assets/Wall.png');
+    game.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('warrior', 'assets/Warrior.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('engineer', 'assets/Engineer.png', TILE_SIZE, TILE_SIZE);
     game.load.spritesheet('mage', 'assets/Mage.png', TILE_SIZE, TILE_SIZE);
@@ -56,11 +58,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // The player sprite
   var player;
+  
+  // Dictionary of door sprites by (x,y)
+  var doors = {};
 
   //These variables are for volume control.
   //TODO: Allow user to choose volume.
-  var sound_volume = 0.75;
-  var music_volume = 0.15;
+  var sound_volume = 0.4;
+  var music_volume = 0.1;
   //Sounds
   var SND_door_open;
   var SND_teleport;
@@ -164,7 +169,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     // Place doors
     _.each(dungeon.doors, function(key) {
       var xy = key.split(',');
-      placeTile(tiles.door, xy[0], xy[1]);
+      var door = game.add.sprite(xy[0] * TILE_SIZE, xy[1] * TILE_SIZE, 'door', 0);
+
+      // Door of a vertical wall?
+      if (dungeon.tiles[(+xy[0]+1) + ',' + (+xy[1])] !== undefined && dungeon.tiles[(+xy[0]-1) + ',' + (+xy[1])] !== undefined)
+        door.frame = 1;
+
+      doors[key] = door;
     });
 
     // Place stairs
@@ -180,15 +191,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     // TODO: Fully implement class system
     var playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
 
-    player = game.add.sprite(0, 0, playerClass, 0);
+    player = game.add.sprite(dungeon.player.x * TILE_SIZE, dungeon.player.y * TILE_SIZE, playerClass, 0);
     player.animations.add('left', [4, 5, 6, 7], 10, true);
     player.animations.add('right', [8, 9, 10, 11], 10, true);
     player.animations.add('up', [12, 13, 14, 15], 10, true);
     player.animations.add('down', [0, 1, 2, 3], 10, true);
     game.camera.follow(player);
-
-    player.x = dungeon.player.x * TILE_SIZE;
-    player.y = dungeon.player.y * TILE_SIZE;
   }
 
   function placeTile(tile, x, y) {
@@ -210,10 +218,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     });
 
     // Doors
-    _.each(dungeon.doors, function(key) {
-      var xy = key.split(',');
-      map.removeTile(xy[0], xy[1], layer);
+    _.each(doors, function(sprite, key) {
+      sprite.destroy();
     });
+
+    doors = {};
   }
 
   // Add (x, y) to the player's position if it is a valid move
@@ -244,11 +253,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       player.isMoving = true;
 
       if (_.contains(dungeon.doors, key)) {
-        // Remove the door
+        // Remove the door from the model
         dungeon.doors.splice(dungeon.doors.indexOf(key), 1);
-        // Overwrite door tile
-        // TODO: Use sprites for doors
-        placeTile(tiles.floor, newX, newY);
+        // Change door's appearance to open
+        var door = doors[key];
+        door.loadTexture('door_open', door.frame);
+
         SND_door_open.play();
         // Add delay to move again
         setTimeout(function() {
