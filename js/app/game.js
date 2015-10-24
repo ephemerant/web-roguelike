@@ -55,10 +55,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   var reset_key;
   // Key that when held, moves the player towards the end of the level [A]
   var autopilot_key;
+  // Square that follows mouse
+  var marker;
 
   // The player sprite
   var player;
-  
+
   // Dictionary of door sprites by (x,y)
   var doors = {};
 
@@ -99,11 +101,20 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     reset_key = game.input.keyboard.addKey(Phaser.Keyboard.R);
     reset_key.onDown.add(createWorld, this);
 
-    //create Sounds
+    // Our painting marker
+    marker = game.add.graphics();
+    marker.lineStyle(2, '#050505', 1);
+    marker.drawRect(0, 0, 32, 32);
+
+    game.input.addMoveCallback(updateMarker, this);
+    game.input.onDown.add(mouseClicked, this);
+
+    // Create Sounds
     SND_door_open = game.add.audio('SND_door_open');
     SND_teleport = game.add.audio('SND_teleport');
     SND_teleport.volume = SND_door_open.volume = sound_volume;
-    //create Music
+
+    // Create Music
     MUS_dungeon1 = game.add.audio('MUS_dungeon1');
     MUS_dungeon1.loop = true;
     MUS_dungeon1.volume = music_volume;
@@ -113,34 +124,68 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     MUS_dungeon2.volume = music_volume;
   }
 
+  function updateMarker() {
+    marker.x = layer.getTileX(game.input.activePointer.worldX) * 32;
+    marker.y = layer.getTileY(game.input.activePointer.worldY) * 32;
+  }
+
+  function mouseClicked() {
+    var x = layer.getTileX(game.input.activePointer.worldX);
+    var y = layer.getTileY(game.input.activePointer.worldY);
+
+    moveToTile(x, y);
+  }
+
+  // Attempt to traverse the entire path to (x, y)
+  function moveToTile(x, y) {
+    if (player.isMoving || (dungeon.player.x === x && dungeon.player.y === y) || dungeon.tiles[x + ',' + y] === undefined) return;
+
+    // Recursively move towards the tile
+    moveTowardsTile(x, y).then(function() {
+      moveToTile(x, y);
+    });
+
+  }
+
+  // Move one step towards (x, y), if it is a valid tile
+  function moveTowardsTile(x, y) {
+    return new Promise(function(resolve, reject) {
+      if (player.isMoving || dungeon.tiles[x + ',' + y] === undefined) {
+        resolve();
+        return;
+      }
+
+      // Input callback informs about map structure
+      var passableCallback = function(x, y) {
+        return (dungeon.tiles[x + "," + y] !== undefined);
+      };
+
+      // Prepare path towards tile
+      var astar = new ROT.Path.AStar(x, y, passableCallback, {
+        topology: 4
+      });
+
+      var count = 0;
+
+      // Compute from player
+      astar.compute(dungeon.player.x, dungeon.player.y, function(x, y) {
+
+        count += 1;
+
+        // Only move once
+        if (count === 2) {
+          var _x = x - dungeon.player.x,
+            _y = y - dungeon.player.y;
+
+          movePlayer(_x, _y).then(resolve);
+        }
+      });
+    });
+  }
+
   // Move player one step towards the stairs (used to test pathing)
   function autoPilot() {
-    if (player.isMoving) return;
-
-    // Input callback informs about map structure
-    var passableCallback = function(x, y) {
-      return (dungeon.tiles[x + "," + y] !== undefined);
-    };
-
-    // Prepare path to stairs
-    var astar = new ROT.Path.AStar(dungeon.stairs.x, dungeon.stairs.y, passableCallback, {
-      topology: 4
-    });
-
-    var exit = 0;
-
-    // Compute from player
-    astar.compute(dungeon.player.x, dungeon.player.y, function(x, y) {
-
-      exit += 1;
-      // Only move once
-      if (exit !== 2) return;
-
-      var _x = x - dungeon.player.x,
-        _y = y - dungeon.player.y;
-
-      movePlayer(_x, _y);
-    });
+    moveTowardsTile(dungeon.stairs.x, dungeon.stairs.y);
   }
 
   function createWorld() {
@@ -172,7 +217,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       var door = game.add.sprite(xy[0] * TILE_SIZE, xy[1] * TILE_SIZE, 'door', 0);
 
       // Door of a vertical wall?
-      if (dungeon.tiles[(+xy[0]+1) + ',' + (+xy[1])] !== undefined && dungeon.tiles[(+xy[0]-1) + ',' + (+xy[1])] !== undefined)
+      if (dungeon.tiles[(+xy[0] + 1) + ',' + (+xy[1])] !== undefined && dungeon.tiles[(+xy[0] - 1) + ',' + (+xy[1])] !== undefined)
         door.frame = 1;
 
       doors[key] = door;
@@ -227,72 +272,79 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // Add (x, y) to the player's position if it is a valid move
   function movePlayer(x, y) {
-    if (player.isMoving) return;
-
-    if (x === 0 && y === 0) return;
-
-    var newX = dungeon.player.x + x,
-      newY = dungeon.player.y + y;
-
-    var key = newX + ',' + newY;
-
-    if (x === 1) {
-      player.play('right');
-    } else if (x === -1) {
-      player.play('left');
-    }
-    if (y === 1) {
-      player.play('down');
-    } else if (y === -1) {
-      player.play('up');
-    }
-
-    // Valid tile
-    if (dungeon.tiles[key] !== undefined) {
-
-      player.isMoving = true;
-
-      if (_.contains(dungeon.doors, key)) {
-        // Remove the door from the model
-        dungeon.doors.splice(dungeon.doors.indexOf(key), 1);
-        // Change door's appearance to open
-        var door = doors[key];
-        door.loadTexture('door_open', door.frame);
-
-        SND_door_open.play();
-        // Add delay to move again
-        setTimeout(function() {
-          player.isMoving = false;
-        }, INPUT_DELAY);
+    return new Promise(function(resolve, reject) {
+      if (player.isMoving || (x === 0 && y === 0)) {
+        resolve();
         return;
       }
 
-      dungeon.player.x += x;
-      dungeon.player.y += y;
+      var newX = dungeon.player.x + x,
+        newY = dungeon.player.y + y;
 
-      // Entering stairs
-      if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
-        // TODO: Swap stairs out with a portal?
-        SND_teleport.play();
-        dungeon.level += 1;
-        createDungeon();
+      var key = newX + ',' + newY;
 
-        if (dungeon.level > 5) {
-          if (MUS_dungeon2.isPlaying === false) {
-            MUS_dungeon1.stop();
-            MUS_dungeon2.play();
-          }
-        }
+      if (x === 1) {
+        player.play('right');
+      } else if (x === -1) {
+        player.play('left');
+      }
+      if (y === 1) {
+        player.play('down');
+      } else if (y === -1) {
+        player.play('up');
       }
 
-      // Slide the player to their new position
-      game.add.tween(player).to({
-        x: dungeon.player.x * TILE_SIZE,
-        y: dungeon.player.y * TILE_SIZE
-      }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function() {
-        player.isMoving = false;
-      }, this);
-    }
+      // Valid tile
+      if (dungeon.tiles[key] !== undefined) {
+
+        player.isMoving = true;
+
+        if (_.contains(dungeon.doors, key)) {
+          // Remove the door from the model
+          dungeon.doors.splice(dungeon.doors.indexOf(key), 1);
+          // Change door's appearance to open
+          var door = doors[key];
+          door.loadTexture('door_open', door.frame);
+
+          SND_door_open.play();
+          // Add delay to move again
+          setTimeout(function() {
+            player.isMoving = false;
+            resolve();
+          }, INPUT_DELAY);
+          return;
+        }
+
+        dungeon.player.x += x;
+        dungeon.player.y += y;
+
+        // Entering stairs
+        if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
+          // TODO: Swap stairs out with a portal?
+          SND_teleport.play();
+          dungeon.level += 1;
+          createDungeon();
+
+          if (dungeon.level > 5) {
+            if (MUS_dungeon2.isPlaying === false) {
+              MUS_dungeon1.stop();
+              MUS_dungeon2.play();
+            }
+          }
+        }
+
+        // Slide the player to their new position
+        game.add.tween(player).to({
+          x: dungeon.player.x * TILE_SIZE,
+          y: dungeon.player.y * TILE_SIZE
+        }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function() {
+          player.isMoving = false;
+          resolve();
+        }, this);
+      } else {
+        resolve();
+      }
+    });
   }
 
   // Handle input / animations
