@@ -61,6 +61,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   // The player sprite
   var player;
 
+  var is_pathing = false;
+
   // Dictionary of door sprites by (x,y)
   var doors = {};
 
@@ -130,15 +132,27 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   }
 
   function mouseClicked() {
+    // Cancel current path, if there is one
+    if (is_pathing) {
+      is_pathing = false;
+      return;
+    }
+
+    // Standard procedure
     var x = layer.getTileX(game.input.activePointer.worldX);
     var y = layer.getTileY(game.input.activePointer.worldY);
+
+    is_pathing = true;
 
     moveToTile(x, y);
   }
 
   // Attempt to traverse the entire path to (x, y)
   function moveToTile(x, y) {
-    if (player.isMoving || (dungeon.player.x === x && dungeon.player.y === y) || dungeon.tiles[x + ',' + y] === undefined) return;
+    if (player.isMoving || (dungeon.player.x === x && dungeon.player.y === y) || dungeon.tiles[x + ',' + y] === undefined || is_pathing === false) {
+      is_pathing = false;
+      return;
+    }
 
     // Recursively move towards the tile
     moveTowardsTile(x, y).then(function() {
@@ -321,6 +335,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         // Entering stairs
         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
           // TODO: Swap stairs out with a portal?
+          is_pathing = false;
           SND_teleport.play();
           dungeon.level += 1;
           createDungeon();
@@ -350,18 +365,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   // Handle input / animations
   function update() {
     if (cursors.left.isDown) {
+      is_pathing = false;
       movePlayer(-1, 0);
-      player.play('left');
     } else if (cursors.right.isDown) {
+      is_pathing = false;
       movePlayer(1, 0);
-      player.play('right');
     } else if (cursors.up.isDown) {
+      is_pathing = false;
       movePlayer(0, -1);
-      player.play('up');
     } else if (cursors.down.isDown) {
+      is_pathing = false;
       movePlayer(0, 1);
-      player.play('down');
     } else if (autopilot_key.isDown) {
+      is_pathing = false;
       autoPilot();
     } else {
       if (!player.isMoving) {
