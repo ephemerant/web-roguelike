@@ -1,0 +1,8 @@
+main creates the states which will be the screens 
+main starts first state, preload
+prelaod loads all assets such as images and sounds for the game
+preload is not necessary and can be done in each states preload, but I thought it would be nice to load everything at once here
+Preload then startes menu state, Menu has a single button that when clicked starts the game state
+Game state is the game, renders image and generates dungeon
+on death (not implemented) start game_over state
+game_over state has single button that starts game state again 
