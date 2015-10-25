@@ -3,3 +3,5 @@ implimented working screens
 Great tutorial on how:
 http://tutorialzine.com/2015/06/making-your-first-html5-game-with-phaser/
 does not include all needed assets such as .mins and images already in the github
+
+! Also implemented fullscreen! Just mouse click screen when in game state
