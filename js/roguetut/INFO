@@ -1,5 +1,5 @@
-Following tutorial from Coding Cookies
-link in Issues
-http://www.codingcookies.com/2013/04/05/building-a-roguelike-in-javascript-part-3a/
-Tutorial uses rot.map.cellular
-need to convert to rot.map.dungeon
+Replaced old version with new phaser version
+implimented working screens
+Great tutorial on how:
+http://tutorialzine.com/2015/06/making-your-first-html5-game-with-phaser/
+does not include all needed assets such as .mins and images already in the github
