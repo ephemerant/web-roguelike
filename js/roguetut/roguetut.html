@@ -1,14 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <title>Javascript Roguelike</title>
-    </head>
-    <body>
-        <script src="../rot.min.js"></script>
-        <script src="assets/game.js"></script>
-        <script src="assets/screens.js"></script>
-        <script src="assets/glyph.js"></script>
-        <script src="assets/tile.js"></script>
-        <script src="assets/map.js"></script>
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>RogueLike</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Snake</title>
+    <script src="assets/js/lib/phaser.min.js"></script>
+    <script src="assets/js/lib/rot.min.js"></script>
+    <script src="assets/js/lib/lodash.min.js"></script>
+    <style>
+        body {
+            margin: 0px;
+            background: #111;
+        }
+        
+        #screen {
+            top: 50%;
+            left: 50%;
+            position: absolute;
+            border: 3px solid black;
+            box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.8);
+            -ms-transform: translateX(-50%) translateY(-50%);
+            -webkit-transform: translateX(-50%) translateY(-50%);
+            transform: translateX(-50%) translateY(-50%);
+        }
+        
+        canvas {
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="assets/js/dungeon.js"></script>
+    <script src="assets/js/preload.js"></script>
+    <script src="assets/js/menu.js"></script>
+    <script src="assets/js/game.js"></script>
+    <script src="assets/js/game_over.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+
 </html>
