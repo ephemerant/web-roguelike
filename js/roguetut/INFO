@@ -1,10 +1,14 @@
+Updated with new code from ephemerant, click to move functions and sideways doors. (10/25/15)
+
 Replaced old version with new phaser version
 implimented working screens
 Great tutorial on how:
 http://tutorialzine.com/2015/06/making-your-first-html5-game-with-phaser/
-does not include all needed assets such as .mins and images already in the github
 
 ! Also implemented fullscreen! Just mouse click screen when in game state
+(fullscreen disabled since mouse click is now used to move, cannot work yet with fullscreen_key)
 
 Note: menu and gameOver screens are buttons, activated on mouse click, not keyboard, just fyi.
       GameOver cannot be tested since game cannot be lost yet
+      moveTowardsTile function does not work, breaking anything that uses it such as autopilot and click to move
+      due to error in line 180 with call to movePlayer. 
