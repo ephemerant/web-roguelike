@@ -1,5 +1,5 @@
 /*jslint nomen: true */
-/*globals _ */
+/*globals _, Promise */
 
 var map,
     // A distinct graphical layer on the map
@@ -11,12 +11,22 @@ var map,
     reset_key,
     // Key that when held, moves the player towards the end of the level [A]
     autopilot_key,
+    // Square that follows mouse
+    marker,
+    // key that toggles fullscreen
+    fullscreen_key,
+    // key to pause game
+    pause_key,
     // The player sprite
     player,
+
+    is_pathing = false,
+    // Dictionary of door sprites by (x,y)
+    doors = {},
     //These variables are for volume control.
     //TODO: Allow user to choose volume.
-    sound_volume = 0.75,
-    music_volume = 0.15,
+    sound_volume = 0.4,
+    music_volume = 0.1,
     //Sounds
     SND_door_open,
     SND_teleport,
@@ -44,12 +54,6 @@ var map,
     // Wall group to use from Wall.png
     WALL_GROUP_UNIT,
     tiles = this.calculateTiles(),
-    // List of cross tiles, used for auto-joining
-    crosses = [tiles.wall_cross_bottom,
-               tiles.wall_cross_top,
-               tiles.wall_cross_left,
-               tiles.wall_cross_right,
-               tiles.wall_cross],
 
     Game = {
 
@@ -76,8 +80,21 @@ var map,
             this.createWorld();
             cursors = game.input.keyboard.createCursorKeys();
             autopilot_key = game.input.keyboard.addKey(Phaser.Keyboard.A);
+            pause_key = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+            game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+            fullscreen_key = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
+            fullscreen_key.onDown.add(this.gofull, this);
+
             reset_key = game.input.keyboard.addKey(Phaser.Keyboard.R);
             reset_key.onDown.add(this.createWorld, this);
+
+            // Our painting marker
+            marker = game.add.graphics();
+            marker.lineStyle(2, '#050505', 1);
+            marker.drawRect(0, 0, 32, 32);
+
+            game.input.addMoveCallback(this.updateMarker, this);
+            game.input.onDown.add(this.mouseClicked, this);
 
             //create Sounds
             SND_door_open = game.add.audio('SND_door_open');
@@ -92,36 +109,84 @@ var map,
             MUS_dungeon2 = game.add.audio('MUS_dungeon2');
             MUS_dungeon2.loop = true;
             MUS_dungeon2.volume = music_volume;
+
+        },
+
+        updateMarker: function () {
+            'use strict';
+            marker.x = layer.getTileX(game.input.activePointer.worldX) * 32;
+            marker.y = layer.getTileY(game.input.activePointer.worldY) * 32;
+        },
+
+        mouseClicked: function () {
+            'use strict';
+            // Cancel current path, if there is one
+            if (is_pathing) {
+                is_pathing = false;
+                return;
+            // Add a input listener that can help us return from being paused
+            } else if (game.paused) {
+                game.paused = false;
+            }
+            // Standard procedure
+            var x = layer.getTileX(game.input.activePointer.worldX),
+                y = layer.getTileY(game.input.activePointer.worldY);
+            is_pathing = true;
+            this.moveToTile(x, y);
+        },
+
+        // Attempt to traverse the entire path to (x, y)
+        moveToTile: function (x, y) {
+            'use strict';
+            if (player.isMoving ||
+                    (dungeon.player.x === x && dungeon.player.y === y) ||
+                    dungeon.tiles[x + ',' + y] === undefined ||
+                    is_pathing === false) {
+                is_pathing = false;
+                return;
+            }
+
+            // Recursively move towards the tile
+            this.moveTowardsTile(x, y).then(function () {
+                this.moveToTile(x, y);
+            });
+
+        },
+
+        // Move one step towards (x, y), if it is a valid tile
+        moveTowardsTile: function (x, y) {
+            'use strict';
+            return new Promise(function (resolve, reject) {
+                if (player.isMoving || dungeon.tiles[x + ',' + y] === undefined) {
+                    resolve();
+                    return;
+                }
+                // Input callback informs about map structure
+                var passableCallback = function (x, y) {
+                        return (dungeon.tiles[x + "," + y] !== undefined);
+                    },
+                    // Prepare path towards tile
+                    astar = new ROT.Path.AStar(x, y, passableCallback, {
+                        topology: 4
+                    }),
+                    count = 0;
+                // Compute from player
+                astar.compute(dungeon.player.x, dungeon.player.y, function (x, y) {
+                    count += 1;
+                    // Only move once
+                    if (count === 2) {
+                        var _x = x - dungeon.player.x,
+                            _y = y - dungeon.player.y;
+                        this.movePlayer(_x, _y).then(resolve);
+                    }
+                });
+            });
         },
 
         // Move player one step towards the stairs (used to test pathing)
         autoPilot: function () {
             'use strict';
-            if (player.isMoving) {
-                return;
-            }
-
-            // Input callback informs about map structure
-            var passableCallback = function (x, y) {
-                    return (dungeon.tiles[x + "," + y] !== undefined);
-                },
-                // Prepare path to stairs
-                astar = new ROT.Path.AStar(dungeon.stairs.x, dungeon.stairs.y, passableCallback, {
-                    topology: 4
-                }),
-                exit = 0;
-
-            // Compute from player
-            astar.compute(dungeon.player.x, dungeon.player.y, function (x, y) {
-                exit += 1;
-                // Only move once
-                if (exit !== 2) {
-                    return;
-                }
-                var _x = x - dungeon.player.x,
-                    _y = y - dungeon.player.y;
-                this.movePlayer(_x, _y);
-            });
+            this.moveTowardsTile(dungeon.stairs.x, dungeon.stairs.y);
         },
 
         createWorld: function () {
@@ -151,8 +216,15 @@ var map,
 
             // Place doors
             _.each(dungeon.doors, function (key) {
-                var xy = key.split(',');
-                map.putTile(tiles.door, xy[0], xy[1]);
+                var xy = key.split(','),
+                    door = game.add.sprite(xy[0] * TILE_SIZE, xy[1] * TILE_SIZE, 'door', 0);
+
+                // Door of a vertical wall?
+                if (dungeon.tiles[(+xy[0] + 1) + ',' + (+xy[1])] !== undefined && dungeon.tiles[(+xy[0] - 1) + ',' + (+xy[1])] !== undefined) {
+                    door.frame = 1;
+                }
+
+                doors[key] = door;
             });
 
             // Place stairs
@@ -167,14 +239,18 @@ var map,
             }
             // TODO: Fully implement class system
             var playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
-            player = game.add.sprite(0, 0, playerClass, 0);
+
+            player = game.add.sprite(dungeon.player.x * TILE_SIZE, dungeon.player.y * TILE_SIZE, playerClass, 0);
             player.animations.add('left', [4, 5, 6, 7], 10, true);
             player.animations.add('right', [8, 9, 10, 11], 10, true);
             player.animations.add('up', [12, 13, 14, 15], 10, true);
             player.animations.add('down', [0, 1, 2, 3], 10, true);
             game.camera.follow(player);
-            player.x = dungeon.player.x * TILE_SIZE;
-            player.y = dungeon.player.y * TILE_SIZE;
+        },
+
+        placeTile: function (tile, x, y) {
+            'use strict';
+            map.putTile(tile, x, y, layer);
         },
 
         // Clear the map of all tiles
@@ -193,109 +269,120 @@ var map,
             });
 
             // Doors
-            _.each(dungeon.doors, function (key) {
-                var xy = key.split(',');
-                map.removeTile(xy[0], xy[1], layer);
+            _.each(doors, function (sprite, key) {
+                sprite.destroy();
             });
+
+            doors = {};
         },
 
         // Add (x, y) to the player's position if it is a valid move
         movePlayer: function (x, y) {
             'use strict';
-            if (player.isMoving) {
-                return;
-            }
-            if (x === 0 && y === 0) {
-                return;
-            }
-            var newX = dungeon.player.x + x,
-                newY = dungeon.player.y + y,
-                key = newX + ',' + newY;
-
-            if (x === 1) {
-                player.play('right');
-            } else if (x === -1) {
-                player.play('left');
-            }
-            if (y === 1) {
-                player.play('down');
-            } else if (y === -1) {
-                player.play('up');
-            }
-
-            // Valid tile
-            if (dungeon.tiles[key] !== undefined) {
-
-                player.isMoving = true;
-
-                if (_.contains(dungeon.doors, key)) {
-                    // Remove the door
-                    dungeon.doors.splice(dungeon.doors.indexOf(key), 1);
-                    // Overwrite door tile
-                    // TODO: Use sprites for doors
-                    map.putTile(tiles.floor, newX, newY);
-                    SND_door_open.play();
-                    // Add delay to move again
-                    setTimeout(function () {
-                        player.isMoving = false;
-                    }, INPUT_DELAY);
+            return new Promise(function (resolve, reject) {
+                if (player.isMoving || (x === 0 && y === 0)) {
+                    resolve();
                     return;
                 }
 
-                dungeon.player.x += x;
-                dungeon.player.y += y;
+                var newX = dungeon.player.x + x,
+                    newY = dungeon.player.y + y,
+                    key = newX + ',' + newY,
+                    door;
 
-                // Entering stairs
-                if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
-                    // TODO: Swap stairs out with a portal?
-                    SND_teleport.play();
-                    dungeon.level += 1;
-                    this.createDungeon();
-
-                    if (dungeon.level > 5) {
-                        if (MUS_dungeon2.isPlaying === false) {
-                            MUS_dungeon1.stop();
-                            MUS_dungeon2.play();
-                        }
-                    }
+                if (x === 1) {
+                    player.play('right');
+                } else if (x === -1) {
+                    player.play('left');
+                }
+                if (y === 1) {
+                    player.play('down');
+                } else if (y === -1) {
+                    player.play('up');
                 }
 
-                // Slide the player to their new position
-                game.add.tween(player).to({
-                    x: dungeon.player.x * TILE_SIZE,
-                    y: dungeon.player.y * TILE_SIZE
-                }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function () {
-                    player.isMoving = false;
-                }, this);
-            }
+                // Valid tile
+                if (dungeon.tiles[key] !== undefined) {
+
+                    player.isMoving = true;
+
+                    if (_.contains(dungeon.doors, key)) {
+                        // Remove the door from the model
+                        dungeon.doors.splice(dungeon.doors.indexOf(key), 1);
+                        // Change door's appearance to open
+                        door = doors[key];
+                        door.loadTexture('door_open', door.frame);
+
+                        SND_door_open.play();
+                        // Add delay to move again
+                        setTimeout(function () {
+                            player.isMoving = false;
+                            resolve();
+                        }, INPUT_DELAY);
+                        return;
+                    }
+
+                    dungeon.player.x += x;
+                    dungeon.player.y += y;
+
+                    // Entering stairs
+                    if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
+                        // TODO: Swap stairs out with a portal?
+                        is_pathing = false;
+                        SND_teleport.play();
+                        dungeon.level += 1;
+                        this.createDungeon();
+
+                        if (dungeon.level > 5) {
+                            if (MUS_dungeon2.isPlaying === false) {
+                                MUS_dungeon1.stop();
+                                MUS_dungeon2.play();
+                            }
+                        }
+                    }
+
+                    // Slide the player to their new position
+                    game.add.tween(player).to({
+                        x: dungeon.player.x * TILE_SIZE,
+                        y: dungeon.player.y * TILE_SIZE
+                    }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function () {
+                        player.isMoving = false;
+                        resolve();
+                    }, this);
+                } else {
+                    resolve();
+                }
+            });
         },
 
+        // Handle input / animations
         update: function () {
             'use strict';
-            // Handle arrow key presses, while not allowing illegal direction changes that will kill the player.
             if (cursors.left.isDown) {
+                is_pathing = false;
                 this.movePlayer(-1, 0);
-                player.play('left');
             } else if (cursors.right.isDown) {
+                is_pathing = false;
                 this.movePlayer(1, 0);
-                player.play('right');
             } else if (cursors.up.isDown) {
+                is_pathing = false;
                 this.movePlayer(0, -1);
-                player.play('up');
             } else if (cursors.down.isDown) {
+                is_pathing = false;
                 this.movePlayer(0, 1);
-                player.play('down');
             } else if (autopilot_key.isDown) {
+                is_pathing = false;
                 this.autoPilot();
+            } else if (pause_key.isDown) {
+                game.paused = true;
             } else {
                 if (!player.isMoving) {
                     player.animations.stop();
                 }
             }
             // Stretch to fill
-            game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
-            game.input.onDown.add(this.gofull, this);
-
+            //game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+            //game.input.onDown.add(this.gofull, this);
         },
 
         gofull: function () {
@@ -315,27 +402,5 @@ var map,
             game.debug.text('Use the ARROW KEYS to move', 16, game.height - 90);
             game.debug.text('Press R to start a new game', 16, game.height - 60);
             game.debug.text('Hold A for auto-pilot', 16, game.height - 30);
-        },
-
-        calculateTiles: function () {
-            'use strict';
-            return {
-                floor: 15,
-                door: 30,
-                stairs: 34,
-                wall_vertical: 20 + WALL_GROUP_UNIT,
-                wall_horizontal: 1 + WALL_GROUP_UNIT,
-                // Corner pieces
-                wall_top_right: 2 + WALL_GROUP_UNIT,
-                wall_bottom_right: 42 + WALL_GROUP_UNIT,
-                wall_top_left: WALL_GROUP_UNIT,
-                wall_bottom_left: 40 + WALL_GROUP_UNIT,
-                // Cross pieces
-                wall_cross_bottom: 44 + WALL_GROUP_UNIT,
-                wall_cross_top: 4 + WALL_GROUP_UNIT,
-                wall_cross_left: 23 + WALL_GROUP_UNIT,
-                wall_cross_right: 25 + WALL_GROUP_UNIT,
-                wall_cross: 24 + WALL_GROUP_UNIT
-            };
         }
     };

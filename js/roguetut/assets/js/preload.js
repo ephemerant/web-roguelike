@@ -13,6 +13,8 @@ var game,
             game.load.image('menu', './assets/images/play.png');
             game.load.image('gameover', './assets/images/gameover.png');
             game.load.image('dungeon', './assets/images/Wall.png');
+            game.load.spritesheet('door', './assets/images/Door.png', TILE_SIZE, TILE_SIZE);
+            game.load.spritesheet('door_open', './assets/images/Door_Open.png', TILE_SIZE, TILE_SIZE);
             game.load.spritesheet('warrior', './assets/images/Warrior.png', TILE_SIZE, TILE_SIZE);
             game.load.spritesheet('engineer', './assets/images/Engineer.png', TILE_SIZE, TILE_SIZE);
             game.load.spritesheet('mage', './assets/images/Mage.png', TILE_SIZE, TILE_SIZE);

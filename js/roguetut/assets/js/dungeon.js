@@ -32,7 +32,7 @@ function calculateTiles() {
 // List of tiles and their corresponding position in the tile sheet
 var tiles = calculateTiles(),
     // List of cross tiles, used for auto-joining
-    crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross],
+    crosses,
     // The main dungeon object
     dungeon = {
 
