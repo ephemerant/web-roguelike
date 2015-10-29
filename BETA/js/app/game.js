@@ -1,28 +1,37 @@
 /*jslint nomen: true */
-/*globals _, Promise */
+/*globals _, Promise, ROT, Phaser, game */
 
-var map,
+// Our ROT-based dungeon model
+var dungeon = dungeon,
+    // Dictionary of tilesheet indexes
+    tiles = dungeon.width,
+    // How wide / tall each tile is
+    TILE_SIZE = 32,
+    // Phaser map where tiles are drawn
+    map,
     // A distinct graphical layer on the map
     // TODO: Use multiple layers for tiles, objects, and creatures
     layer,
+    
     // Arrow keys
     cursors,
     // Key to start a new game [R]
     reset_key,
     // Key that when held, moves the player towards the end of the level [A]
     autopilot_key,
-    // Square that follows mouse
-    marker,
     // key that toggles fullscreen
     fullscreen_key,
     // key to pause game
     pause_key,
+    
+    // Square that follows mouse
+    marker,
     // The player sprite
     player,
-
     is_pathing = false,
     // Dictionary of door sprites by (x,y)
     doors = {},
+    
     //These variables are for volume control.
     //TODO: Allow user to choose volume.
     sound_volume = 0.4,
@@ -33,27 +42,20 @@ var map,
     //Music
     MUS_dungeon1,
     MUS_dungeon2,
-    game = game,
-    Phaser = Phaser,
-    ROT = ROT,
-    // Our ROT-based dungeon model
-    dungeon = dungeon,
-    // Dictionary of tilesheet indexes
-    tiles = dungeon.width,
-    // How wide / tall each tile is
-    TILE_SIZE = 32,
+    
     // Width / height of the actual window
     // TODO: Completely fill window with game screen?
     SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio,
     SCREEN_HEIGHT = window.innerHeight * window.devicePixelRatio,
+    
     DUNGEON_WIDTH = dungeon.width * TILE_SIZE,
     DUNGEON_HEIGHT = dungeon.width * TILE_SIZE,
+    
     INPUT_DELAY = 80,
     TILESHEET_WIDTH = 640,
     TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE,
     // Wall group to use from Wall.png
     WALL_GROUP_UNIT,
-    tiles = this.calculateTiles(),
 
     Game = {
 

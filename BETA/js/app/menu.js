@@ -1,5 +1,6 @@
-var game,
-    Menu = {
+/*globals game*/
+
+var Menu = {
 
         preload: function () {
             'use strict';
