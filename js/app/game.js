@@ -1,7 +1,10 @@
-define(['Phaser', 'lodash', 'dungeon', 'ROT', 'creatures'], function(Phaser, _, dungeon, ROT, creatures) {
+define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT) {
 
   // Dictionary of tilesheet indexes
   var tiles = dungeon.tiles;
+
+  // Creature types
+  var creatures = dungeon.creatures;
 
   // How wide / tall each tile is
   var TILE_SIZE = dungeon.TILE_SIZE;
@@ -18,30 +21,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'creatures'], function(Phaser, _, 
   var DUNGEON_HEIGHT = dungeon.width * TILE_SIZE;
 
   var INPUT_DELAY = 80;
-
-  var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'screen', {
-    preload: preload,
-    create: create,
-    update: update,
-    render: render
-  });
-
-  // Import assets
-  function preload() {
-    // TODO: Loading screen?
-    game.load.image('dungeon', 'assets/Wall.png');
-    game.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
-    game.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
-    game.load.spritesheet('warrior', 'assets/Warrior.png', TILE_SIZE, TILE_SIZE);
-    game.load.spritesheet('engineer', 'assets/Engineer.png', TILE_SIZE, TILE_SIZE);
-    game.load.spritesheet('mage', 'assets/Mage.png', TILE_SIZE, TILE_SIZE);
-    game.load.spritesheet('paladin', 'assets/Paladin.png', TILE_SIZE, TILE_SIZE);
-    game.load.spritesheet('rogue', 'assets/Rogue.png', TILE_SIZE, TILE_SIZE);
-    game.load.audio('SND_door_open', 'assets/Sounds/Door.wav');
-    game.load.audio('SND_teleport', ['assets/Sounds/Teleport.ogg', 'assets/Sounds/Teleport.wav']);
-    game.load.audio('MUS_dungeon1', ['assets/Music/Adventure_Meme.ogg', 'assets/Music/Adventure_Meme.mp3']);
-    game.load.audio('MUS_dungeon2', ['assets/Music/Wonderful_Nightmare.ogg', 'assets/Music/Wonderful_Nightmare.mp3']);
-  }
 
   // Phaser map where tiles are drawn
   var map;
@@ -61,10 +40,15 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'creatures'], function(Phaser, _, 
   // The player sprite
   var player;
 
+  // TODO: Make a player/creature variable
+  // Currently automatically moving?
   var is_pathing = false;
 
   // Dictionary of door sprites by (x,y)
   var doors = {};
+
+  // List of monster sprites
+  var monsters = [];
 
   //These variables are for volume control.
   //TODO: Allow user to choose volume.
@@ -76,6 +60,39 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'creatures'], function(Phaser, _, 
   //Music
   var MUS_dungeon1;
   var MUS_dungeon2;
+
+  var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'screen', {
+    preload: preload,
+    create: create,
+    update: update,
+    render: render
+  });
+
+  // Import assets
+  function preload() {
+    // TODO: Loading screen?
+    game.load.image('dungeon', 'assets/Wall.png');
+    game.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
+
+    // TODO: Move this list to a player.js file or something of the sort
+    var classes = ['Warrior', 'Engineer', 'Mage', 'Paladin', 'Rogue'];
+
+    // Load player sprites
+    classes.forEach(function(name) {
+      game.load.spritesheet(name.toLowerCase(), 'assets/' + name + '.png', TILE_SIZE, TILE_SIZE);
+    });
+
+    // Load monster sprites
+    creatures._sprites.forEach(function(sprite) {
+      game.load.spritesheet(sprite.toLowerCase().replace('.png', ''), 'assets/monsters/' + sprite, TILE_SIZE, TILE_SIZE);
+    });
+
+    game.load.audio('SND_door_open', 'assets/sounds/Door.wav');
+    game.load.audio('SND_teleport', ['assets/sounds/Teleport.ogg', 'assets/sounds/Teleport.wav']);
+    game.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
+    game.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
+  }
 
   function create() {
     // // Increase bounds so camera can move around
@@ -241,6 +258,18 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'creatures'], function(Phaser, _, 
       doors[key] = door;
     });
 
+    // Place monsters
+
+    // TEMPORARY, for testing
+    (function() {
+      var keys = Object.keys(dungeon.tiles);
+      var tile = keys[1].split(',');
+      var x = +tile[0],
+        y = +tile[1];
+      var monster = game.add.sprite(x * TILE_SIZE, y * TILE_SIZE, 'reptile0', 38);
+      monsters.push(monster);
+    })();
+
     // Place stairs
     placeTile(tiles.stairs, dungeon.stairs.x, dungeon.stairs.y);
   }
@@ -285,7 +314,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'creatures'], function(Phaser, _, 
       sprite.destroy();
     });
 
+    // Monsters
+    monsters.forEach(function(sprite) {
+      sprite.destroy();
+    });
+
     doors = {};
+    monsters = [];
   }
 
   // Add (x, y) to the player's position if it is a valid move

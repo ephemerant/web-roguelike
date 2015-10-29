@@ -1,13 +1,7 @@
-define(['ROT', 'lodash', 'Phaser'], function(ROT, _, Phaser){
-
-  var sprites = ['Reptile0.png', 'Reptile1.png'];
-
-  sprites.forEach(function(sprite) {
-    //  game.load.spritesheet(sprite.toLower().replace('.png', ''), 'assets/monsters/' + sprite, TILE_SIZE, TILE_SIZE);
-  });
-
-  var creatures = {
-    base: function (name, hp, str, sprite, frame) {
+define(['ROT', 'lodash', 'Phaser'], function(ROT, _, Phaser) {
+  return {
+    _sprites: ['Reptile0.png', 'Reptile1.png'],
+    _generic: function(name, hp, str, sprite, frame) {
       return {
         name: name,
         hp: hp,
@@ -21,17 +15,14 @@ define(['ROT', 'lodash', 'Phaser'], function(ROT, _, Phaser){
           this.x += x;
           this.y += y;
         },
-        die: function() {
-        },
-        interact: function(){
+        die: function() {},
+        interact: function() {
           //this function is for if the player runs into the creature without intent to attack.
         }
       };
     },
-    snake: function () {
-      return creatures.base('Snake', 10, 5, 'Reptile0', 35);
+    snake: function() {
+      return this._generic('Snake', 10, 5, 'Reptile0', 35);
     }
   };
-
-  return creatures;
 });

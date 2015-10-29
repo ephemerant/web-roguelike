@@ -4,11 +4,7 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
   var TILE_SIZE = 32;
   var TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE;
 
-  // Wall group to use from Wall.png
-  var snake = creatures.snake();
-
-  console.log(snake);
-  
+  // Wall group to use from Wall.png  
   function calculateTiles(WALL_GROUP_UNIT) {
     return {
       floor: 5 + WALL_GROUP_UNIT,
@@ -61,6 +57,7 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
       this._placeDoors();
 
       this._placeWalls();
+
       var keys = Object.keys(dungeon.tiles);
 
       var tile = keys[0].split(',');
@@ -247,6 +244,7 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
   return {
     TILE_SIZE: TILE_SIZE,
     dungeon: dungeon,
-    tiles: tiles
+    tiles: tiles,
+    creatures: creatures
   };
 });
