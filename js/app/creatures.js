@@ -1,4 +1,4 @@
-define(['ROT', 'lodash', 'Phaser'], function(ROT, _, Phaser) {
+define(['ROT', 'Phaser'], function(ROT, Phaser) {
   return {
     _sprites: ['Reptile0.png', 'Reptile1.png'],
     _generic: function(name, hp, str, sprite, frame) {

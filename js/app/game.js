@@ -95,12 +95,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   }
 
   function create() {
-    // // Increase bounds so camera can move around
+    // // Increase bounds so camera can move outside the map boundaries
     game.world.setBounds(-DUNGEON_WIDTH, -DUNGEON_HEIGHT, DUNGEON_WIDTH * 3, DUNGEON_HEIGHT * 3);
 
     game.stage.backgroundColor = '#050505';
-
-    game.stage.smoothed = false;
 
     // Creates a blank tilemap
     map = game.add.tilemap(null, TILE_SIZE, TILE_SIZE);

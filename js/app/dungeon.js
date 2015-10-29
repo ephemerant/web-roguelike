@@ -58,20 +58,28 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
       this._placeWalls();
 
-      var keys = Object.keys(dungeon.tiles);
+      this._rooms = this.digger.getRooms();
 
-      var tile = keys[0].split(',');
+      var playerRoom = this._rooms[_.random(this._rooms.length - 1)];
+
+      function distance(a, b) {
+        return Math.sqrt(Math.pow(a._x1 - b._x1, 2) + Math.pow(a._y1 - b._y1, 2));
+      }
+
+      // Sort based on distance from player's room
+      this._rooms.sort(function(a, b) {
+        return distance(a, playerRoom) - distance(b, playerRoom);
+      });
 
       this.player = {
-        x: +tile[0],
-        y: +tile[1]
+        x: playerRoom._x1,
+        y: playerRoom._y1
       };
 
-      tile = keys[keys.length - 1].split(',');
-
+      // Put stairs in the farthest room away
       this.stairs = {
-        x: +tile[0],
-        y: +tile[1]
+        x: this._rooms[this._rooms.length - 1]._x2,
+        y: this._rooms[this._rooms.length - 1]._y2
       };
 
     },
