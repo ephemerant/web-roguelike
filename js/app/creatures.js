@@ -1,7 +1,7 @@
 define(['ROT', 'Phaser'], function(ROT, Phaser) {
   return {
     _sprites: ['Reptile0.png', 'Reptile1.png'],
-    _generic: function(name, hp, str, sprite, frame) {
+    _generic: function(name, hp, str, sprite, frame, x, y) {
       return {
         name: name,
         hp: hp,
@@ -9,11 +9,11 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         str: str,
         sprite: sprite,
         frame: frame,
-        x: 0,
-        y: 0,
-        move: function(x, y) {
-          this.x += x;
-          this.y += y;
+        x: x,
+        y: y,
+        move: function(_x, _y) {
+          this.x += _x;
+          this.y += _y;
         },
         die: function() {},
         interact: function() {
@@ -21,8 +21,8 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         }
       };
     },
-    snake: function() {
-      return this._generic('Snake', 10, 5, 'Reptile0', 35);
+    snake: function(x, y) {
+      return this._generic('Snake', 10, 5, 'reptile0', 35, x, y);
     }
   };
 });

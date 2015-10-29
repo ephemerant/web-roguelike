@@ -42,6 +42,9 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
     _init: function() {
 
+      // Used to avoid conflicts
+      var vm = this;
+
       tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
 
       crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
@@ -50,38 +53,53 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
       console.log('Using RNG seed:', ROT.RNG.getSeed());
 
-      this.tiles = {};
+      vm.tiles = {};
 
-      this._generate();
+      vm._generate();
 
-      this._placeDoors();
+      vm._placeDoors();
 
-      this._placeWalls();
+      vm._placeWalls();
 
-      this._rooms = this.digger.getRooms();
+      vm.rooms = vm.digger.getRooms();
 
-      var playerRoom = this._rooms[_.random(this._rooms.length - 1)];
+      var playerRoom = vm.rooms[_.random(vm.rooms.length - 1)];
 
       function distance(a, b) {
         return Math.sqrt(Math.pow(a._x1 - b._x1, 2) + Math.pow(a._y1 - b._y1, 2));
       }
 
       // Sort based on distance from player's room
-      this._rooms.sort(function(a, b) {
+      vm.rooms.sort(function(a, b) {
         return distance(a, playerRoom) - distance(b, playerRoom);
       });
 
-      this.player = {
+      vm.player = {
         x: playerRoom._x1,
         y: playerRoom._y1
       };
 
       // Put stairs in the farthest room away
-      this.stairs = {
-        x: this._rooms[this._rooms.length - 1]._x2,
-        y: this._rooms[this._rooms.length - 1]._y2
+      vm.stairs = {
+        x: vm.rooms[vm.rooms.length - 1]._x2,
+        y: vm.rooms[vm.rooms.length - 1]._y2
       };
 
+      vm.monsters = [];
+
+      // Spawn monsters
+      vm.rooms.forEach(function(room) {
+        var x = Math.round((room._x1 + room._x2) / 2);
+        var y = Math.round((room._y1 + room._y2) / 2);
+        if (vm._isAvailable(x, y)) {
+          vm.monsters.push(creatures.snake(x, y));
+        }
+      });
+    },
+
+    _isAvailable: function(x, y) {
+      // True if unoccupied by player or stairs, and it's a valid tile
+      return !(this.player.x === x && this.player.y === y) && !(this.stairs.x === x && this.stairs.y === y) && (this.tiles[x + ',' + y] !== undefined);
     },
 
     _generate: function() {

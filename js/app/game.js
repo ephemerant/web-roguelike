@@ -47,9 +47,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   // Dictionary of door sprites by (x,y)
   var doors = {};
 
-  // List of monster sprites
-  var monsters = [];
-
   //These variables are for volume control.
   //TODO: Allow user to choose volume.
   var sound_volume = 0.4;
@@ -163,7 +160,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // Attempt to traverse the entire path to (x, y)
   function moveToTile(x, y) {
-    if (player.isMoving ||
+    if (dungeon.player.isMoving ||
       (dungeon.player.x === x && dungeon.player.y === y) ||
       dungeon.tiles[x + ',' + y] === undefined ||
       is_pathing === false) {
@@ -181,7 +178,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   // Move one step towards (x, y), if it is a valid tile
   function moveTowardsTile(x, y) {
     return new Promise(function(resolve, reject) {
-      if (player.isMoving || dungeon.tiles[x + ',' + y] === undefined) {
+      if (dungeon.player.isMoving || dungeon.tiles[x + ',' + y] === undefined) {
         resolve();
         return;
       }
@@ -257,36 +254,25 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     });
 
     // Place monsters
-
-    // TEMPORARY, for testing
-    (function() {
-      var keys = Object.keys(dungeon.tiles);
-      var tile = keys[1].split(',');
-      var x = +tile[0],
-        y = +tile[1];
-      var monster = game.add.sprite(x * TILE_SIZE, y * TILE_SIZE, 'reptile0', 38);
-      monsters.push(monster);
-    })();
+    dungeon.monsters.forEach(function(monster) {
+      monster.sprite = game.add.sprite(monster.x * TILE_SIZE, monster.y * TILE_SIZE, monster.sprite, monster.frame);
+    });
 
     // Place stairs
     placeTile(tiles.stairs, dungeon.stairs.x, dungeon.stairs.y);
   }
 
   function createPlayer() {
-    // In the case you're starting a new game, delete the old player sprite
-    if (player) {
-      player.destroy();
-    }
-
     // TODO: Fully implement class system
     var playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
 
-    player = game.add.sprite(dungeon.player.x * TILE_SIZE, dungeon.player.y * TILE_SIZE, playerClass, 0);
-    player.animations.add('left', [4, 5, 6, 7], 10, true);
-    player.animations.add('right', [8, 9, 10, 11], 10, true);
-    player.animations.add('up', [12, 13, 14, 15], 10, true);
-    player.animations.add('down', [0, 1, 2, 3], 10, true);
-    game.camera.follow(player);
+    dungeon.player.sprite = game.add.sprite(dungeon.player.x * TILE_SIZE, dungeon.player.y * TILE_SIZE, playerClass, 0);
+    dungeon.player.sprite.animations.add('left', [4, 5, 6, 7], 10, true);
+    dungeon.player.sprite.animations.add('right', [8, 9, 10, 11], 10, true);
+    dungeon.player.sprite.animations.add('up', [12, 13, 14, 15], 10, true);
+    dungeon.player.sprite.animations.add('down', [0, 1, 2, 3], 10, true);
+    
+    game.camera.follow(dungeon.player.sprite);
   }
 
   function placeTile(tile, x, y) {
@@ -295,6 +281,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // Clear the map of all tiles
   function removeTiles() {
+    // Player
+    if (dungeon.player !== undefined) {
+      dungeon.player.sprite.destroy();
+    }
+
     // Tiles
     _.each(dungeon.tiles, function(tile, key) {
       var xy = key.split(',');
@@ -313,9 +304,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     });
 
     // Monsters
-    monsters.forEach(function(sprite) {
-      sprite.destroy();
-    });
+    if (dungeon.monsters) {
+      dungeon.monsters.forEach(function(monster) {
+        monster.sprite.destroy();
+      });
+    }
 
     doors = {};
     monsters = [];
@@ -324,7 +317,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   // Add (x, y) to the player's position if it is a valid move
   function movePlayer(x, y) {
     return new Promise(function(resolve, reject) {
-      if (player.isMoving || (x === 0 && y === 0)) {
+      if (dungeon.player.isMoving || (x === 0 && y === 0)) {
         resolve();
         return;
       }
@@ -335,20 +328,20 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       var key = newX + ',' + newY;
 
       if (x === 1) {
-        player.play('right');
+        dungeon.player.sprite.play('right');
       } else if (x === -1) {
-        player.play('left');
+        dungeon.player.sprite.play('left');
       }
       if (y === 1) {
-        player.play('down');
+        dungeon.player.sprite.play('down');
       } else if (y === -1) {
-        player.play('up');
+        dungeon.player.sprite.play('up');
       }
 
       // Valid tile
       if (dungeon.tiles[key] !== undefined) {
 
-        player.isMoving = true;
+        dungeon.player.isMoving = true;
 
         if (_.contains(dungeon.doors, key)) {
           // Remove the door from the model
@@ -360,7 +353,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
           SND_door_open.play();
           // Add delay to move again
           setTimeout(function() {
-            player.isMoving = false;
+            dungeon.player.isMoving = false;
             resolve();
           }, INPUT_DELAY);
           return;
@@ -386,11 +379,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         }
 
         // Slide the player to their new position
-        game.add.tween(player).to({
+        game.add.tween(dungeon.player.sprite).to({
           x: dungeon.player.x * TILE_SIZE,
           y: dungeon.player.y * TILE_SIZE
         }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function() {
-          player.isMoving = false;
+          dungeon.player.isMoving = false;
           resolve();
         }, this);
       } else {
@@ -417,8 +410,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       is_pathing = false;
       autoPilot();
     } else {
-      if (!player.isMoving) {
-        player.animations.stop();
+      if (!dungeon.player.isMoving) {
+        dungeon.player.sprite.animations.stop();
       }
     }
   }
