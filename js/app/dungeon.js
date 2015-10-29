@@ -74,27 +74,11 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         return distance(a, playerRoom) - distance(b, playerRoom);
       });
 
-      vm.player = {
-        x: playerRoom._x1,
-        y: playerRoom._y1
-      };
+      vm._spawnPlayer(playerRoom._x1, playerRoom._y1);
 
-      // Put stairs in the farthest room away
-      vm.stairs = {
-        x: vm.rooms[vm.rooms.length - 1]._x2,
-        y: vm.rooms[vm.rooms.length - 1]._y2
-      };
+      vm._spawnStairs();
 
-      vm.monsters = [];
-
-      // Spawn monsters
-      vm.rooms.forEach(function(room) {
-        var x = Math.round((room._x1 + room._x2) / 2);
-        var y = Math.round((room._y1 + room._y2) / 2);
-        if (vm._isAvailable(x, y)) {
-          vm.monsters.push(creatures.snake(x, y));
-        }
-      });
+      vm._spawnMonsters();
     },
 
     _isAvailable: function(x, y) {
@@ -114,6 +98,36 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
       digger.create(digCallback.bind(this));
 
       this.digger = digger;
+    },
+
+    _spawnPlayer: function(x, y) {
+      this.player = this.player || {};
+      
+      this.player.x = x;
+      this.player.y = y;
+    },
+
+    _spawnStairs: function() {
+      // Put stairs in the farthest room away
+      this.stairs = {
+        x: this.rooms[this.rooms.length - 1]._x2,
+        y: this.rooms[this.rooms.length - 1]._y2
+      };
+    },
+
+    _spawnMonsters: function() {
+      var vm = this;
+
+      vm.monsters = [];
+
+      // Spawn monsters
+      vm.rooms.forEach(function(room) {
+        var x = Math.round((room._x1 + room._x2) / 2);
+        var y = Math.round((room._y1 + room._y2) / 2);
+        if (vm._isAvailable(x, y)) {
+          vm.monsters.push(creatures.snake(x, y));
+        }
+      });
     },
 
     // Analyze rooms and place doors

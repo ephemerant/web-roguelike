@@ -37,9 +37,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   // Square that follows mouse
   var marker;
 
-  // The player sprite
-  var player;
-
   // TODO: Make a player/creature variable
   // Currently automatically moving?
   var is_pathing = false;
@@ -164,6 +161,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       (dungeon.player.x === x && dungeon.player.y === y) ||
       dungeon.tiles[x + ',' + y] === undefined ||
       is_pathing === false) {
+
       is_pathing = false;
       return;
     }
@@ -172,7 +170,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     moveTowardsTile(x, y).then(function() {
       moveToTile(x, y);
     });
-
   }
 
   // Move one step towards (x, y), if it is a valid tile
@@ -196,16 +193,24 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       var count = 0;
 
       // Compute from player
-      astar.compute(dungeon.player.x, dungeon.player.y, function(x, y) {
+      astar.compute(dungeon.player.x, dungeon.player.y, function($x, $y) {
 
         count += 1;
 
         // Only move once
         if (count === 2) {
-          var _x = x - dungeon.player.x,
-            _y = y - dungeon.player.y;
+          var _x = $x - dungeon.player.x,
+            _y = $y - dungeon.player.y;
 
-          movePlayer(_x, _y).then(resolve);
+          movePlayer(_x, _y).then(function () {
+            // If we bumped the goal tile, stop (e.g. bump to open a door, but don't walk into it after)
+            // This will be very useful to avoid clicking a monster and infinitely attacking it
+            if ($x === x && $y === y) {
+              is_pathing = false;
+            }
+
+            resolve();
+          });
         }
       });
     });
@@ -218,6 +223,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   function createWorld() {
     dungeon.level = 1;
+
+    if (dungeon.player !== undefined) {
+      dungeon.player.sprite.destroy();
+    }
+
     createDungeon();
     createPlayer();
   }
@@ -271,7 +281,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     dungeon.player.sprite.animations.add('right', [8, 9, 10, 11], 10, true);
     dungeon.player.sprite.animations.add('up', [12, 13, 14, 15], 10, true);
     dungeon.player.sprite.animations.add('down', [0, 1, 2, 3], 10, true);
-    
+
     game.camera.follow(dungeon.player.sprite);
   }
 
@@ -281,11 +291,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // Clear the map of all tiles
   function removeTiles() {
-    // Player
-    if (dungeon.player !== undefined) {
-      dungeon.player.sprite.destroy();
-    }
-
     // Tiles
     _.each(dungeon.tiles, function(tile, key) {
       var xy = key.split(',');
