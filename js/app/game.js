@@ -1,4 +1,146 @@
+<<<<<<< HEAD
+define(['Phaser', 'lodash', 'dungeon', 'ROT', 'creatures'], function(Phaser, _, dungeon, ROT, creatures) {
+
+  // Dictionary of tilesheet indexes
+  var tiles = dungeon.tiles;
+
+  // How wide / tall each tile is
+  var TILE_SIZE = dungeon.TILE_SIZE;
+
+  // Our ROT-based dungeon model
+  dungeon = dungeon.dungeon;
+
+  // Width / height of the actual window
+  // TODO: Completely fill window with game screen?
+  var SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio;
+  var SCREEN_HEIGHT = window.innerHeight * window.devicePixelRatio;
+
+  var DUNGEON_WIDTH = dungeon.width * TILE_SIZE;
+  var DUNGEON_HEIGHT = dungeon.width * TILE_SIZE;
+
+  var INPUT_DELAY = 80;
+
+  var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'screen', {
+    preload: preload,
+    create: create,
+    update: update,
+    render: render
+  });
+
+  // Import assets
+  function preload() {
+    // TODO: Loading screen?
+    game.load.image('dungeon', 'assets/Wall.png');
+    game.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('warrior', 'assets/Warrior.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('engineer', 'assets/Engineer.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('mage', 'assets/Mage.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('paladin', 'assets/Paladin.png', TILE_SIZE, TILE_SIZE);
+    game.load.spritesheet('rogue', 'assets/Rogue.png', TILE_SIZE, TILE_SIZE);
+    game.load.audio('SND_door_open', 'assets/Sounds/Door.wav');
+    game.load.audio('SND_teleport', ['assets/Sounds/Teleport.ogg', 'assets/Sounds/Teleport.wav']);
+    game.load.audio('MUS_dungeon1', ['assets/Music/Adventure_Meme.ogg', 'assets/Music/Adventure_Meme.mp3']);
+    game.load.audio('MUS_dungeon2', ['assets/Music/Wonderful_Nightmare.ogg', 'assets/Music/Wonderful_Nightmare.mp3']);
+  }
+
+  // Phaser map where tiles are drawn
+  var map;
+  // A distinct graphical layer on the map
+  // TODO: Use multiple layers for tiles, objects, and creatures
+  var layer;
+
+  // Arrow keys
+  var cursors;
+  // Key to start a new game [R]
+  var reset_key;
+  // Key that when held, moves the player towards the end of the level [A]
+  var autopilot_key;
+  // Square that follows mouse
+  var marker;
+
+  // The player sprite
+  var player;
+
+  var is_pathing = false;
+
+  // Dictionary of door sprites by (x,y)
+  var doors = {};
+
+  //These variables are for volume control.
+  //TODO: Allow user to choose volume.
+  var sound_volume = 0.4;
+  var music_volume = 0.1;
+  //Sounds
+  var SND_door_open;
+  var SND_teleport;
+  //Music
+  var MUS_dungeon1;
+  var MUS_dungeon2;
+
+  function create() {
+    // // Increase bounds so camera can move around
+    game.world.setBounds(-DUNGEON_WIDTH, -DUNGEON_HEIGHT, DUNGEON_WIDTH * 3, DUNGEON_HEIGHT * 3);
+
+    game.stage.backgroundColor = '#050505';
+
+    game.stage.smoothed = false;
+
+    // Creates a blank tilemap
+    map = game.add.tilemap(null, TILE_SIZE, TILE_SIZE);
+
+    // Add a Tileset image to the map
+    map.addTilesetImage('dungeon');
+
+    // Creates a new blank layer and sets the map dimensions.
+    layer = map.create('level1', dungeon.width, dungeon.height, TILE_SIZE, TILE_SIZE);
+
+    createWorld();
+
+    cursors = game.input.keyboard.createCursorKeys();
+
+    autopilot_key = game.input.keyboard.addKey(Phaser.Keyboard.A);
+
+    reset_key = game.input.keyboard.addKey(Phaser.Keyboard.R);
+    reset_key.onDown.add(createWorld, this);
+
+    // Our painting marker
+    marker = game.add.graphics();
+    marker.lineStyle(2, '#050505', 1);
+    marker.drawRect(0, 0, 32, 32);
+
+    game.input.addMoveCallback(updateMarker, this);
+    game.input.onDown.add(mouseClicked, this);
+
+    // Create Sounds
+    SND_door_open = game.add.audio('SND_door_open');
+    SND_teleport = game.add.audio('SND_teleport');
+    SND_teleport.volume = SND_door_open.volume = sound_volume;
+
+    // Create Music
+    MUS_dungeon1 = game.add.audio('MUS_dungeon1');
+    MUS_dungeon1.loop = true;
+    MUS_dungeon1.volume = music_volume;
+    MUS_dungeon1.play();
+    MUS_dungeon2 = game.add.audio('MUS_dungeon2');
+    MUS_dungeon2.loop = true;
+    MUS_dungeon2.volume = music_volume;
+  }
+
+  function updateMarker() {
+    marker.x = layer.getTileX(game.input.activePointer.worldX) * 32;
+    marker.y = layer.getTileY(game.input.activePointer.worldY) * 32;
+  }
+
+  function mouseClicked() {
+    // Cancel current path, if there is one
+    if (is_pathing) {
+      is_pathing = false;
+      return;
+    }
+=======
 define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, dungeon, ROT) {
+>>>>>>> origin/master
 
     // Dictionary of tilesheet indexes
     var tiles = dungeon.tiles;
@@ -395,8 +537,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, dungeon, ROT
     function render() {
         game.debug.text('Level ' + dungeon.level, 16, 30);
 
+<<<<<<< HEAD
+    game.debug.text('Use the ARROW KEYS to move', 16, game.height - 90);
+    game.debug.text('Press R to start a new game', 16, game.height - 60);
+    game.debug.text('Hold A for auto-pilot', 16, game.height - 30);
+  }
+});
+=======
         game.debug.text('Use the ARROW KEYS to move', 16, game.height - 90);
         game.debug.text('Press R to start a new game', 16, game.height - 60);
         game.debug.text('Hold A for auto-pilot', 16, game.height - 30);
     }
 });
+>>>>>>> origin/master

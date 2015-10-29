@@ -1,11 +1,14 @@
-define(['ROT', 'lodash'], function(ROT, _) {
+define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
   var TILESHEET_WIDTH = 640;
   var TILE_SIZE = 32;
   var TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE;
 
   // Wall group to use from Wall.png
+  var snake = creatures.snake();
 
+  console.log(snake);
+  
   function calculateTiles(WALL_GROUP_UNIT) {
     return {
       floor: 5 + WALL_GROUP_UNIT,
@@ -41,7 +44,7 @@ define(['ROT', 'lodash'], function(ROT, _) {
 
     level: 1,
 
-    _init: function() {      
+    _init: function() {
 
       tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
 
@@ -58,7 +61,6 @@ define(['ROT', 'lodash'], function(ROT, _) {
       this._placeDoors();
 
       this._placeWalls();
-
       var keys = Object.keys(dungeon.tiles);
 
       var tile = keys[0].split(',');
@@ -79,7 +81,6 @@ define(['ROT', 'lodash'], function(ROT, _) {
 
     _generate: function() {
       var digger = new ROT.Map.Digger(this.width, this.height);
-
       var digCallback = function(x, y, value) {
         if (value) {
           return;
@@ -95,7 +96,6 @@ define(['ROT', 'lodash'], function(ROT, _) {
     // Analyze rooms and place doors
     _placeDoors: function() {
       var doors = [];
-
       _.each(this.digger.getRooms(), function(room, key) {
         _.each(room._doors, function(door, key) {
           var xy = key.split(',');
