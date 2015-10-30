@@ -1,43 +1,34 @@
 ### Coding
 
-* Clayton - 25%
-	* Initial rot.js framework set up
-	* Player experience (movement, camera, combat calls, pick up items, enter doors)
-* Stephen - 25%
+* Clayton - 40%
+	* Framework (ROT and Phaser) setup
+	* Player experience (movement, camera, combat calls, pick up items, open doors, etc)
+* Stephen - 20%
 	* GUI
 	* HUD
 	* Lighting
 	* Menus/Screens
-* Cody - 25%
+* Cody - 20%
 	* Design interactables (objects, creatures, etc) 
 	* Combat/poison/etc functionality
-* Jason - 25%
+* Jason - 20%
 	* Design interactables (objects, creatures, etc)
 	* Combat/Stats
 
-### Features for grabs:
-
-* AI
-* Inventory system
-* Equipment slots
-* Randomly spawning NPCs (shopkeeper, etc?) and items
-* Leveling system
-* Character customization
-* Save files
-* Menus
-* Leaderboards
-* Game styles (endless, story)
-
 ### Testing
 
-* Clayton - 25%
-* Stephen - 25%
-* Cody - 25%
-* Jason - 25%
+* Clayton - 40%
+	* Set up unit tests
+	* Set up simple automation test
+* Stephen - 20%
+	* User testing
+* Cody - 20%
+	* User testing
+* Jason - 20%
+	* User testing
 
 ### Documentation
 
-* Clayton - 25%
-* Stephen - 25%
-* Cody - 25%
-* Jason - 25%
+* Stephen - 33%
+* Cody - 33%
+* Jason - 33%
