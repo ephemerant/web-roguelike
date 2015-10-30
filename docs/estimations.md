@@ -5,7 +5,7 @@
 | Combat/stats                                 | 8                 |                       | Everyone               |
 | Graphics                                     | 13                | 7 (ongoing)           | Stephen / Clayton      |
 | Basic camera                                 | 2                 | 2                     | Clayton                |
-| Lighting / Vision                            | 6                 |                       | Clayton                |
+| Lighting / Vision                            | 6                 |                       | Stephen                |
 | Enemy design                                 | 8                 | 2                     | Jason / Cody / Clayton |
 | Item design                                  | 8                 |                       | Jason / Cody           |
 | Leveling system                              | 8                 |                       | Jason / Stephen        |
