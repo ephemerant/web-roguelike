@@ -424,7 +424,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
             // Where each frame is rendered
             render: function () {
-                this.debug.text('Level ' + dungeon.level, 16, 30);
+                //this.debug.text('Level ' + dungeon.level, 16, 30);
                 //this.debug.text('Use the ARROW KEYS to move', 16, this.height - 90);
                 //this.debug.text('Press R to start a new game', 16, this.height - 60);
                 //this.debug.text('Hold A for auto-pilot', 16, this.height - 30);
