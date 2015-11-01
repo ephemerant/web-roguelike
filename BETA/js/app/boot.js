@@ -1,13 +1,17 @@
-/*globals Phaser, Preload, Menu, Game, Game_Over*/
+/*globals define*/
 
-// Create a new game instance 800px wide and 600px tall:
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'screen');
+define(['Phaser', 'preload', 'start', 'game'], function (Phaser, Preload, Start, Game) {
+    'use strict';
 
-// First parameter is how our state will be called.
-// Second parameter is an object containing the needed methods for state functionality
-game.state.add('Preload', Preload);
-game.state.add('Menu', Menu);
-game.state.add('Game', Game);
-game.state.add('Game_Over', Game_Over);
+    var SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio,
+        SCREEN_HEIGHT = window.innerHeight * window.devicePixelRatio,
+        
+        game = new Phaser.Game(800, 600, Phaser.CANVAS, 'screen');
 
-game.state.start('Preload');
+    game.state.add('Preload', Preload);
+    game.state.add('Start', Start);
+    game.state.add('Game', Game);
+
+    game.state.start('Preload');
+
+});
