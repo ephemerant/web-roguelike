@@ -25,6 +25,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
             wall_cross: 24 + WALL_GROUP_UNIT
         };
     }
+
     var TILESHEET_WIDTH = 640,
         TILE_SIZE = 32,
         TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE,
@@ -94,7 +95,10 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
 
             _isAvailable: function (x, y) {
                 // True if unoccupied by player or stairs, and it's a valid tile
-                return !(this.player.x === x && this.player.y === y) && !(this.stairs.x === x && this.stairs.y === y) && (this.tiles[x + ',' + y] !== undefined);
+                return !(this.player.x === x &&
+                        this.player.y === y) &&
+                    !(this.stairs.x === x && this.stairs.y === y) &&
+                    (this.tiles[x + ',' + y] !== undefined);
             },
 
             _generate: function () {
@@ -218,7 +222,8 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                     });
 
                     // Crosses
-                    if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) && _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
+                    if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) &&
+                            _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
                         walls[key] = tiles.wall_cross;
                     } else if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) && _.contains(nearbyWalls, up)) {
                         walls[key] = tiles.wall_cross_bottom;

@@ -326,8 +326,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                         dungeon.player.sprite.play('right');
                     } else if (x === -1) {
                         dungeon.player.sprite.play('left');
-                    }
-                    if (y === 1) {
+                    } else if (y === 1) {
                         dungeon.player.sprite.play('down');
                     } else if (y === -1) {
                         dungeon.player.sprite.play('up');

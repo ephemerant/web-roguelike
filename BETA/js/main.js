@@ -15,7 +15,8 @@ requirejs.config({
         game: '../app/game',
         start: '../app/start',
         preload: '../app/preload',
-        game_over: '../app/game_over'
+        game_over: '../app/game_over',
+        player: '../app/player'
 	}
 });
 
