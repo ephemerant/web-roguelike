@@ -81,9 +81,19 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
       vm._spawnMonsters();
     },
 
+    _validTile: function(x, y) {
+      // True if (x, y) is present in tile
+      return (this.tiles[x + ',' + y] !== undefined);
+    },
+
     _isAvailable: function(x, y) {
-      // True if unoccupied by player or stairs, and it's a valid tile
-      return !(this.player.x === x && this.player.y === y) && !(this.stairs.x === x && this.stairs.y === y) && (this.tiles[x + ',' + y] !== undefined);
+      // True if unoccupied by the player, a monster, or stairs, and it's a valid tile
+      var hasMonster = false;
+      this.monsters.forEach(function(monster) {
+        if (monster.x === x && monster.y === y)
+          hasMonster = true;
+      });
+      return !hasMonster && !(this.player.x === x && this.player.y === y) && !(this.stairs.x === x && this.stairs.y === y) && this._validTile(x, y);
     },
 
     _generate: function() {
@@ -102,7 +112,7 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
     _spawnPlayer: function(x, y) {
       this.player = this.player || {};
-      
+
       this.player.x = x;
       this.player.y = y;
     },

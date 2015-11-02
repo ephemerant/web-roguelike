@@ -1,5 +1,5 @@
 // Load modules
-requirejs.config({
+require.config({
 	baseUrl: 'js/lib',
 	paths: {
 		Phaser: 'phaser.min',
@@ -11,4 +11,4 @@ requirejs.config({
 });
 
 // Start the app
-requirejs(['../app/game']);
+require(['../app/game']);
