@@ -51,6 +51,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
   //Sounds
   var SND_door_open;
   var SND_teleport;
+  var SND_hit;
   //Music
   var MUS_dungeon1;
   var MUS_dungeon2;
@@ -83,7 +84,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     });
 
     game.load.audio('SND_door_open', 'assets/sounds/Door.wav');
+    game.load.audio('SND_hit', 'assets/sounds/Hit.wav');
     game.load.audio('SND_teleport', ['assets/sounds/Teleport.ogg', 'assets/sounds/Teleport.wav']);
+
     game.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
     game.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
   }
@@ -123,7 +126,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     // Create Sounds
     SND_door_open = game.add.audio('SND_door_open');
     SND_teleport = game.add.audio('SND_teleport');
-    SND_teleport.volume = SND_door_open.volume = sound_volume;
+    SND_hit = game.add.audio('SND_hit');
+    SND_hit.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
 
     // Create Music
     MUS_dungeon1 = game.add.audio('MUS_dungeon1');
@@ -202,7 +206,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
           var _x = $x - dungeon.player.x,
             _y = $y - dungeon.player.y;
 
-          movePlayer(_x, _y).then(function () {
+          movePlayer(_x, _y).then(function() {
             // If we bumped the goal tile, stop (e.g. bump to open a door, but don't walk into it after)
             // This will be very useful to avoid clicking a monster and infinitely attacking it
             if ($x === x && $y === y) {
@@ -343,29 +347,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
         dungeon.player.sprite.play('up');
       }
 
-      // Valid tile
-      if (dungeon.tiles[key] !== undefined) {
+      var result = dungeon._moveCreature(dungeon.player, x, y);
 
+      // The player moved
+      if (result.moved) {
         dungeon.player.isMoving = true;
-
-        if (_.contains(dungeon.doors, key)) {
-          // Remove the door from the model
-          dungeon.doors.splice(dungeon.doors.indexOf(key), 1);
-          // Change door's appearance to open
-          var door = doors[key];
-          door.loadTexture('door_open', door.frame);
-
-          SND_door_open.play();
-          // Add delay to move again
-          setTimeout(function() {
-            dungeon.player.isMoving = false;
-            resolve();
-          }, INPUT_DELAY);
-          return;
-        }
-
-        dungeon.player.x += x;
-        dungeon.player.y += y;
 
         // Entering stairs
         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
@@ -391,7 +377,29 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
           dungeon.player.isMoving = false;
           resolve();
         }, this);
+
+      }
+      // The player opened a door
+      else if (result.door) {
+        dungeon.player.isMoving = true;
+        // Change door's appearance to open
+        var door = doors[key];
+        door.loadTexture('door_open', door.frame);
+        // Play a sound effect
+        SND_door_open.play();
+        // Add delay until the next action
+        setTimeout(function() {
+          dungeon.player.isMoving = false;
+          resolve();
+        }, INPUT_DELAY);
+      }
+      // Combat occurred
+      else if (result.combat) {
+        SND_hit.play();
+        is_pathing = false;
+        resolve();
       } else {
+        is_pathing = false;
         resolve();
       }
     });

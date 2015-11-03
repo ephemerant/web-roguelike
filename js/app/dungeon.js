@@ -51,7 +51,7 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
         ROT.RNG.setSeed(ROT.RNG.getUniform());
 
-        console.log('Using RNG seed:', this._getSeed());
+        console.log('Using RNG seed:', vm._getSeed());
 
         vm.tiles = {};
 
@@ -90,14 +90,79 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         return (this.tiles[x + ',' + y] !== undefined);
       },
 
-      _isAvailable: function(x, y) {
-        // True if unoccupied by the player, a monster, or stairs, and it's a valid tile
+      _hasMonster: function(x, y) {
+        // True if a monster exists at (x, y)
         var hasMonster = false;
+
         this.monsters.forEach(function(monster) {
           if (monster.x === x && monster.y === y)
             hasMonster = true;
         });
-        return !hasMonster && !(this.player.x === x && this.player.y === y) && !(this.stairs.x === x && this.stairs.y === y) && this._validTile(x, y);
+        return hasMonster;
+      },
+
+      _getMonster: function(x, y) {
+        // Return the monster at (x, y), if there is one
+        var foundMonster;
+
+        this.monsters.forEach(function(monster) {
+          if (monster.x === x && monster.y === y)
+            foundMonster = monster;
+        });
+        return foundMonster;
+      },
+
+      _hasDoor: function(x, y) {
+        return this.doors.indexOf(x + ',' + y) !== -1;
+      },
+
+      _isAvailable: function(x, y) {
+        // True if the tile is available for movement
+        // i.e. it is unoccupied by the player, a monster, or a door, and it's a valid tile
+
+        return !(this.player.x === x && this.player.y === y) && this._validTile(x, y) && !this._hasMonster(x, y) && !this._hasDoor(x, y);
+      },
+
+      _moveCreature: function(creature, x, y) {
+        var outcome = {
+          moved: false,
+          door: false,
+          combat: false
+        };
+
+        var newX = creature.x + x,
+          newY = creature.y + y;
+
+        var key = newX + ',' + newY;
+
+        // Basic movement
+        if (this._isAvailable(newX, newY)) {
+          creature.x = newX;
+          creature.y = newY;
+          outcome.moved = true;
+        }
+        // "Open" a door, i.e. remove it
+        else if (this._hasDoor(newX, newY)) {
+          this.doors.splice(this.doors.indexOf(key), 1);
+          // Let phaser know we opened the door
+          outcome.door = true;
+        }
+        // Combat
+        else if (this._hasMonster(newX, newY)) {
+          var monster = this._getMonster(newX, newY);
+          // TODO: Attack the monster
+          // e.g. creature.attack(monster)
+
+          // Basic death:
+          // TODO: Move to creatures.js
+          monster.sprite.destroy();
+          this.monsters.splice(this.monsters.indexOf(monster), 1);
+          //
+
+          outcome.combat = true;
+        }
+
+        return outcome;
       },
 
       _generate: function() {

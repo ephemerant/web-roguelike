@@ -33,9 +33,12 @@ define(['dungeon'], function(dungeon) {
         var x = +match[1],
           y = +match[2];
 
-        // Upon initialization, doors should be valid, non-occupied tiles
-        it('should be a valid, non-occupied tile', function() {
-          expect(model._isAvailable(x, y)).toBe(true);
+        it('should occupy its tile', function() {
+          expect(model._isAvailable(x, y)).toBe(false);
+        });
+
+        it('should return "true" when calling "model._hasDoor(x, y)"', function() {
+          expect(model._hasDoor(x, y)).toBe(true);
         });
       });
     }
@@ -115,6 +118,10 @@ define(['dungeon'], function(dungeon) {
           _init: Function,
           _getSeed: Function,
           _validTile: Function,
+          _hasMonster: Function,
+          _getMonster: Function,
+          _hasDoor: Function,
+          _moveCreature: Function,
           _isAvailable: Function,
           _generate: Function,
           _spawnPlayer: Function,
@@ -169,8 +176,8 @@ define(['dungeon'], function(dungeon) {
             expect(model._validTile(model.stairs.x, model.stairs.y)).toBe(true);
           });
 
-          it('should occupy its tile', function() {
-            expect(model._isAvailable(model.stairs.x, model.stairs.y)).toBe(false);
+          it('should be an unoccupied its tile', function() {
+            expect(model._isAvailable(model.stairs.x, model.stairs.y)).toBe(true);
           });
         });
 
@@ -210,8 +217,8 @@ define(['dungeon'], function(dungeon) {
     for (var variable in types) {
       expectType(variable, dungeon, types);
     }
-    // Bulk test across multiple dungeon instances
-    for (var i = 1; i <= 5; i++) {
+    // Able to bulk test across multiple dungeon instances
+    for (var i = 1; i <= 1; i++) {
       expectValidDungeon(i, dungeon._dungeon());
     }
   });
