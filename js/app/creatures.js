@@ -42,7 +42,7 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
           if (name === 'Skeleton' && isDead=== 1){//Skeletons may revive each turn
             var revive = Math.floor(Math.random()*10);
             if (revive=== 1){
-              isDead = 0;
+              this.isDead = 0;
             }
           }
         },
@@ -56,22 +56,24 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         attack: function(){
           //This is called when the creature attacks
         },
-        gethurt: function(damage){
+        getHurt: function(damage){
           //This is called when the creature is hurt
-          damage -=def; //Subtract the creatures defense from the damage
-          hp -= damage; //apply damage to hp
-          if(hp <=0){
-            hp = 0;
-            isDead = 1;
+          this.damage -= this.def; //Subtract the creatures defense from the damage
+          this.hp -= damage; //apply damage to hp
+          console.log('hp ' + this.hp);
+          if(this.hp <=0){
+            this.hp = 0;
+            this.isDead = 1;
+            this.frame = 0;
           }
         }
       };
     },
     snake: function(x, y) {
-      return this._generic('Snake', 10, 5, 1, 'reptile0', 35, x, y);
+      return this._generic('Snake', 8, 5, 1, 'reptile0', 43, x, y);
     },
     skeleton: function(x, y){
-      return this._generic('Skeleton', 10, 4, 0, 'undead0', 16, x, y);
+      return this._generic('Skeleton', 15, 4, 0, 'undead0', 24, x, y);
     }
   };
 });

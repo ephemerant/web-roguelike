@@ -150,16 +150,17 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         // Combat
         else if (this._hasMonster(newX, newY)) {
           var monster = this._getMonster(newX, newY);
-          // TODO: Attack the monster
-          // e.g. creature.attack(monster)
-
-          // Basic death:
-          // TODO: Move to creatures.js
-          monster.sprite.destroy();
-          this.monsters.splice(this.monsters.indexOf(monster), 1);
-          //
-
-          outcome.combat = true;
+          // TODO: Give hero stats
+          if (monster.isDead === 0){
+            //5 used as generic damage, player needs damage stat
+            monster.getHurt(5);
+            outcome.combat = true;
+          }
+          else{
+            creature.x = newX;
+            creature.y = newY;
+            outcome.moved = true;
+          }
         }
 
         return outcome;

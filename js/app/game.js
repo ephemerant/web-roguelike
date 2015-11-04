@@ -407,6 +407,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // Handle input / animations
   function update() {
+    dungeon.monsters.forEach(function(monster){
+      monster.sprite.frame = monster.frame;
+    });
     if (cursors.left.isDown) {
       is_pathing = false;
       movePlayer(-1, 0);
