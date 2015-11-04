@@ -58,18 +58,20 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
         //Music
         MUS_dungeon1,
         MUS_dungeon2,
-
+        
         Game = {
             create: function () {
-                // // Increase bounds so camera can move outside the map boundaries
-                this.world.setBounds(-DUNGEON_WIDTH, -DUNGEON_HEIGHT,
+                // Used to avoid conflicts
+                var vm = this;
+                // Increase bounds so camera can move outside the map boundaries
+                vm.world.setBounds(-DUNGEON_WIDTH, -DUNGEON_HEIGHT,
                     DUNGEON_WIDTH * 3,
                     DUNGEON_HEIGHT * 3);
 
-                this.stage.backgroundColor = '#050505';
+                vm.stage.backgroundColor = '#050505';
 
                 // Creates a blank tilemap
-                map = this.add.tilemap(null, TILE_SIZE, TILE_SIZE);
+                map = vm.add.tilemap(null, TILE_SIZE, TILE_SIZE);
 
                 // Add a Tileset image to the map
                 map.addTilesetImage('dungeon');
@@ -82,65 +84,73 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                     TILE_SIZE);
                 
                 // Create Music
-                MUS_dungeon1 = this.add.audio('MUS_dungeon1');
+                MUS_dungeon1 = vm.add.audio('MUS_dungeon1');
                 MUS_dungeon1.loop = true;
                 MUS_dungeon1.volume = music_volume;
-                MUS_dungeon2 = this.add.audio('MUS_dungeon2');
+                MUS_dungeon2 = vm.add.audio('MUS_dungeon2');
                 MUS_dungeon2.loop = true;
                 MUS_dungeon2.volume = music_volume;
 
-                this.createWorld();
+                vm.createWorld();
 
-                cursors = this.input.keyboard.createCursorKeys();
+                cursors = vm.input.keyboard.createCursorKeys();
 
-                autopilot_key = this.input.keyboard.addKey(Phaser.Keyboard.A);
+                autopilot_key = vm.input.keyboard.addKey(Phaser.Keyboard.A);
 
-                reset_key = this.input.keyboard.addKey(Phaser.Keyboard.R);
-                reset_key.onDown.add(this.createWorld, this);
+                reset_key = vm.input.keyboard.addKey(Phaser.Keyboard.R);
+                reset_key.onDown.add(vm.createWorld, this);
 
-                fullscreen_key = this.input.keyboard.addKey(Phaser.Keyboard.F);
-                fullscreen_key.onDown.add(this.gofull, this);
-                this.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+                fullscreen_key = vm.input.keyboard.addKey(Phaser.Keyboard.F);
+                fullscreen_key.onDown.add(vm.gofull, this);
+                vm.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
 
                 // Our painting marker
-                marker = this.add.graphics();
+                marker = vm.add.graphics();
                 marker.lineStyle(2, '#050505', 1);
                 marker.drawRect(0, 0, 32, 32);
 
-                this.input.addMoveCallback(this.updateMarker, this);
-                this.input.onDown.add(this.mouseClicked, this);
+                vm.input.addMoveCallback(vm.updateMarker, this);
+                vm.input.onDown.add(vm.mouseClicked, this);
 
                 // Create Sounds
-                SND_door_open = this.add.audio('SND_door_open');
-                SND_teleport = this.add.audio('SND_teleport');
+                SND_door_open = vm.add.audio('SND_door_open');
+                SND_teleport = vm.add.audio('SND_teleport');
                 SND_teleport.volume = SND_door_open.volume = sound_volume;
-                SND_hit = this.add.audio('SND_hit');
+                SND_hit = vm.add.audio('SND_hit');
                 SND_hit.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
 
             },
 
             updateMarker: function () {
-                marker.x = layer.getTileX(this.input.activePointer.worldX) * 32;
-                marker.y = layer.getTileY(this.input.activePointer.worldY) * 32;
+                // Used to avoid conflicts
+                var vm = this;
+                marker.x = layer.getTileX(vm.input.activePointer.worldX) * 32;
+                marker.y = layer.getTileY(vm.input.activePointer.worldY) * 32;
             },
 
             mouseClicked: function () {
+                // Used to avoid conflicts
+                var vm = this,
+                    x,
+                    y;
                 // Cancel current path, if there is one
                 if (is_pathing) {
                     is_pathing = false;
                     return;
                 }
                 // Standard procedure
-                var x = layer.getTileX(this.input.activePointer.worldX),
-                    y = layer.getTileY(this.input.activePointer.worldY);
+                x = layer.getTileX(vm.input.activePointer.worldX);
+                y = layer.getTileY(vm.input.activePointer.worldY);
 
                 is_pathing = true;
 
-                this.moveToTile(x, y);
+                vm.moveToTile(x, y);
             },
 
             // Attempt to traverse the entire path to (x, y)
             moveToTile: function (x, y) {
+                // Used to avoid conflicts
+                var vm = this;
                 if (dungeon.player.isMoving ||
                         (dungeon.player.x === x && dungeon.player.y === y) ||
                         dungeon.tiles[x + ',' + y] === undefined ||
@@ -150,7 +160,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                 }
 
                 // Recursively move towards the tile
-                this.moveTowardsTile(x, y).then(function () {
+                vm.moveTowardsTile(x, y).then(function () {
                     Game.moveToTile(x, y);
                 });
             },
@@ -202,10 +212,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
             // Move player one step towards the stairs (used to test pathing)
             autoPilot: function () {
-                this.moveTowardsTile(dungeon.stairs.x, dungeon.stairs.y);
+                // Used to avoid conflicts
+                var vm = this;
+                vm.moveTowardsTile(dungeon.stairs.x, dungeon.stairs.y);
             },
 
             createWorld: function () {
+                // Used to avoid conflicts
+                var vm = this;
                 dungeon.level = 1;
                 MUS_dungeon2.stop();
                 MUS_dungeon1.play();
@@ -213,14 +227,17 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                     dungeon.player.sprite.destroy();
                 }
 
-                this.createDungeon();
-                this.createPlayer();
+                vm.createDungeon();
+                vm.createPlayer();
             },
 
             createDungeon: function () {
+                // Used to avoid conflicts
+                var vm = this;
+                
                 is_pathing = false;
 
-                this.removeTiles();
+                vm.removeTiles();
 
                 dungeon._init();
 
@@ -260,14 +277,17 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                 });
 
                 // Place stairs
-                this.placeTile(tiles.stairs, dungeon.stairs.x, dungeon.stairs.y);
+                vm.placeTile(tiles.stairs, dungeon.stairs.x, dungeon.stairs.y);
             },
 
             createPlayer: function () {
-                // TODO: Fully implement class system
-                var playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
+                // Used to avoid conflicts
+                var vm = this,
+                
+                    // TODO: Fully implement class system
+                    playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
 
-                dungeon.player.sprite = this.add.sprite(dungeon.player.x * TILE_SIZE,
+                dungeon.player.sprite = vm.add.sprite(dungeon.player.x * TILE_SIZE,
                     dungeon.player.y * TILE_SIZE,
                     playerClass, 0);
                 dungeon.player.sprite.animations.add('left', [4, 5, 6, 7], 10, true);
@@ -275,7 +295,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                 dungeon.player.sprite.animations.add('up', [12, 13, 14, 15], 10, true);
                 dungeon.player.sprite.animations.add('down', [0, 1, 2, 3], 10, true);
 
-                this.camera.follow(dungeon.player.sprite);
+                vm.camera.follow(dungeon.player.sprite);
             },
 
             placeTile: function (tile, x, y) {
@@ -399,35 +419,39 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
             },
 
             gofull: function () {
-
-                if (this.scale.isFullScreen) {
-                    this.scale.stopFullScreen();
+                // Used to avoid conflicts
+                var vm = this;
+                if (vm.scale.isFullScreen) {
+                    vm.scale.stopFullScreen();
                 } else {
-                    this.scale.startFullScreen(false);
+                    vm.scale.startFullScreen(false);
                 }
 
             },
 
             // Handle input / animations
             update: function () {
+                // Used to avoid conflicts
+                var vm = this;
+                
                 dungeon.monsters.forEach(function (monster) {
                     monster.sprite.frame = monster.frame;
                 });
                 if (cursors.left.isDown) {
                     is_pathing = false;
-                    this.movePlayer(-1, 0);
+                    vm.movePlayer(-1, 0);
                 } else if (cursors.right.isDown) {
                     is_pathing = false;
-                    this.movePlayer(1, 0);
+                    vm.movePlayer(1, 0);
                 } else if (cursors.up.isDown) {
                     is_pathing = false;
-                    this.movePlayer(0, -1);
+                    vm.movePlayer(0, -1);
                 } else if (cursors.down.isDown) {
                     is_pathing = false;
-                    this.movePlayer(0, 1);
+                    vm.movePlayer(0, 1);
                 } else if (autopilot_key.isDown) {
                     is_pathing = false;
-                    this.autoPilot();
+                    vm.autoPilot();
                 } else {
                     if (!dungeon.player.isMoving) {
                         dungeon.player.sprite.animations.stop();
@@ -437,7 +461,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
             // Where each frame is rendered
             render: function () {
-                //this.debug.text('Level ' + dungeon.level, 16, 30);
+                // Used to avoid conflicts
+                //var vm = this;
+                //vm.debug.text('Level ' + dungeon.level, 16, 30);
                 //this.debug.text('Use the ARROW KEYS to move', 16, this.height - 90);
                 //this.debug.text('Press R to start a new game', 16, this.height - 60);
                 //this.debug.text('Hold A for auto-pilot', 16, this.height - 30);
