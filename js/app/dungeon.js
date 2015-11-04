@@ -39,13 +39,18 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
       height: 40,
 
       level: 1,
-
       _init: function() {
 
         // Used to avoid conflicts
         var vm = this;
 
-        tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
+        //Used to change the 'area' after a certain amount of levels
+        var area = 1;
+        if (this.level >=6){
+          area = 2;
+        }
+
+        tiles = calculateTiles(TILE_UNIT * 3 * area);
 
         crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
 

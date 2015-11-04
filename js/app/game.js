@@ -106,6 +106,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     // Creates a new blank layer and sets the map dimensions.
     layer = map.create('level1', dungeon.width, dungeon.height, TILE_SIZE, TILE_SIZE);
 
+    // Create Music
+    MUS_dungeon1 = game.add.audio('MUS_dungeon1');
+    MUS_dungeon1.loop = true;
+    MUS_dungeon1.volume = music_volume;
+    MUS_dungeon2 = game.add.audio('MUS_dungeon2');
+    MUS_dungeon2.loop = true;
+    MUS_dungeon2.volume = music_volume;
+
     createWorld();
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -129,14 +137,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     SND_hit = game.add.audio('SND_hit');
     SND_hit.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
 
-    // Create Music
-    MUS_dungeon1 = game.add.audio('MUS_dungeon1');
-    MUS_dungeon1.loop = true;
-    MUS_dungeon1.volume = music_volume;
-    MUS_dungeon1.play();
-    MUS_dungeon2 = game.add.audio('MUS_dungeon2');
-    MUS_dungeon2.loop = true;
-    MUS_dungeon2.volume = music_volume;
   }
 
   function updateMarker() {
@@ -227,7 +227,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   function createWorld() {
     dungeon.level = 1;
-
+    MUS_dungeon2.stop();
+    MUS_dungeon1.play();
     if (dungeon.player !== undefined) {
       dungeon.player.sprite.destroy();
     }
@@ -360,7 +361,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
           SND_teleport.play();
           dungeon.level += 1;
           createDungeon();
-
+          if (dungeon.level >=1 && dungeon.level <= 5){
+            if (MUS_dungeon1.isPlaying === false) {
+              MUS_dungeon2.stop();
+              MUS_dungeon1.play();
+            }
+          }
           if (dungeon.level > 5) {
             if (MUS_dungeon2.isPlaying === false) {
               MUS_dungeon1.stop();
