@@ -28,8 +28,8 @@ define(['Phaser', 'game', 'dungeon', 'player'], function (Phaser, Game, dungeon,
 
                 // Load Sound Effects
                 this.load.audio('SND_door_open', 'assets/sounds/Door.wav');
+                this.load.audio('SND_hit', 'assets/sounds/Hit.wav');
                 this.load.audio('SND_teleport', ['assets/sounds/Teleport.ogg', 'assets/sounds/Teleport.wav']);
-
                 // Load Music
                 this.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
                 this.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);

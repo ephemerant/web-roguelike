@@ -4,7 +4,7 @@
 define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
     'use strict';
 
-    // Wall group to use from Wall.png  
+    // Wall group to use from Wall.png
     function calculateTiles(WALL_GROUP_UNIT) {
         return {
             floor: 5 + WALL_GROUP_UNIT,
@@ -39,31 +39,35 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                    tiles.wall_cross_left,
                    tiles.wall_cross_right,
                    tiles.wall_cross],
-
         // The main dungeon object
-        dungeon = {
+        dungeon;
 
+    // Dungeon factory
+    function _dungeon() {
+        return {
             width: 60,
             height: 40,
 
             level: 1,
-
             _init: function () {
 
                 // Used to avoid conflicts
                 var vm = this,
+
+                    //Used to change the 'area' after a certain amount of levels
+                    area = 1,
                     playerRoom;
+                if (this.level >= 6) {
+                    area = 2;
+                }
 
-                tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
+                tiles = calculateTiles(TILE_UNIT * 3 * area);
 
-                crosses = [tiles.wall_cross_bottom,
-                           tiles.wall_cross_top,
-                           tiles.wall_cross_left,
-                           tiles.wall_cross_right,
-                           tiles.wall_cross];
+                crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
 
                 ROT.RNG.setSeed(ROT.RNG.getUniform());
-                console.log('Using RNG seed:', ROT.RNG.getSeed());
+
+                console.log('Using RNG seed:', vm._getSeed());
 
                 vm.tiles = {};
 
@@ -93,12 +97,89 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                 vm._spawnMonsters();
             },
 
+            _getSeed: function () {
+                return ROT.RNG.getSeed();
+            },
+
+            _validTile: function (x, y) {
+                // True if (x, y) is present in tile
+                return (this.tiles[x + ',' + y] !== undefined);
+            },
+
+            _hasMonster: function (x, y) {
+                // True if a monster exists at (x, y)
+                var hasMonster = false;
+
+                this.monsters.forEach(function (monster) {
+                    if (monster.x === x && monster.y === y) {
+                        hasMonster = true;
+                    }
+                });
+                return hasMonster;
+            },
+
+            _getMonster: function (x, y) {
+                // Return the monster at (x, y), if there is one
+                var foundMonster;
+
+                this.monsters.forEach(function (monster) {
+                    if (monster.x === x && monster.y === y) {
+                        foundMonster = monster;
+                    }
+                });
+                return foundMonster;
+            },
+
+            _hasDoor: function (x, y) {
+                return this.doors.indexOf(x + ',' + y) !== -1;
+            },
+
             _isAvailable: function (x, y) {
-                // True if unoccupied by player or stairs, and it's a valid tile
-                return !(this.player.x === x &&
-                        this.player.y === y) &&
-                    !(this.stairs.x === x && this.stairs.y === y) &&
-                    (this.tiles[x + ',' + y] !== undefined);
+                // True if the tile is available for movement
+                // i.e. it is unoccupied by the player, a monster, or a door, and it's a valid tile
+
+                return !(this.player.x === x && this.player.y === y) && this._validTile(x, y) && !this._hasMonster(x, y) && !this._hasDoor(x, y);
+            },
+
+            _moveCreature: function (creature, x, y) {
+                var outcome = {
+                        moved: false,
+                        door: false,
+                        combat: false
+                    },
+
+                    newX = creature.x + x,
+                    newY = creature.y + y,
+
+                    key = newX + ',' + newY,
+                    monster;
+
+                // Basic movement
+                if (this._isAvailable(newX, newY)) {
+                    creature.x = newX;
+                    creature.y = newY;
+                    outcome.moved = true;
+                    // "Open" a door, i.e. remove it
+                } else if (this._hasDoor(newX, newY)) {
+                    this.doors.splice(this.doors.indexOf(key), 1);
+                    // Let phaser know we opened the door
+                    outcome.door = true;
+                    // Combat
+                } else if (this._hasMonster(newX, newY)) {
+                    monster = this._getMonster(newX, newY);
+                    // TODO: Give hero stats
+                    if (monster.isDead === 0) {
+                        //5 used as generic damage, player needs damage stat
+                        monster.getHurt(5);
+                        outcome.combat = true;
+                    } else {
+                        creature.x = newX;
+                        creature.y = newY;
+                        outcome.moved = true;
+                    }
+                }
+
+                return outcome;
             },
 
             _generate: function () {
@@ -140,7 +221,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                     var x = Math.round((room._x1 + room._x2) / 2),
                         y = Math.round((room._y1 + room._y2) / 2);
                     if (vm._isAvailable(x, y)) {
-                        vm.monsters.push(creatures.snake(x, y));
+                        vm.monsters.push(creatures._putCreature(dungeon.level, x, y));
                     }
                 });
             },
@@ -171,6 +252,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
             // Place and autojoin walls around tiles
             _placeWalls: function () {
                 var walls = {},
+                    
                     myTiles = this.tiles,
                     doors = this.doors;
 
@@ -178,9 +260,10 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                 _.each(myTiles, function (tile, key) {
 
                     var xy = key.split(','),
+                        
                         x = +(xy[0]),
                         y = +(xy[1]),
-
+                        
                         left = (x - 1) + ',' + (y),
                         right = (x + 1) + ',' + (y),
                         up = (x) + ',' + (y - 1),
@@ -189,7 +272,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                         bottom_right = (x + 1) + ',' + (y + 1),
                         bottom_left = (x - 1) + ',' + (y + 1),
                         top_left = (x - 1) + ',' + (y - 1),
-
+                        
                         directions = [left, right, up, down, top_right, bottom_right, bottom_left, top_left];
 
                     _.each(directions, function (direction) {
@@ -202,16 +285,17 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                 // Join walls
                 _.each(walls, function (tile, key) {
                     var xy = key.split(','),
+                        
                         x = +(xy[0]),
                         y = +(xy[1]),
-
+                        
                         left = (x - 1) + ',' + (y),
                         right = (x + 1) + ',' + (y),
                         up = (x) + ',' + (y - 1),
                         down = (x) + ',' + (y + 1),
-
+                        
                         directions = [left, right, up, down],
-
+                        
                         nearbyWalls = [];
 
                     // Create list of surrounding walls based on direction
@@ -222,8 +306,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                     });
 
                     // Crosses
-                    if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) &&
-                            _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
+                    if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) && _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
                         walls[key] = tiles.wall_cross;
                     } else if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) && _.contains(nearbyWalls, up)) {
                         walls[key] = tiles.wall_cross_bottom;
@@ -233,7 +316,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                         walls[key] = tiles.wall_cross_left;
                     } else if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
                         walls[key] = tiles.wall_cross_right;
-                        // Corners
+                    // Corners
                     } else if (_.contains(nearbyWalls, down) && _.contains(nearbyWalls, right)) {
                         walls[key] = tiles.wall_top_left;
                     } else if (_.contains(nearbyWalls, down) && _.contains(nearbyWalls, left)) {
@@ -242,7 +325,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                         walls[key] = tiles.wall_bottom_left;
                     } else if (_.contains(nearbyWalls, up) && _.contains(nearbyWalls, left)) {
                         walls[key] = tiles.wall_bottom_right;
-                        // Horizontal / Vertical
+                    // Horizontal / Vertical
                     } else if (_.contains(nearbyWalls, up) || _.contains(nearbyWalls, down)) {
                         walls[key] = tiles.wall_vertical;
                     } else if (_.contains(nearbyWalls, left) || _.contains(nearbyWalls, right)) {
@@ -254,9 +337,10 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                 _.each(walls, function (tile, key) {
                     if (_.contains(crosses, tile)) {
                         var xy = key.split(','),
+                            
                             x = +(xy[0]),
                             y = +(xy[1]),
-
+                            
                             left = (x - 1) + ',' + (y),
                             up = (x) + ',' + (y - 1);
 
@@ -267,7 +351,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                         } else if (tile === tiles.wall_cross_right && walls[left] === tiles.wall_cross_left) {
                             walls[key] = tiles.wall_vertical;
                             walls[left] = tiles.wall_vertical;
-                            // Decompose full crosses
+                        // Decompose full crosses
                         } else if (tile === tiles.wall_cross_right && walls[left] === tiles.wall_cross) {
                             walls[key] = tiles.wall_vertical;
                             walls[left] = tiles.wall_cross_right;
@@ -286,12 +370,17 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                 this.walls = walls;
             }
         };
+    }
+
+    // The main dungeon object
+    dungeon = _dungeon();
 
     // Export data
     return {
         TILE_SIZE: TILE_SIZE,
         dungeon: dungeon,
         tiles: tiles,
-        creatures: creatures
+        creatures: creatures,
+        _dungeon: _dungeon
     };
 });
