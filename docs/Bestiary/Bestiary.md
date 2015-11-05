@@ -2,6 +2,7 @@ Bestiary
 ====
 Undead
 ---
+___
 ![Skeleton](Skeleton.png)
 Skeleton
 ---
@@ -13,11 +14,25 @@ These are the remains of previous adventurers. Reanimated by dark magic, they ar
 
 Reptiles
 ---
+___
 ![Snake](Snake.png)
 Snake
 ---
+
 * HP: 15
 * Strength: 5
 * Special notes: Beware their poisonous bite.
 
 They slide along the ground looking for food. Their bite, while not deadly, is harmful. Proper armor is recommended.
+
+Fey
+---
+___
+![Fairy](Fairy.png)
+Fairy
+---
+* HP: 25
+* Strength: 5
+* Special notes: Teleport around the dungeon
+
+Don't be fooled by their dainty appearance. These magical creatures are masters of magic and can warp space to their will.

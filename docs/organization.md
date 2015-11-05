@@ -9,8 +9,8 @@
 	* Lighting
 	* Menus/Screens
 * Cody - 20%
-	* Design interactables (objects, creatures, etc) 
-	* Combat/poison/etc functionality
+	* Design interactables (objects, creatures, etc)
+	* Combat/Stats/poison/etc functionality
 * Jason - 20%
 	* Design interactables (objects, creatures, etc)
 	* Combat/Stats
