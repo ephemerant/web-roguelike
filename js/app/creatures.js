@@ -3,7 +3,11 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
     _sprites: ['Reptile0.png', 'Reptile1.png','Undead0.png','Undead1.png','Humanoid0.png','Humanoid1.png'],
     _creatures_area1: ['skeleton', 'snake', 'fairy'],//Creature pool for area 1
 
-    //picks a creature from the creature pool
+    /**
+     * [Picks a random crature from the proper creature pool.]
+     * @param  {[integer]} level [What level of the dungeon the player is currently on]
+     * @return {[string]}       [The name of the creature that has been picked to be placed]
+     */
     _pickCreature: function(level){
       if (level >= 1 && level <= 5){ //pick a random creature from section 1
         return this._creatures_area1[Math.floor(Math.random() * 3)];
@@ -11,7 +15,14 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
       return (this._creatures_area1[Math.floor(Math.random() * 2)]); //If calculation breaks then just return area1
     },
 
-    //Returns a creature to push
+    /**
+     * [Creates a creature that is to be put into the dungeon. It calls the _pickCreature function to randomly select
+     * a creature. This function creates the randomly chosen enemy and returns that creature.]
+     * @param  {[integer]} level [What level of the dungeon the player is currently on]
+     * @param  {[integer]} x     [X coordinate of where the creature is to be placed.]
+     * @param  {[integer]} y     [Y coordinate of where the creature is to be placed.]
+     * @return {[creature]}       [The creature created is returned.]
+     */
     _putCreature: function( level, x, y){
       var creatureName = this._pickCreature(level);
       if (creatureName === 'skeleton'){
@@ -24,7 +35,20 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         return this.snake(x, y); //If all else fails put snake
       }
     },
-
+    /**
+     * [A factory that creates an enemy based upon the data given]
+     * @param  {string} name    [Creatures name]
+     * @param  {integer} hp      [Health will also become the max_hp]
+     * @param  {[integer]} str     [Strength]
+     * @param  {[integer]} def     [Defense]
+     * @param  {[integer]} crit    [Critical hit ratio]
+     * @param  {[integer]} expgain [Experience point gain]
+     * @param  {[string]} sprite  [Sprite sheet name]
+     * @param  {[integer]} frame   [What frame from the spritesheet to use]
+     * @param  {[integer]} x       [X coordinate of where the sprite is located in the dungeon]
+     * @param  {[integer]} y       [Y coordinate of where the sprite is located in the dungeon]
+     * @return {[creature]}         [The created creature object is returned to the caller]
+     */
     _generic: function(name, hp, str, def, crit, expgain, sprite, frame, x, y) {
       return {
         name: name,
@@ -39,6 +63,12 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         x: x,
         y: y,
         isDead: 0,
+
+        /**
+         * [Moves the changes the x and y coordinate of the creature]
+         * @param  {[integer]} _x [Tells the creature where to move relative to its current position]
+         * @param  {[integer]} _y [Tells the creature where to move relative to its current position]
+         */
         move: function(_x, _y) {
           if (isDead === 0){ //cannot move if dead
             this.x += _x;
@@ -51,15 +81,31 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
             }
           }
         },
+
+        /**
+         * [Performs any action that must be done upon death (ex. item drop)]
+         */
         die: function() {},
+
+        /**
+         * [Performs any non attack action that the player may do to the creature (ex. talk)]
+         */
         interact: function() {
-          //This function is for if the player runs into the creature without intent to attack.
+
         },
+
+        /**
+         * [Perform a special creature specific action that isnt an attack. (ex. fairy teleport)]
+         */
         special: function(){
-          //This is for any special move that the creature can perform, outside of the attack.
+
         },
+
+        /**
+         * [The creature attacks the creature that is passed to it. Calculations are made to determine damage given.]
+         * @param  {[creature]} creature [The creature that is being attacked]
+         */
         attack: function(creature){
-          //This is called when the creature attacks
           var damage = this.str;
           if(Math.floor(Math.random()*this.crit)=== 1){
             damage *= 2;// Critical Hit double the damage.
@@ -85,6 +131,17 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         }
       };
     },
+
+    /**
+     * [A factory that creates the player based upon the data given]
+     * @param  {[string]} name  [Name is 'Player' !!DO NOT CHANGE THIS!!
+     * @param  {[integer]} hp    [Health of the player, will also become the max_hp]
+     * @param  {[integer]} str   [Strength of the player]
+     * @param  {[integer]} def   [Defense of the player]
+     * @param  {[integer]} crit  [Critical hit ratio]
+     * @param  {[string]} Class [Name of the class the player is]
+     * @return {[creature]}       [Returns the created player to the caller]
+     */
     _makePlayer: function(name, hp, str, def, crit, Class) {
       return {
         name: name,
@@ -100,6 +157,10 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         class: Class, //The class of the character 'rogue, warrior etc'
         isDead: 0, //Not sure if necessary
 
+        /**
+         * [The playerattacks the creature that is passed to it. Calculations are made to determine damage given.]
+         * @param  {[creature]} creature [The creature that is being attacked]
+         */
         attack: function(creature){
           var damage = this.str;
           if(Math.floor(Math.random()*this.crit)=== 1){
@@ -127,6 +188,9 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
           }
         },
 
+        /**
+         * [This function is for any calculation that must be made each turn]
+         */
         turnTick: function(){
           if (this.poisonTimer>=1){
             this.poisonTimer--;
@@ -144,6 +208,10 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         }
       };
     },
+
+    /*
+     *The following functions create creatures by giving data to the factories.
+     */
 
     snake: function(x, y) {
       return this._generic('Snake', 8, 5, 1, 20, 10, 'reptile0', 43, x, y);
