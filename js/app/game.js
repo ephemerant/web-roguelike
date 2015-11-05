@@ -1,7 +1,7 @@
 /*globals define, Promise*/
 /*jslint nomen: true */
 
-define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT) {
+define(['Phaser', 'lodash', 'dungeon', 'ROT', 'items'], function (Phaser, _, Dungeon, ROT, items) {
     'use strict';
     // Dictionary of tilesheet indexes
     var tiles = Dungeon.tiles,
@@ -195,9 +195,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                                 _y = $y - dungeon.player.y;
 
                             Game.movePlayer(_x, _y).then(function () {
-                                // If we bumped the goal tile, stop 
+                                // If we bumped the goal tile, stop
                                 // (e.g. bump to open a door, but don't walk into it after)
-                                // This will be very useful to avoid 
+                                // This will be very useful to avoid
                                 // clicking a monster and infinitely attacking it
                                 if ($x === x && $y === y) {
                                     is_pathing = false;

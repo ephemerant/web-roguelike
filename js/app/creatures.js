@@ -1,7 +1,7 @@
 /*globals define, console*/
 /*jslint nomen: true */
 
-define(['ROT', 'Phaser'], function (ROT, Phaser) {
+define(['ROT', 'Phaser','items'], function (ROT, Phaser, items) {
     'use strict';
     return {
         _sprites: ['Reptile0.png', 'Reptile1.png', 'Undead0.png', 'Undead1.png', 'Humanoid0.png', 'Humanoid1.png'],

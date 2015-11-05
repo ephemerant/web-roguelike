@@ -1,7 +1,7 @@
 /*globals define, console*/
 /*jslint nomen: true */
 
-define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
+define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, items) {
     'use strict';
 
     /**
@@ -307,7 +307,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                 this.doors = doors;
             },
 
-            /** 
+            /**
              * Place and autojoin walls around tiles
              * @return {[type]}
              */
