@@ -353,7 +353,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       // The player moved
       if (result.moved) {
         dungeon.player.isMoving = true;
-
+        dungeon.playerStats.turnTick();
         // Entering stairs
         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
           // TODO: Swap stairs out with a portal?
@@ -444,5 +444,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
     game.debug.text('Use the ARROW KEYS to move', 16, game.height - 90);
     game.debug.text('Press R to start a new game', 16, game.height - 60);
     game.debug.text('Hold A for auto-pilot', 16, game.height - 30);
+    game.debug.text('Player hp: ' + dungeon.playerStats.hp + ' player is dead? ' + dungeon.playerStats.isDead, 16, game.height - 120);
   }
 });
