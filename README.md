@@ -1,4 +1,4 @@
-# C346 Roguelike
+# ![](http://i.imgur.com/jDiIWqN.png)
 
 A Web-based, JavaScript Roguelike group project created for the Introduction to Software Engineering class at IUS.
 
