@@ -4,7 +4,11 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
   var TILE_SIZE = 32;
   var TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE;
 
-  // Wall group to use from Wall.png
+  /**
+   * Wall group to use from Wall.png
+   * @param  {Number} WALL_GROUP_UNIT
+   * @return {Array} - environment-specific group of tiles
+   */
   function calculateTiles(WALL_GROUP_UNIT) {
     return {
       floor: 5 + WALL_GROUP_UNIT,
@@ -26,13 +30,22 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
     };
   }
 
-  // List of tiles and their corresponding position in the tile sheet
+  /**
+   * List of tiles and their corresponding position in the tile sheet
+   * @type {Array}
+   */
   var tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
 
-  // List of cross tiles, used for auto-joining
+  /**
+   * List of cross tiles, used for auto-joining
+   * @type {Array}
+   */
   var crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
 
-  // Dungeon factory
+  /**
+   * Dungeon factory
+   * @return {Object}
+   */
   function _dungeon() {
     return {
       width: 60,
@@ -46,7 +59,7 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
         //Used to change the 'area' after a certain amount of levels
         var area = 1;
-        if (this.level >=6){
+        if (this.level >= 6) {
           area = 2;
         }
 
@@ -70,6 +83,12 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
 
         var playerRoom = vm.rooms[_.random(vm.rooms.length - 1)];
 
+        /**
+         * Basic distance formula between two points on a 2D plane
+         * @param  {room} a
+         * @param  {room} b
+         * @return {number} distance
+         */
         function distance(a, b) {
           return Math.sqrt(Math.pow(a._x1 - b._x1, 2) + Math.pow(a._y1 - b._y1, 2));
         }
@@ -86,15 +105,28 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         vm._spawnMonsters();
       },
 
+      /**
+       * @return {[type]}
+       */
       _getSeed: function() {
         return ROT.RNG.getSeed();
       },
 
+      /**
+       * @param  {[type]}
+       * @param  {[type]}
+       * @return {[type]}
+       */
       _validTile: function(x, y) {
         // True if (x, y) is present in tile
         return (this.tiles[x + ',' + y] !== undefined);
       },
 
+      /**
+       * @param  {[type]}
+       * @param  {[type]}
+       * @return {Boolean}
+       */
       _hasMonster: function(x, y) {
         // True if a monster exists at (x, y)
         var hasMonster = false;
@@ -106,6 +138,11 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         return hasMonster;
       },
 
+      /**
+       * @param  {[type]}
+       * @param  {[type]}
+       * @return {[type]}
+       */
       _getMonster: function(x, y) {
         // Return the monster at (x, y), if there is one
         var foundMonster;
@@ -117,10 +154,20 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         return foundMonster;
       },
 
+      /**
+       * @param  {[type]}
+       * @param  {[type]}
+       * @return {Boolean}
+       */
       _hasDoor: function(x, y) {
         return this.doors.indexOf(x + ',' + y) !== -1;
       },
 
+      /**
+       * @param  {[type]}
+       * @param  {[type]}
+       * @return {Boolean}
+       */
       _isAvailable: function(x, y) {
         // True if the tile is available for movement
         // i.e. it is unoccupied by the player, a monster, or a door, and it's a valid tile
@@ -128,6 +175,12 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         return !(this.player.x === x && this.player.y === y) && this._validTile(x, y) && !this._hasMonster(x, y) && !this._hasDoor(x, y);
       },
 
+      /**
+       * @param  {[type]}
+       * @param  {[type]}
+       * @param  {[type]}
+       * @return {[type]}
+       */
       _moveCreature: function(creature, x, y) {
         var outcome = {
           moved: false,
@@ -156,12 +209,11 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         else if (this._hasMonster(newX, newY)) {
           var monster = this._getMonster(newX, newY);
 
-          if (monster.isDead === 0){
+          if (monster.isDead === 0) {
             this.playerStats.attack(monster);
             monster.attack(this.playerStats);
             outcome.combat = true;
-          }
-          else{
+          } else {
             creature.x = newX;
             creature.y = newY;
             outcome.moved = true;
@@ -171,6 +223,9 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         return outcome;
       },
 
+      /**
+       * @return {[type]}
+       */
       _generate: function() {
         var digger = new ROT.Map.Digger(this.width, this.height);
         var digCallback = function(x, y, value) {
@@ -185,6 +240,11 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         this.digger = digger;
       },
 
+      /**
+       * @param  {[type]}
+       * @param  {[type]}
+       * @return {[type]}
+       */
       _spawnPlayer: function(x, y) {
         this.player = this.player || {};
 
@@ -192,6 +252,9 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         this.player.y = y;
       },
 
+      /**
+       * @return {[type]}
+       */
       _spawnStairs: function() {
         // Put stairs in the farthest room away
         this.stairs = {
@@ -200,6 +263,9 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         };
       },
 
+      /**
+       * @return {[type]}
+       */
       _spawnMonsters: function() {
         var vm = this;
 
@@ -215,7 +281,10 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         });
       },
 
-      // Analyze rooms and place doors
+      /**
+       * Analyze rooms and place doors
+       * @return {[type]}
+       */
       _placeDoors: function() {
         var doors = [];
         _.each(this.digger.getRooms(), function(room, key) {
@@ -240,7 +309,10 @@ define(['ROT', 'lodash', 'creatures'], function(ROT, _, creatures) {
         this.doors = doors;
       },
 
-      // Place and autojoin walls around tiles
+      /** 
+       * Place and autojoin walls around tiles
+       * @return {[type]}
+       */
       _placeWalls: function() {
         var walls = {};
 
