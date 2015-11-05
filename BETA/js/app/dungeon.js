@@ -47,7 +47,7 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
         return {
             width: 60,
             height: 40,
-
+            playerStats: creatures.player(), //Create player stat array
             level: 1,
             _init: function () {
 
@@ -169,8 +169,8 @@ define(['ROT', 'lodash', 'creatures'], function (ROT, _, creatures) {
                     monster = this._getMonster(newX, newY);
                     // TODO: Give hero stats
                     if (monster.isDead === 0) {
-                        //5 used as generic damage, player needs damage stat
-                        monster.getHurt(5);
+                        this.playerStats.attack(monster);
+                        monster.attack(this.playerStats);
                         outcome.combat = true;
                     } else {
                         creature.x = newX;
