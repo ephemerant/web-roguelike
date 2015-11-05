@@ -361,7 +361,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
           SND_teleport.play();
           dungeon.level += 1;
           createDungeon();
-          if (dungeon.level >=1 && dungeon.level <= 5){
+          if (dungeon.level >= 1 && dungeon.level <= 5) {
             if (MUS_dungeon1.isPlaying === false) {
               MUS_dungeon2.stop();
               MUS_dungeon1.play();
@@ -403,7 +403,15 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
       else if (result.combat) {
         SND_hit.play();
         is_pathing = false;
-        resolve();
+
+        // Add delay for next attack
+
+        dungeon.player.isMoving = true;
+
+        setTimeout(function() {
+          dungeon.player.isMoving = false;
+          resolve();
+        }, INPUT_DELAY);
       } else {
         is_pathing = false;
         resolve();
@@ -413,7 +421,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, dungeon, ROT)
 
   // Handle input / animations
   function update() {
-    dungeon.monsters.forEach(function(monster){
+    dungeon.monsters.forEach(function(monster) {
       monster.sprite.frame = monster.frame;
     });
     if (cursors.left.isDown) {
