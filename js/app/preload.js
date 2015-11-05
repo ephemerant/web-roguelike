@@ -1,11 +1,12 @@
 /*globals define*/
 /*jslint nomen: true */
 
-define(['Phaser', 'game', 'dungeon', 'player'], function (Phaser, Game, dungeon, player) {
+define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
     'use strict';
     var creatures = dungeon.creatures,
         TILE_SIZE = dungeon.TILE_SIZE,
-
+        // TODO: Move this list to a player.js file or something of the sort
+        classes = ['Warrior', 'Engineer', 'Mage', 'Paladin', 'Rogue'],
         Preload = {
             // Import assets
             preload: function () {
@@ -20,8 +21,8 @@ define(['Phaser', 'game', 'dungeon', 'player'], function (Phaser, Game, dungeon,
                 vm.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
 
                 // Load player sprites
-                player.sprites.forEach(function (sprite) {
-                    Preload.load.spritesheet(sprite.toLowerCase().replace('.png', ''), 'assets/' + sprite, TILE_SIZE, TILE_SIZE);
+                classes.forEach(function (name) {
+                    vm.load.spritesheet(name.toLowerCase(), 'assets/' + name + '.png', TILE_SIZE, TILE_SIZE);
                 });
                 // Load monster sprites
                 creatures._sprites.forEach(function (sprite) {
