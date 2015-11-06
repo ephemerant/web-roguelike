@@ -8,9 +8,10 @@ requirejs.config({
 		Phaser: 'phaser.min',
 		lodash: 'lodash.min',
 		ROT: 'rot.min',
-        
+
         // Game Files
 		creatures: '../app/creatures',
+		items: '../app/items',
 		dungeon: '../app/dungeon',
         game: '../app/game',
         start: '../app/start',

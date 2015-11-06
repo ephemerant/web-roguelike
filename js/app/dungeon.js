@@ -50,6 +50,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                    tiles.wall_cross_right,
                    tiles.wall_cross],
         // The main dungeon object
+        loot = [],
         dungeon;
 
     /**
@@ -113,6 +114,8 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                 vm._spawnStairs();
 
                 vm._spawnMonsters();
+
+                vm._spawnItems();
             },
             /**
              * @return {[type]}
@@ -145,6 +148,20 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                 });
                 return hasMonster;
             },
+
+            _hasItem: function(x, y){
+              var hasItem = false;
+
+              if (this.loot){
+                this.loot.forEach(function (item){
+                  if (item.x === x && item.y === y){
+                    hasItem = true;
+                  }
+                });
+              }
+              return hasItem;
+            },
+
             /**
              * @param  {[type]}
              * @param  {[type]}
@@ -161,6 +178,18 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                 });
                 return foundMonster;
             },
+
+            _getItem: function(x, y){
+                var foundItem;
+
+                this.loot.forEach(function (item){
+                  if (item.x === x && item.y === y){
+                    foundItem = item;
+                  }
+                });
+                return foundItem;
+            },
+
             /**
              * @param  {[type]}
              * @param  {[type]}
@@ -178,7 +207,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                 // True if the tile is available for movement
                 // i.e. it is unoccupied by the player, a monster, or a door, and it's a valid tile
 
-                return !(this.player.x === x && this.player.y === y) && this._validTile(x, y) && !this._hasMonster(x, y) && !this._hasDoor(x, y);
+                return !(this.player.x === x && this.player.y === y) && this._validTile(x, y) && !this._hasMonster(x, y) && !this._hasDoor(x, y) && !this._hasItem(x, y);
             },
             /**
              * @param  {[type]}
@@ -222,6 +251,9 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                         creature.y = newY;
                         outcome.moved = true;
                     }
+                } else if (this._hasItem(newX, newY)){
+                    var item = this._getItem(newX, newY);
+                    item.pickup(this.playerStats);
                 }
 
                 return outcome;
@@ -279,6 +311,21 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                         vm.monsters.push(creatures._putCreature(dungeon.level, x, y));
                     }
                 });
+            },
+
+            _spawnItems: function(){
+              var vm = this;
+              vm.loot = [];
+
+              // place items
+              vm.rooms.forEach(function (room) {
+                  var x = Math.round((room._x1 + room._x2) / 2),
+                      y = Math.round((room._y1 + room._y2) / 2);
+                  if (vm._isAvailable(x+1, y)) {
+                      vm.loot.push(items._putItem(dungeon.level, x+1, y));
+                  }
+              });
+              console.log(vm.loot);
             },
 
             /**
@@ -442,6 +489,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
         dungeon: dungeon,
         tiles: tiles,
         creatures: creatures,
+        items: items,
         _dungeon: _dungeon
     };
 });

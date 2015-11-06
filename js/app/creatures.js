@@ -14,7 +14,7 @@ define(['ROT', 'Phaser','items'], function (ROT, Phaser, items) {
          */
         _pickCreature: function (level) {
             if (level >= 1 && level <= 5) { //pick a random creature from section 1
-                return this._creatures_area1[Math.floor(Math.random() * 3)];
+                return this._creatures_area1[Math.floor(Math.random() * 2)];
             }
             return (this._creatures_area1[Math.floor(Math.random() * 2)]); //If calculation breaks then just return area1
         },
@@ -153,6 +153,8 @@ define(['ROT', 'Phaser','items'], function (ROT, Phaser, items) {
                 poisonTimer: 0,
                 charClass: Class, //The class of the character 'rogue, warrior etc'
                 isDead: 0, //Not sure if necessary
+                inventory: ['none','none','none','none','none','none','none','none','none','none'],
+
                 /**
                  * [The playerattacks the creature that is passed to it. Calculations are made to determine damage given.]
                  * @param  {[creature]} creature [The creature that is being attacked]
@@ -198,6 +200,19 @@ define(['ROT', 'Phaser','items'], function (ROT, Phaser, items) {
                         this.hp = 0;
                         this.isDead = 1;
                     }
+                },
+
+                /**
+                 * [Checks if the player has an empty spot in their inventory]
+                 * @return {[int]} [Returns the index of free space if space is found and -1 if no space is found.]
+                 */
+                checkInventorySpace: function(){
+                  for (i = 0; i< this.inventory.length; i++){
+                    if (this.inventory[i] === 'none'){
+                      return i;
+                    }
+                  }
+                  return -1;
                 }
             };
         },

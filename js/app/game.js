@@ -1,12 +1,14 @@
 /*globals define, Promise*/
 /*jslint nomen: true */
 
-define(['Phaser', 'lodash', 'dungeon', 'ROT', 'items'], function (Phaser, _, Dungeon, ROT, items) {
+define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT) {
     'use strict';
     // Dictionary of tilesheet indexes
     var tiles = Dungeon.tiles,
         // Creature types
         creatures = Dungeon.creatures,
+        // Item types
+        loot = Dungeon.loot,
         // How wide / tall each tile is
         TILE_SIZE = Dungeon.TILE_SIZE,
         // Our ROT-based dungeon model
@@ -46,6 +48,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'items'], function (Phaser, _, Dun
         // Dictionary of door sprites by (x,y)
         doors = {},
         monsters = [],
+        loot = [],
 
         //These variables are for volume control.
         //TODO: Allow user to choose volume.
@@ -276,6 +279,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'items'], function (Phaser, _, Dun
                         monster.frame);
                 });
 
+                // Place items
+                dungeon.loot.forEach(function (item) {
+                    item.sprite = Game.add.sprite(item.x * TILE_SIZE,
+                        item.y * TILE_SIZE,
+                        item.sprite,
+                        item.frame);
+                });
+
                 // Place stairs
                 vm.placeTile(tiles.stairs, dungeon.stairs.x, dungeon.stairs.y);
             },
@@ -328,8 +339,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT', 'items'], function (Phaser, _, Dun
                     });
                 }
 
+                //items
+                if (dungeon.loot) {
+                    dungeon.loot.forEach(function (item) {
+                        item.sprite.destroy();
+                    });
+                }
+
                 doors = {};
                 monsters = [];
+                loot = [];
             },
 
             // Add (x, y) to the player's position if it is a valid move

@@ -4,6 +4,7 @@
 define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
     'use strict';
     var creatures = dungeon.creatures,
+    items = dungeon.items,
         TILE_SIZE = dungeon.TILE_SIZE,
         // TODO: Move this list to a player.js file or something of the sort
         classes = ['Warrior', 'Engineer', 'Mage', 'Paladin', 'Rogue'],
@@ -27,6 +28,11 @@ define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
                 // Load monster sprites
                 creatures._sprites.forEach(function (sprite) {
                     Preload.load.spritesheet(sprite.toLowerCase().replace('.png', ''), 'assets/monsters/' + sprite, TILE_SIZE, TILE_SIZE);
+                });
+
+                // Load item sprites
+                items._sprites.forEach(function (sprite) {
+                    Preload.load.spritesheet(sprite.toLowerCase().replace('.png', ''), 'assets/items/' + sprite, TILE_SIZE, TILE_SIZE);
                 });
 
                 // Load Sound Effects
