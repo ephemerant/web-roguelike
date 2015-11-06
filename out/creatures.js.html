@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: creatures.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: creatures.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*globals define, console*/
+/*jslint nomen: true */
+
+define(['ROT', 'Phaser','items'], function (ROT, Phaser, items) {
+    'use strict';
+    return {
+        _sprites: ['Reptile0.png', 'Reptile1.png', 'Undead0.png', 'Undead1.png', 'Humanoid0.png', 'Humanoid1.png'],
+        _creatures_area1: ['skeleton', 'snake', 'fairy'], //Creature pool for area 1
+
+        /**
+         * [Picks a random crature from the proper creature pool.]
+         * @param  {[integer]} level [What level of the dungeon the player is currently on]
+         * @return {[string]}       [The name of the creature that has been picked to be placed]
+         */
+        _pickCreature: function (level) {
+            if (level >= 1 &amp;&amp; level &lt;= 5) { //pick a random creature from section 1
+                return this._creatures_area1[Math.floor(Math.random() * 3)];
+            }
+            return (this._creatures_area1[Math.floor(Math.random() * 2)]); //If calculation breaks then just return area1
+        },
+
+        /**
+         * [Creates a creature that is to be put into the dungeon. It calls the _pickCreature function to randomly select
+         * a creature. This function creates the randomly chosen enemy and returns that creature.]
+         * @param  {[integer]} level [What level of the dungeon the player is currently on]
+         * @param  {[integer]} x     [X coordinate of where the creature is to be placed.]
+         * @param  {[integer]} y     [Y coordinate of where the creature is to be placed.]
+         * @return {[creature]}       [The creature created is returned.]
+         */
+        _putCreature: function (level, x, y) {
+            var creatureName = this._pickCreature(level);
+            if (creatureName === 'skeleton') {
+                return this.skeleton(x, y);
+            } else if (creatureName === 'fairy') {
+                return this.fairy(x, y);
+            } else {
+                return this.snake(x, y); //If all else fails put snake
+            }
+        },
+        /**
+         * [A factory that creates an enemy based upon the data given]
+         * @param  {string} name    [Creatures name]
+         * @param  {integer} hp      [Health will also become the max_hp]
+         * @param  {[integer]} str     [Strength]
+         * @param  {[integer]} def     [Defense]
+         * @param  {[integer]} crit    [Critical hit ratio]
+         * @param  {[integer]} expgain [Experience point gain]
+         * @param  {[string]} sprite  [Sprite sheet name]
+         * @param  {[integer]} frame   [What frame from the spritesheet to use]
+         * @param  {[integer]} x       [X coordinate of where the sprite is located in the dungeon]
+         * @param  {[integer]} y       [Y coordinate of where the sprite is located in the dungeon]
+         * @return {[creature]}         [The created creature object is returned to the caller]
+         */
+        _generic: function (name, hp, str, def, crit, expgain, sprite, frame, x, y) {
+            return {
+                name: name,
+                hp: hp,
+                max_hp: hp,
+                str: str,
+                def: def,
+                crit: crit, //The lower this value is the higher the chance of a critical hit
+                expgain: expgain,
+                sprite: sprite,
+                frame: frame,
+                x: x,
+                y: y,
+                isDead: 0,
+                /**
+                 * [Moves the changes the x and y coordinate of the creature]
+                 * @param  {[integer]} _x [Tells the creature where to move relative to its current position]
+                 * @param  {[integer]} _y [Tells the creature where to move relative to its current position]
+                 */
+                move: function (_x, _y) {
+                    if (isDead === 0) { //cannot move if dead
+                        this.x += _x;
+                        this.y += _y;
+                    }
+                    if (this.name === 'Skeleton' &amp;&amp; this.isDead === 1) { //Skeletons may revive each turn
+                        var revive = Math.floor(Math.random() * 10);
+                        if (revive === 1) {
+                            this.isDead = 0;
+                        }
+                    }
+                },
+                /**
+                 * [Performs any action that must be done upon death (ex. item drop)]
+                 */
+                die: function () {},
+                /**
+                 * [Performs any non attack action that the player may do to the creature (ex. talk)]
+                 */
+                interact: function () {
+                    //This function is for if the player runs into the creature without intent to attack.
+                },
+                /**
+                 * [Perform a special creature specific action that isnt an attack. (ex. fairy teleport)]
+                 */
+                special: function () {
+                    //This is for any special move that the creature can perform, outside of the attack.
+                },
+                /**
+                 * [The creature attacks the creature that is passed to it. Calculations are made to determine damage given.]
+                 * @param  {[creature]} creature [The creature that is being attacked]
+                 */
+                attack: function (creature) {
+                    //This is called when the creature attacks
+                    var damage = this.str;
+                    if (Math.floor(Math.random() * this.crit) === 1) {
+                        damage *= 2; // Critical Hit double the damage.
+
+                        console.log('CRITICAL HIT!');
+                    }
+                    if (this.name === 'Snake' &amp;&amp; Math.floor(Math.random() * 5) === 1) {
+                        creature.isPoisoned = 1;
+                        creature.poisonTimer = 10;
+                        console.log('Player poisoned');
+                    }
+                    damage -= creature.def;
+                    creature.hp -= damage;
+
+                    console.log('Creature did ' + damage + ' damage');
+                    console.log('Player health now ' + creature.hp);
+
+                    if (creature.hp &lt;= 0) {
+                        creature.hp = 0;
+                        creature.isDead = 1;
+                        creature.frame = 0;
+                    }
+                }
+            };
+        },
+        /**
+         * [A factory that creates the player based upon the data given]
+         * @param  {[string]} name  [Name is 'Player' !!DO NOT CHANGE THIS!!
+         * @param  {[integer]} hp    [Health of the player, will also become the max_hp]
+         * @param  {[integer]} str   [Strength of the player]
+         * @param  {[integer]} def   [Defense of the player]
+         * @param  {[integer]} crit  [Critical hit ratio]
+         * @param  {[string]} Class [Name of the class the player is]
+         * @return {[creature]}       [Returns the created player to the caller]
+         */
+        _makePlayer: function (name, hp, str, def, crit, Class) {
+            return {
+                name: name,
+                level: 1,
+                exp: 0,
+                hp: hp,
+                max_hp: hp,
+                str: str,
+                def: def,
+                crit: crit, //The lower this value is the higher the chance of a critical hit
+                isPoisoned: 0,
+                poisonTimer: 0,
+                charClass: Class, //The class of the character 'rogue, warrior etc'
+                isDead: 0, //Not sure if necessary
+                /**
+                 * [The playerattacks the creature that is passed to it. Calculations are made to determine damage given.]
+                 * @param  {[creature]} creature [The creature that is being attacked]
+                 */
+                attack: function (creature) {
+                    var damage = this.str;
+                    if (Math.floor(Math.random() * this.crit) === 1) {
+                        damage *= 2; // Critical Hit double the damage.
+                    }
+                    damage -= creature.def;
+                    creature.hp -= damage;
+
+                    console.log('Player did ' + damage + ' damage');
+                    console.log('Monster health is now ' + creature.hp);
+
+                    if (creature.hp &lt;= 0) {
+                        creature.hp = 0;
+                        creature.isDead = 1;
+                        creature.frame = 0;
+                        this.exp += (creature.expgain - (this.level * 2));
+
+                        if (this.exp >= 100) { //Leveling up system ;D
+                            this.exp -= 100;
+                            this.level += 1;
+                            this.str += 2;
+                            this.def += 1;
+                            this.hp += 3;
+                        }
+                    }
+                },
+
+                turnTick: function () {
+                    if (this.poisonTimer >= 1) {
+                        this.poisonTimer -= 1;
+                        this.hp -= 1;
+                        console.log('Player suffers from poison' + ' hp now ' + this.hp);
+                        if (this.poisonTimer === 0) {
+                            this.isPoisoned = 0;
+                            console.log('Player no longer poisoned');
+                        }
+                    }
+                    if (this.hp &lt;= 0) {
+                        this.hp = 0;
+                        this.isDead = 1;
+                    }
+                }
+            };
+        },
+        /*
+         *The following functions create creatures by giving data to the factories.
+         */
+        snake: function (x, y) {
+            return this._generic('Snake', 8, 5, 1, 20, 10, 'reptile0', 43, x, y);
+        },
+        skeleton: function (x, y) {
+            return this._generic('Skeleton', 15, 4, 0, 20, 10, 'undead0', 24, x, y);
+        },
+        fairy: function (x, y) {
+            return this._generic('Fairy', 25, 4, 0, 20, 10, 'humanoid0', 34, x, y);
+        },
+        player: function () {
+            return this._makePlayer('Player', 30, 5, 1, 20, 'Warrior');
+        }
+    };
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#_generate">_generate</a></li><li><a href="global.html#_generic">_generic</a></li><li><a href="global.html#_getMonster">_getMonster</a></li><li><a href="global.html#_getSeed">_getSeed</a></li><li><a href="global.html#_hasDoor">_hasDoor</a></li><li><a href="global.html#_hasMonster">_hasMonster</a></li><li><a href="global.html#_isAvailable">_isAvailable</a></li><li><a href="global.html#_makePlayer">_makePlayer</a></li><li><a href="global.html#_moveCreature">_moveCreature</a></li><li><a href="global.html#_pickCreature">_pickCreature</a></li><li><a href="global.html#_placeDoors">_placeDoors</a></li><li><a href="global.html#_placeWalls">_placeWalls</a></li><li><a href="global.html#_putCreature">_putCreature</a></li><li><a href="global.html#_spawnMonsters">_spawnMonsters</a></li><li><a href="global.html#_spawnPlayer">_spawnPlayer</a></li><li><a href="global.html#_spawnStairs">_spawnStairs</a></li><li><a href="global.html#_validTile">_validTile</a></li><li><a href="global.html#attack">attack</a></li><li><a href="global.html#die">die</a></li><li><a href="global.html#interact">interact</a></li><li><a href="global.html#move">move</a></li><li><a href="global.html#special">special</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Thu Nov 05 2015 19:45:25 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

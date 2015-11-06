@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: dungeon.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: dungeon.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*globals define, console*/
+/*jslint nomen: true */
+
+define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, items) {
+    'use strict';
+
+    /**
+     * Wall group to use from Wall.png
+     * @param  {Number} WALL_GROUP_UNIT
+     * @return {Array} - environment-specific group of tiles
+     */
+    function calculateTiles(WALL_GROUP_UNIT) {
+        return {
+            floor: 5 + WALL_GROUP_UNIT,
+            door: 30,
+            stairs: 34,
+            wall_vertical: 20 + WALL_GROUP_UNIT,
+            wall_horizontal: 1 + WALL_GROUP_UNIT,
+            // Corner pieces
+            wall_top_right: 2 + WALL_GROUP_UNIT,
+            wall_bottom_right: 42 + WALL_GROUP_UNIT,
+            wall_top_left: WALL_GROUP_UNIT,
+            wall_bottom_left: 40 + WALL_GROUP_UNIT,
+            // Cross pieces
+            wall_cross_bottom: 44 + WALL_GROUP_UNIT,
+            wall_cross_top: 4 + WALL_GROUP_UNIT,
+            wall_cross_left: 23 + WALL_GROUP_UNIT,
+            wall_cross_right: 25 + WALL_GROUP_UNIT,
+            wall_cross: 24 + WALL_GROUP_UNIT
+        };
+    }
+
+    var TILESHEET_WIDTH = 640,
+        TILE_SIZE = 32,
+        TILE_UNIT = TILESHEET_WIDTH / TILE_SIZE,
+
+        /**
+         * List of tiles and their corresponding position in the tile sheet
+         * @type {Array}
+         */
+        tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8)),
+
+        /**
+         * List of cross tiles, used for auto-joining
+         * @type {Array}
+         */
+        crosses = [tiles.wall_cross_bottom,
+                   tiles.wall_cross_top,
+                   tiles.wall_cross_left,
+                   tiles.wall_cross_right,
+                   tiles.wall_cross],
+        // The main dungeon object
+        dungeon;
+
+    /**
+     * Dungeon factory
+     * @return {Object}
+     */
+    function _dungeon() {
+        return {
+            width: 60,
+            height: 40,
+            playerStats: creatures.player(), //Create player stat array
+            level: 1,
+            _init: function () {
+
+                // Used to avoid conflicts
+                var vm = this,
+
+                    //Used to change the 'area' after a certain amount of levels
+                    area = 1,
+                    playerRoom;
+                if (this.level >= 6) {
+                    area = 2;
+                }
+
+                tiles = calculateTiles(TILE_UNIT * 3 * area);
+
+                crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
+
+                ROT.RNG.setSeed(ROT.RNG.getUniform());
+
+                console.log('Using RNG seed:', vm._getSeed());
+
+                vm.tiles = {};
+
+                vm._generate();
+
+                vm._placeDoors();
+
+                vm._placeWalls();
+
+                vm.rooms = vm.digger.getRooms();
+
+                playerRoom = vm.rooms[_.random(vm.rooms.length - 1)];
+                /**
+                 * Basic distance formula between two points on a 2D plane
+                 * @param  {room} a
+                 * @param  {room} b
+                 * @return {number} distance
+                 */
+                function distance(a, b) {
+                    return Math.sqrt(Math.pow(a._x1 - b._x1, 2) + Math.pow(a._y1 - b._y1, 2));
+                }
+
+                // Sort based on distance from player's room
+                vm.rooms.sort(function (a, b) {
+                    return distance(a, playerRoom) - distance(b, playerRoom);
+                });
+
+                vm._spawnPlayer(playerRoom._x1, playerRoom._y1);
+
+                vm._spawnStairs();
+
+                vm._spawnMonsters();
+            },
+            /**
+             * @return {[type]}
+             */
+            _getSeed: function () {
+                return ROT.RNG.getSeed();
+            },
+            /**
+             * @param  {[type]}
+             * @param  {[type]}
+             * @return {[type]}
+             */
+            _validTile: function (x, y) {
+                // True if (x, y) is present in tile
+                return (this.tiles[x + ',' + y] !== undefined);
+            },
+            /**
+             * @param  {[type]}
+             * @param  {[type]}
+             * @return {Boolean}
+             */
+            _hasMonster: function (x, y) {
+                // True if a monster exists at (x, y)
+                var hasMonster = false;
+
+                this.monsters.forEach(function (monster) {
+                    if (monster.x === x &amp;&amp; monster.y === y) {
+                        hasMonster = true;
+                    }
+                });
+                return hasMonster;
+            },
+            /**
+             * @param  {[type]}
+             * @param  {[type]}
+             * @return {[type]}
+             */
+            _getMonster: function (x, y) {
+                // Return the monster at (x, y), if there is one
+                var foundMonster;
+
+                this.monsters.forEach(function (monster) {
+                    if (monster.x === x &amp;&amp; monster.y === y) {
+                        foundMonster = monster;
+                    }
+                });
+                return foundMonster;
+            },
+            /**
+             * @param  {[type]}
+             * @param  {[type]}
+             * @return {Boolean}
+             */
+            _hasDoor: function (x, y) {
+                return this.doors.indexOf(x + ',' + y) !== -1;
+            },
+            /**
+             * @param  {[type]}
+             * @param  {[type]}
+             * @return {Boolean}
+             */
+            _isAvailable: function (x, y) {
+                // True if the tile is available for movement
+                // i.e. it is unoccupied by the player, a monster, or a door, and it's a valid tile
+
+                return !(this.player.x === x &amp;&amp; this.player.y === y) &amp;&amp; this._validTile(x, y) &amp;&amp; !this._hasMonster(x, y) &amp;&amp; !this._hasDoor(x, y);
+            },
+            /**
+             * @param  {[type]}
+             * @param  {[type]}
+             * @param  {[type]}
+             * @return {[type]}
+             */
+            _moveCreature: function (creature, x, y) {
+                var outcome = {
+                        moved: false,
+                        door: false,
+                        combat: false
+                    },
+
+                    newX = creature.x + x,
+                    newY = creature.y + y,
+
+                    key = newX + ',' + newY,
+                    monster;
+
+                // Basic movement
+                if (this._isAvailable(newX, newY)) {
+                    creature.x = newX;
+                    creature.y = newY;
+                    outcome.moved = true;
+                    // "Open" a door, i.e. remove it
+                } else if (this._hasDoor(newX, newY)) {
+                    this.doors.splice(this.doors.indexOf(key), 1);
+                    // Let phaser know we opened the door
+                    outcome.door = true;
+                    // Combat
+                } else if (this._hasMonster(newX, newY)) {
+                    monster = this._getMonster(newX, newY);
+                    // TODO: Give hero stats
+                    if (monster.isDead === 0) {
+                        this.playerStats.attack(monster);
+                        monster.attack(this.playerStats);
+                        outcome.combat = true;
+                    } else {
+                        creature.x = newX;
+                        creature.y = newY;
+                        outcome.moved = true;
+                    }
+                }
+
+                return outcome;
+            },
+            /**
+             * @return {[type]}
+             */
+            _generate: function () {
+                var digger = new ROT.Map.Digger(this.width, this.height),
+                    digCallback = function (x, y, value) {
+                        if (value) {
+                            return;
+                        }
+                        this.tiles[(x) + ',' + (y)] = tiles.floor;
+                    };
+
+                digger.create(digCallback.bind(this));
+
+                this.digger = digger;
+            },
+            /**
+             * @param  {[type]}
+             * @param  {[type]}
+             * @return {[type]}
+             */
+            _spawnPlayer: function (x, y) {
+                this.player = this.player || {};
+
+                this.player.x = x;
+                this.player.y = y;
+            },
+            /**
+             * @return {[type]}
+             */
+            _spawnStairs: function () {
+                // Put stairs in the farthest room away
+                this.stairs = {
+                    x: this.rooms[this.rooms.length - 1]._x2,
+                    y: this.rooms[this.rooms.length - 1]._y2
+                };
+            },
+            /**
+             * @return {[type]}
+             */
+            _spawnMonsters: function () {
+                var vm = this;
+
+                vm.monsters = [];
+
+                // Spawn monsters
+                vm.rooms.forEach(function (room) {
+                    var x = Math.round((room._x1 + room._x2) / 2),
+                        y = Math.round((room._y1 + room._y2) / 2);
+                    if (vm._isAvailable(x, y)) {
+                        vm.monsters.push(creatures._putCreature(dungeon.level, x, y));
+                    }
+                });
+            },
+
+            /**
+             * Analyze rooms and place doors
+             * @return {[type]}
+             */
+            _placeDoors: function () {
+                var doors = [];
+                _.each(this.digger.getRooms(), function (room, key) {
+                    _.each(room._doors, function (door, key) {
+                        var xy = key.split(','),
+                            x = +xy[0],
+                            y = +xy[1];
+                        // Don't place doors next to each other
+                        if (!_.contains(doors, (x + 1) + ',' + (y)) &amp;&amp;
+                                !_.contains(doors, (x) + ',' + (y + 1)) &amp;&amp;
+                                !_.contains(doors, (x - 1) + ',' + (y)) &amp;&amp;
+                                !_.contains(doors, (x) + ',' + (y - 1)) &amp;&amp;
+                                // Avoid duplicates
+                                !_.contains(doors, key) &amp;&amp;
+                                ROT.RNG.getPercentage() &lt;= 60) {
+                            doors.push(key);
+                        }
+                    });
+                });
+                this.doors = doors;
+            },
+
+            /**
+             * Place and autojoin walls around tiles
+             * @return {[type]}
+             */
+            _placeWalls: function () {
+                var walls = {},
+
+                    myTiles = this.tiles,
+                    doors = this.doors;
+
+                // Place unjoined walls
+                _.each(myTiles, function (tile, key) {
+
+                    var xy = key.split(','),
+
+                        x = +(xy[0]),
+                        y = +(xy[1]),
+
+                        left = (x - 1) + ',' + (y),
+                        right = (x + 1) + ',' + (y),
+                        up = (x) + ',' + (y - 1),
+                        down = (x) + ',' + (y + 1),
+                        top_right = (x + 1) + ',' + (y - 1),
+                        bottom_right = (x + 1) + ',' + (y + 1),
+                        bottom_left = (x - 1) + ',' + (y + 1),
+                        top_left = (x - 1) + ',' + (y - 1),
+
+                        directions = [left, right, up, down, top_right, bottom_right, bottom_left, top_left];
+
+                    _.each(directions, function (direction) {
+                        if (myTiles[direction] === undefined &amp;&amp; walls[direction] === undefined) {
+                            walls[direction] = true;
+                        }
+                    });
+                });
+
+                // Join walls
+                _.each(walls, function (tile, key) {
+                    var xy = key.split(','),
+
+                        x = +(xy[0]),
+                        y = +(xy[1]),
+
+                        left = (x - 1) + ',' + (y),
+                        right = (x + 1) + ',' + (y),
+                        up = (x) + ',' + (y - 1),
+                        down = (x) + ',' + (y + 1),
+
+                        directions = [left, right, up, down],
+
+                        nearbyWalls = [];
+
+                    // Create list of surrounding walls based on direction
+                    _.each(directions, function (direction) {
+                        if (walls[direction] !== undefined || _.contains(doors, direction)) {
+                            nearbyWalls.push(direction);
+                        }
+                    });
+
+                    // Crosses
+                    if (_.contains(nearbyWalls, left) &amp;&amp; _.contains(nearbyWalls, right) &amp;&amp; _.contains(nearbyWalls, up) &amp;&amp; _.contains(nearbyWalls, down)) {
+                        walls[key] = tiles.wall_cross;
+                    } else if (_.contains(nearbyWalls, left) &amp;&amp; _.contains(nearbyWalls, right) &amp;&amp; _.contains(nearbyWalls, up)) {
+                        walls[key] = tiles.wall_cross_bottom;
+                    } else if (_.contains(nearbyWalls, left) &amp;&amp; _.contains(nearbyWalls, right) &amp;&amp; _.contains(nearbyWalls, down)) {
+                        walls[key] = tiles.wall_cross_top;
+                    } else if (_.contains(nearbyWalls, down) &amp;&amp; _.contains(nearbyWalls, right) &amp;&amp; _.contains(nearbyWalls, up)) {
+                        walls[key] = tiles.wall_cross_left;
+                    } else if (_.contains(nearbyWalls, left) &amp;&amp; _.contains(nearbyWalls, up) &amp;&amp; _.contains(nearbyWalls, down)) {
+                        walls[key] = tiles.wall_cross_right;
+                        // Corners
+                    } else if (_.contains(nearbyWalls, down) &amp;&amp; _.contains(nearbyWalls, right)) {
+                        walls[key] = tiles.wall_top_left;
+                    } else if (_.contains(nearbyWalls, down) &amp;&amp; _.contains(nearbyWalls, left)) {
+                        walls[key] = tiles.wall_top_right;
+                    } else if (_.contains(nearbyWalls, up) &amp;&amp; _.contains(nearbyWalls, right)) {
+                        walls[key] = tiles.wall_bottom_left;
+                    } else if (_.contains(nearbyWalls, up) &amp;&amp; _.contains(nearbyWalls, left)) {
+                        walls[key] = tiles.wall_bottom_right;
+                        // Horizontal / Vertical
+                    } else if (_.contains(nearbyWalls, up) || _.contains(nearbyWalls, down)) {
+                        walls[key] = tiles.wall_vertical;
+                    } else if (_.contains(nearbyWalls, left) || _.contains(nearbyWalls, right)) {
+                        walls[key] = tiles.wall_horizontal;
+                    }
+                });
+
+                // Smooth out cross stacking (optional, but looks ugly without)
+                _.each(walls, function (tile, key) {
+                    if (_.contains(crosses, tile)) {
+                        var xy = key.split(','),
+
+                            x = +(xy[0]),
+                            y = +(xy[1]),
+
+                            left = (x - 1) + ',' + (y),
+                            up = (x) + ',' + (y - 1);
+
+                        // Turn cross pairs into horizontal/vertical
+                        if (tile === tiles.wall_cross_bottom &amp;&amp; walls[up] === tiles.wall_cross_top) {
+                            walls[key] = tiles.wall_horizontal;
+                            walls[up] = tiles.wall_horizontal;
+                        } else if (tile === tiles.wall_cross_right &amp;&amp; walls[left] === tiles.wall_cross_left) {
+                            walls[key] = tiles.wall_vertical;
+                            walls[left] = tiles.wall_vertical;
+                            // Decompose full crosses
+                        } else if (tile === tiles.wall_cross_right &amp;&amp; walls[left] === tiles.wall_cross) {
+                            walls[key] = tiles.wall_vertical;
+                            walls[left] = tiles.wall_cross_right;
+                        } else if (tile === tiles.wall_cross_bottom &amp;&amp; walls[up] === tiles.wall_cross) {
+                            walls[key] = tiles.wall_horizontal;
+                            walls[up] = tiles.wall_cross_bottom;
+                        } else if (tile === tiles.wall_cross &amp;&amp; walls[left] === tiles.wall_cross_left) {
+                            walls[key] = tiles.wall_cross_left;
+                            walls[left] = tiles.wall_vertical;
+                        } else if (tile === tiles.wall_cross &amp;&amp; walls[up] === tiles.wall_cross_top) {
+                            walls[key] = tiles.wall_cross_top;
+                            walls[up] = tiles.wall_horizontal;
+                        }
+                    }
+                });
+                this.walls = walls;
+            }
+        };
+    }
+
+    // The main dungeon object
+    dungeon = _dungeon();
+
+    // Export data
+    return {
+        TILE_SIZE: TILE_SIZE,
+        dungeon: dungeon,
+        tiles: tiles,
+        creatures: creatures,
+        _dungeon: _dungeon
+    };
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#_generate">_generate</a></li><li><a href="global.html#_generic">_generic</a></li><li><a href="global.html#_getMonster">_getMonster</a></li><li><a href="global.html#_getSeed">_getSeed</a></li><li><a href="global.html#_hasDoor">_hasDoor</a></li><li><a href="global.html#_hasMonster">_hasMonster</a></li><li><a href="global.html#_isAvailable">_isAvailable</a></li><li><a href="global.html#_makePlayer">_makePlayer</a></li><li><a href="global.html#_moveCreature">_moveCreature</a></li><li><a href="global.html#_pickCreature">_pickCreature</a></li><li><a href="global.html#_placeDoors">_placeDoors</a></li><li><a href="global.html#_placeWalls">_placeWalls</a></li><li><a href="global.html#_putCreature">_putCreature</a></li><li><a href="global.html#_spawnMonsters">_spawnMonsters</a></li><li><a href="global.html#_spawnPlayer">_spawnPlayer</a></li><li><a href="global.html#_spawnStairs">_spawnStairs</a></li><li><a href="global.html#_validTile">_validTile</a></li><li><a href="global.html#attack">attack</a></li><li><a href="global.html#die">die</a></li><li><a href="global.html#interact">interact</a></li><li><a href="global.html#move">move</a></li><li><a href="global.html#special">special</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Thu Nov 05 2015 19:45:25 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
