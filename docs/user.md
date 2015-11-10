@@ -39,3 +39,10 @@
 ## Boss Monsters
 
 ## Items
+
+| Name     | Effect       |
+| ---      | ---          |
+| Potion   | Heals 10 HP  |
+| Antidote | Heals poison |
+
+
