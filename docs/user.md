@@ -13,9 +13,12 @@
 
 ## Controls
 
-* Movement: Click a tile *OR* use the arrow keys
-* New game: R
-* Open inventory: I
+| Action         | Key        | Alternate Key |
+| ---            | ---        | ---           |
+| Movement       | Arrow keys | Click a tile  |
+| New game       | R          |               |
+| Open inventory | I          |               |
+| Full screen    | F          |               |
 
 ## Character Classes
 
@@ -27,9 +30,11 @@
 
 ## Monster Types
 
-* Snake
-* Fairy
-* Skeleton
+| Name     | HP  | Strength | Defense | Crit | Exp | Abilities | Gold | Loot |
+| ---      | --- | ---      | ---     | ---  | --- | ---       | ---  | ---  |
+| Snake    | 8   | 5        | 1       | 20   | 10  | Poison    |      |      |
+| Skeleton | 15  | 4        | 0       | 20   | 10  |           |      |      |
+| Fairy    | 25  | 4        | 0       | 20   | 10  |           |      |      |
 
 ## Boss Monsters
 
