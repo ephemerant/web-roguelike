@@ -79,7 +79,7 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                  * @param  {number} _y      Tells the creature where to move relative to its current position
                  */
                 move: function (_x, _y) {
-                    if (isDead === 0) { //cannot move if dead
+                    if (this.isDead === 0) { //cannot move if dead
                         this.x += _x;
                         this.y += _y;
                     }
