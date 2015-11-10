@@ -4,7 +4,8 @@ A Web-based, JavaScript Roguelike group project created for the Introduction to 
 
 * [Playable version](http://www.clayton-mcguire.com/roguelike/)
 * [Unit tests](http://www.clayton-mcguire.com/roguelike/index.tests.html)
-* [Trello page](https://trello.com/b/XISltL05/c346-roguelike)
+* [API Documentation](http://ephemerant.github.io/C346-Roguelike/main/out/index.html)
+* [Trello](https://trello.com/b/XISltL05/c346-roguelike)
 
 ### Collaborators:
 * [Clayton McGuire](https://github.com/ephemerant)
