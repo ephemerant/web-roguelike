@@ -10,6 +10,7 @@ require.config({
         'jasmine-html': 'jasmine-html',
         'jasmine-boot': 'boot',
         'creatures': '../app/creatures',
+        'items': '../app/items',
         'dungeon': '../app/dungeon',
         'preload': '../app/preload',
         'start': '../app/start',
