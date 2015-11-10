@@ -2,8 +2,8 @@
 
 A Web-based, JavaScript Roguelike group project created for the Introduction to Software Engineering class at IUS.
 
-* [Playable version](http://www.clayton-mcguire.com/roguelike/)
-* [Unit tests](http://www.clayton-mcguire.com/roguelike/index.tests.html)
+* [Playable version](http://ephemerant.github.io/C346-Roguelike/main/)
+* [Unit tests](http://ephemerant.github.io/C346-Roguelike/main/index.tests.html)
 * [API Documentation](http://ephemerant.github.io/C346-Roguelike/main/out/index.html)
 * [Trello](https://trello.com/b/XISltL05/c346-roguelike)
 
