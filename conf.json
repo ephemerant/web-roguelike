@@ -1,7 +1,6 @@
 {
     "tags": {
-        "allowUnknownTags": true,
-        "dictionaries": ["jsdoc", "closure"]
+        "allowUnknownTags": true
     },
     "source": {
         "include": ["js"],
@@ -12,6 +11,17 @@
     "plugins": [],
     "templates": {
         "cleverLinks": false,
-        "monospaceLinks": false
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true
+        },
+        "systemName": "The Legend of Cheryl",
+        "footer": "",
+        "copyright": "Copyright © 2014",
+        "navType": "vertical",
+        "theme": "oblivion",
+        "linenums": true,
+        "collapseSymbols": false,
+        "inverseNav": true
     }
 }

@@ -1,4 +1,32 @@
-/*globals define, Promise*/
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: game.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: game.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*globals define, Promise*/
 /*jslint nomen: true */
 
 define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT) {
@@ -179,7 +207,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 // Used to avoid conflicts
                 var vm = this;
                 if (dungeon.player.isMoving ||
-                    (dungeon.player.x === x && dungeon.player.y === y) ||
+                    (dungeon.player.x === x &amp;&amp; dungeon.player.y === y) ||
                     dungeon.tiles[x + ',' + y] === undefined ||
                     is_pathing === false) {
                     is_pathing = false;
@@ -231,7 +259,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                                 // (e.g. bump to open a door, but don't walk into it after)
                                 // This will be very useful to avoid
                                 // clicking a monster and infinitely attacking it
-                                if ($x === x && $y === y) {
+                                if ($x === x &amp;&amp; $y === y) {
                                     is_pathing = false;
                                 }
 
@@ -271,7 +299,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             },
 
             /**
-             * Generate a new floor<br>
+             * Generate a new floor&lt;br>
              * i.e. place tiles, walls, doors, monsters, items, stairs
              * @function createDungeon
              */
@@ -305,7 +333,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             TILE_SIZE, 'door', 0);
 
                     // Door of a vertical wall?
-                    if (dungeon.tiles[(+xy[0] + 1) + ',' + (+xy[1])] !== undefined &&
+                    if (dungeon.tiles[(+xy[0] + 1) + ',' + (+xy[1])] !== undefined &amp;&amp;
                         dungeon.tiles[(+xy[0] - 1) + ',' + (+xy[1])] !== undefined) {
                         door.frame = 1;
                     }
@@ -415,7 +443,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              */
             movePlayer: function(x, y) {
                 return new Promise(function(resolve, reject) {
-                    if (dungeon.player.isMoving || (x === 0 && y === 0)) {
+                    if (dungeon.player.isMoving || (x === 0 &amp;&amp; y === 0)) {
                         resolve();
                         return;
                     }
@@ -445,13 +473,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         dungeon.player.isMoving = true;
                         dungeon.playerStats.turnTick();
                         // Entering stairs
-                        if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
+                        if (dungeon.player.x === dungeon.stairs.x &amp;&amp; dungeon.player.y === dungeon.stairs.y) {
                             // TODO: Swap stairs out with a portal?
                             is_pathing = false;
                             SND_teleport.play();
                             dungeon.level += 1;
                             Game.createDungeon();
-                            if (dungeon.level >= 1 && dungeon.level <= 5) {
+                            if (dungeon.level >= 1 &amp;&amp; dungeon.level &lt;= 5) {
                                 if (MUS_dungeon1.isPlaying === false) {
                                     MUS_dungeon2.stop();
                                     MUS_dungeon1.play();
@@ -571,4 +599,26 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         };
 
     return Game;
-});
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-creatures.html">creatures</a></li><li><a href="module-dungeon.html">dungeon</a></li><li><a href="module-dungeon__dungeon.html">dungeon/_dungeon</a></li><li><a href="module-game.html">game</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Nov 10 2015 20:44:44 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
