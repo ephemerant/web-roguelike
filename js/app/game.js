@@ -580,7 +580,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * @function render
              */
             render: function() {
-                text_health.text = 'Health: ' + dungeon.playerStats.hp + ' / ' + dungeon.playerStats.max_hp;
+                text_health.text = 'HP: ' + dungeon.playerStats.hp + ' / ' + dungeon.playerStats.max_hp;
                 text_health.bringToTop();
             }
         };
