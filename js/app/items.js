@@ -72,7 +72,7 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
      * @return {item}   returns the item to the caller
      */
     potion: function(x, y){
-      return this._generic('Health Potion', 'potion', 1, x, y);
+      return this._generic('Health Potion', 'potion', 1, 0, 0, x, y);
     }
   };
 });
