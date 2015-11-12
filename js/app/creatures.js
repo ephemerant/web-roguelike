@@ -14,7 +14,7 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
 
         /**
          * Picks a random crature from the proper creature pool.
-         * 
+         *
          * @param  {number} level - What level of the dungeon the player is currently on
          * @return {string} The name of the creature that has been picked to be placed
          */
@@ -28,7 +28,7 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
         /**
          * Creates a creature that is to be put into the dungeon. It calls the _pickCreature function to randomly select
          * a creature. This function creates the randomly chosen enemy and returns that creature.
-         * 
+         *
          * @param  {number} level   What level of the dungeon the player is currently on
          * @param  {number} x       X coordinate of where the creature is to be placed.
          * @param  {number} y       Y coordinate of where the creature is to be placed.
@@ -46,7 +46,7 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
         },
         /**
          * A factory that creates an enemy based upon the given data
-         * 
+         *
          * @param  {string} name    Creatures name
          * @param  {number} hp      Health will also become the max_hp
          * @param  {number} str     Strength
@@ -108,7 +108,7 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                 },
                 /**
                  * The creature attacks the creature that is passed to it. Calculations are made to determine damage given.
-                 * 
+                 *
                  * @param  {creature} creature      The creature that is being attacked
                  */
                 attack: function (creature) {
@@ -195,7 +195,10 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                         }
                     }
                 },
-
+                /**
+                 * This is called every turn, used for poison and other checks
+                 * that must be performed every turn
+                 */
                 turnTick: function () {
                     if (this.poisonTimer >= 1) {
                         this.poisonTimer -= 1;
@@ -214,7 +217,7 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
 
                 /**
                  * Checks if the player has an empty spot in their inventory
-                 * 
+                 *
                  * @return {number} Returns the index of free space if space is found and -1 if no space is found.
                  */
                 checkInventorySpace: function () {
@@ -225,6 +228,20 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                         }
                     }
                     return -1;
+                },
+
+                /**
+                 * Puts the item in the players inventory if there is room
+                 * @param  {item} item    the item to be picked up
+                 * @return {number}      1 if the item was gotten, 0 if not
+                 */
+                pickup: function(item){
+                  var freespot = this.checkInventorySpace();
+                  if (freespot !== -1){
+                    this.inventory[freespot] = item;
+                    return 1;
+                  }
+                  return 0;
                 }
             };
         },
