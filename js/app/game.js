@@ -18,8 +18,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
         // Width / height of the actual window
         // TODO: Completely fill window with game screen?
-        SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio,
-        SCREEN_HEIGHT = window.innerHeight * window.devicePixelRatio,
+        SCREEN_WIDTH = 800,
+        SCREEN_HEIGHT = 600,
 
         DUNGEON_WIDTH = dungeon.width * TILE_SIZE,
         DUNGEON_HEIGHT = dungeon.width * TILE_SIZE,
@@ -63,13 +63,15 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         //Music
         MUS_dungeon1,
         MUS_dungeon2,
+        //
+        text_health,
 
         Game = {
 
             /**
              * @module  game
              */
-            
+
             /**
              * Initialize the phaser game
              * @function create
@@ -132,6 +134,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 SND_teleport.volume = SND_door_open.volume = sound_volume;
                 SND_hit = vm.add.audio('SND_hit');
                 SND_hit.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
+
+                // Text
+                var style = {
+                    font: 'bold 20pt Helvetica',
+                    fill: 'white',
+                    align: 'left'
+                };
+
+                text_health = Game.add.text(5, 5, '', style);
+
+                text_health.fixedToCamera = true;
+
+
 
             },
 
@@ -465,6 +480,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             }
                         }
 
+                        // Tween text
+                        // Game.add.tween(Epic_Text).to({
+                        //     x: dungeon.player.x * TILE_SIZE - SCREEN_WIDTH / 2,
+                        //     y: dungeon.player.y * TILE_SIZE - SCREEN_HEIGHT / 2
+                        // }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
+
                         // Slide the player to their new position
                         Game.add.tween(dungeon.player.sprite).to({
                             x: dungeon.player.x * TILE_SIZE,
@@ -559,14 +580,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * @function render
              */
             render: function() {
-                // Used to avoid conflicts
-                //var vm = this;
-                //vm.debug.text('Level ' + dungeon.level, 16, 30);
-                //this.debug.text('Use the ARROW KEYS to move', 16, this.height - 90);
-                //this.debug.text('Press R to start a new game', 16, this.height - 60);
-                //this.debug.text('Hold A for auto-pilot', 16, this.height - 30);
-                //game.debug.text('Player hp: ' + dungeon.playerStats.hp + ' player is dead? ' +
-                //dungeon.playerStats.isDead, 16, game.height - 120);
+                text_health.text = 'HP: ' + dungeon.playerStats.hp + ' / ' + dungeon.playerStats.max_hp;
+                text_health.bringToTop();
             }
         };
 
