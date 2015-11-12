@@ -283,10 +283,12 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
           // Combat
         } else if (this._hasMonster(newX, newY)) {
           monster = this._getMonster(newX, newY);
-          // TODO: Give hero stats
+
           if (monster.isDead === 0) {
             this.playerStats.attack(monster);
-            monster.attack(this.playerStats);
+            if(monster.isDead ===0){
+              monster.attack(this.playerStats);
+            }
             outcome.combat = true;
           } else {
             creature.x = newX;
@@ -294,8 +296,22 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             outcome.moved = true;
           }
         } else if (this._hasItem(newX, newY)) {
-          var item = this._getItem(newX, newY);
-          item.pickup(this.playerStats);
+
+          var gotitem = this._getItem(newX, newY);
+          if(this.playerStats.pickup(gotitem)===1){
+            creature.x = newX;
+            creature.y = newY;
+            console.log(gotitem.name + ' gotten');
+            this.loot.splice(this.loot.indexOf(gotitem), 1);
+            outcome.moved = true;
+            outcome.item = true;
+          }
+          else{
+            creature.x = newX;
+            creature.y = newY;
+            console.log('No room for item');
+            outcome.moved = true;
+          }
         }
 
         return outcome;
@@ -374,11 +390,10 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             vm.loot.push(items._putItem(dungeon.level, x + 1, y));
           }
         });
-        console.log(vm.loot);
       },
 
       /**
-       * Analyze ROT rooms and place doors 
+       * Analyze ROT rooms and place doors
        */
       _placeDoors: function() {
         var doors = [];

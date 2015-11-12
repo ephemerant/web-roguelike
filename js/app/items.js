@@ -26,14 +26,6 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         frame: frame,
         x: x,
         y: y,
-        pickup: function(player){
-          var freespot = player.checkInventorySpace();
-          if (freespot !== -1){
-            player.inventory[freespot] = this;
-            return 1;
-          }
-          return 0;
-        },
 
         use: function(player){
 

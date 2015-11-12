@@ -49,8 +49,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
         // Dictionary of door sprites by (x,y)
         doors = {},
-        monsters = [],
-        loot = [],
+        monsters = {},
+        loot = {},
 
         //These variables are for volume control.
         //TODO: Allow user to choose volume.
@@ -336,18 +336,22 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 // Place monsters
                 dungeon.monsters.forEach(function(monster) {
-                    monster.sprite = Game.add.sprite(monster.x * TILE_SIZE,
+                    var key = monster.x + ',' + monster.y;
+                    var monstersprite = Game.add.sprite(monster.x * TILE_SIZE,
                         monster.y * TILE_SIZE,
                         monster.sprite,
                         monster.frame);
+                    monsters[key] = monstersprite;
                 });
 
                 // Place items
                 dungeon.loot.forEach(function(item) {
-                    item.sprite = Game.add.sprite(item.x * TILE_SIZE,
+                    var key = item.x + ',' + item.y;
+                    var itemsprite = Game.add.sprite(item.x * TILE_SIZE,
                         item.y * TILE_SIZE,
                         item.sprite,
                         item.frame);
+                    loot[key] = itemsprite;
                 });
 
                 // Place stairs
@@ -405,27 +409,23 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 });
 
                 // Doors
-                _.each(doors, function(sprite, key) {
+                _.each(doors, function(sprite) {
                     sprite.destroy();
                 });
 
                 // Monsters
-                if (dungeon.monsters) {
-                    dungeon.monsters.forEach(function(monster) {
-                        monster.sprite.destroy();
-                    });
-                }
+                _.each(monsters, function(sprite){
+                    sprite.destroy();
+                });
 
                 //items
-                if (dungeon.loot) {
-                    dungeon.loot.forEach(function(item) {
-                        item.sprite.destroy();
-                    });
-                }
+                _.each(loot, function(sprite){
+                  sprite.destroy();
+                });
 
                 doors = {};
-                monsters = [];
-                loot = [];
+                monsters = {};
+                loot = {};
             },
 
             /**
@@ -531,6 +531,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         is_pathing = false;
                         resolve();
                     }
+                    if(result.item){
+                        var remitem = loot[key];
+                        remitem.destroy();
+                    }
                 });
             },
 
@@ -558,7 +562,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 var vm = this;
 
                 dungeon.monsters.forEach(function(monster) {
-                    monster.sprite.frame = monster.frame;
+                    var key = monster.x + ',' + monster.y;
+                    var monstersprite = monsters[key];
+                    monstersprite.frame = monster.frame;
                 });
                 if (cursors.left.isDown) {
                     is_pathing = false;
