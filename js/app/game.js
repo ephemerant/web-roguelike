@@ -137,13 +137,20 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 // Text
                 var style = {
-                    font: 'bold 20pt Helvetica',
+                    font: 'bold 16pt Helvetica',
                     fill: 'white',
                     align: 'left'
                 };
 
                 text_health = Game.add.text(5, 5, '', style);
 
+                text_health.stroke = "#000";
+                text_health.strokeThickness = 6;
+
+                // Make text starting at index 3 red
+                text_health.addColor('#f20', 3);
+
+                // Move text with camera
                 text_health.fixedToCamera = true;
 
 
