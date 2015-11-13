@@ -578,8 +578,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                                     MUS_dungeon2.play();
                                 }
                             }
-
-                            Game.changeLevel();
                         }
 
                         // Slide the player to their new position
