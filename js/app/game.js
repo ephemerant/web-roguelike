@@ -570,6 +570,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                 } else {
                     MUS_dungeon2.stop();
                 }
+                dungeon.player.isMoving = false;
                 dungeon.playerStats.hp = dungeon.playerStats.max_hp;
                 this.state.start('Game_Over');
             },
