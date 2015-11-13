@@ -60,11 +60,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         SND_door_open,
         SND_teleport,
         SND_hit,
+        SND_item,
         //Music
         MUS_dungeon1,
         MUS_dungeon2,
         //
         text_health,
+        text_mana,
 
         Game = {
 
@@ -131,17 +133,18 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 // Create Sounds
                 SND_door_open = vm.add.audio('SND_door_open');
                 SND_teleport = vm.add.audio('SND_teleport');
-                SND_teleport.volume = SND_door_open.volume = sound_volume;
                 SND_hit = vm.add.audio('SND_hit');
+                SND_item = vm.add.audio('SND_item');
                 SND_hit.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
 
                 // Text
                 var style = {
-                    font: 'bold 16pt Helvetica',
+                    font: 'bold 16pt Monospace',
                     fill: 'white',
                     align: 'left'
                 };
 
+                // Health
                 text_health = Game.add.text(5, 5, '', style);
 
                 text_health.stroke = "#000";
@@ -152,6 +155,18 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 // Move text with camera
                 text_health.fixedToCamera = true;
+
+                // Mana
+                text_mana = Game.add.text(5, 25, 'MP: 10 / 10', style);
+
+                text_mana.stroke = "#000";
+                text_mana.strokeThickness = 6;
+
+                // Make text starting at index 3 red
+                text_mana.addColor('#08f', 3);
+
+                // Move text with camera
+                text_mana.fixedToCamera = true;
 
 
 
@@ -414,13 +429,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 });
 
                 // Monsters
-                _.each(monsters, function(sprite){
+                _.each(monsters, function(sprite) {
                     sprite.destroy();
                 });
 
                 //items
-                _.each(loot, function(sprite){
-                  sprite.destroy();
+                _.each(loot, function(sprite) {
+                    sprite.destroy();
                 });
 
                 doors = {};
@@ -444,7 +459,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                     var newX = dungeon.player.x + x,
                         newY = dungeon.player.y + y,
-
                         key = newX + ',' + newY,
                         result,
                         door;
@@ -531,8 +545,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         is_pathing = false;
                         resolve();
                     }
-                    if(result.item){
+                    if (result.item) {
                         var remitem = loot[key];
+                        SND_item.play();
                         remitem.destroy();
                     }
                 });

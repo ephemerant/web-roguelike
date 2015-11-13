@@ -39,6 +39,7 @@ define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
                 vm.load.audio('SND_door_open', 'assets/sounds/Door.wav');
                 vm.load.audio('SND_hit', 'assets/sounds/Hit.wav');
                 vm.load.audio('SND_teleport', ['assets/sounds/Teleport.ogg', 'assets/sounds/Teleport.wav']);
+                vm.load.audio('SND_item', 'assets/sounds/Item.wav');
                 // Load Music
                 vm.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
                 vm.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
