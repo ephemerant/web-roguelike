@@ -314,7 +314,6 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
         }
         // Pick up item
         else if (this._hasItem(newX, newY)) {
-
           gotitem = this._getItem(newX, newY);
           if (this.playerStats.pickup(gotitem) === 1) {
             creature.x = newX;
