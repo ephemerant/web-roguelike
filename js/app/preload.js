@@ -4,7 +4,7 @@
 define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
     'use strict';
     var creatures = dungeon.creatures,
-    items = dungeon.items,
+        items = dungeon.items,
         TILE_SIZE = dungeon.TILE_SIZE,
         // TODO: Move this list to a player.js file or something of the sort
         classes = ['Warrior', 'Engineer', 'Mage', 'Paladin', 'Rogue'],
@@ -39,6 +39,7 @@ define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
                 vm.load.audio('SND_door_open', 'assets/sounds/Door.wav');
                 vm.load.audio('SND_hit', 'assets/sounds/Hit.wav');
                 vm.load.audio('SND_teleport', ['assets/sounds/Teleport.ogg', 'assets/sounds/Teleport.wav']);
+                vm.load.audio('SND_item', 'assets/sounds/Item.wav');
                 // Load Music
                 vm.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
                 vm.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
