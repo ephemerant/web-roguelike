@@ -550,10 +550,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         // Entering stairs
                         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
                             // TODO: Swap stairs out with a portal?
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> origin/master
                             is_pathing = false;
 
                             SND_teleport.play();
@@ -564,45 +560,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                             Game.createDungeon();
 
-<<<<<<< HEAD
                             Game.displayText('LEVEL ' + dungeon.level, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, {
                                 font: 'bold 36pt Monospace',
                                 fill: 'white',
                                 align: 'center'
                             }, true);
-=======
-                            // Display level pop-up
-
-                            var level_text = Game.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, 'LEVEL ' + dungeon.level, {
-                                font: 'bold 32pt Monospace',
-                                fill: 'white',
-                                align: 'center'
-                            });
-
-                            level_text.stroke = "#000";
-                            level_text.strokeThickness = 6;
-
-                            level_text.fixedToCamera = true;
-
-                            level_text.anchor.setTo(0.5);
-
-                            level_text.alpha = 0;
-
-                            // Fade text in, wait, fade it out, delete it
-                            Game.add.tween(level_text).to({
-                                alpha: 1
-                            }, 750, 'Linear', true).onComplete.add(function() {
-                                setTimeout(function() {
-                                    Game.add.tween(level_text).to({
-                                        alpha: 0
-                                    }, 250, 'Linear', true).onComplete.add(function() {
-                                        level_text.destroy();
-                                    });
-                                }, 500);
-                            });
-
-                            //
->>>>>>> origin/master
 
                             if (dungeon.level >= 1 && dungeon.level <= 5) {
                                 if (MUS_dungeon1.isPlaying === false) {
@@ -616,12 +578,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                                     MUS_dungeon2.play();
                                 }
                             }
-<<<<<<< HEAD
-=======
-                            Game.changeLevel();
->>>>>>> origin/master
-=======
->>>>>>> origin/master
                         }
 
                         // Slide the player to their new position
@@ -649,8 +605,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                     } else if (result.combat) {
                         SND_hit.play();
                         is_pathing = false;
-<<<<<<< HEAD
-<<<<<<< HEAD
 
                         if (result.monster !== undefined) {
                             // Display damage to monster
@@ -671,26 +625,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                                     bones[kill_key] = Game.add.sprite(result.monster.x * TILE_SIZE, result.monster.y * TILE_SIZE, 'objects', 24);
                                     dungeon.player.sprite.bringToTop();
                                 }
-=======
-                        // Display damage counter
-                        // TODO: replace filler text with damage number
-                        Game.makeText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'hit',
-                              'bold 16pt Monospace', 'red', 'center', true, 20);
-=======
-
->>>>>>> origin/master
-                        // Was a monster killed?
-                        if (result.kill) {
-                            // Remove its sprite - can add a special condition for skeletons
-                            result.kill.sprite.destroy();
-
-                            // Add bones                            
-                            var kill_key = result.kill.x + ',' + result.kill.y;
-
-                            if (bones[kill_key] === undefined) {
-                                bones[kill_key] = Game.add.sprite(result.kill.x * TILE_SIZE, result.kill.y * TILE_SIZE, 'objects', 24);
-                                dungeon.player.sprite.bringToTop();
->>>>>>> origin/master
                             }
                         }
 
