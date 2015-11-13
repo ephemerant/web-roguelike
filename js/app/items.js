@@ -5,9 +5,9 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
      */
 
     //array of spritesheets
-    _sprites: ['Armor.png','Potion.png'],
+    _sprites: ['Armor.png','Potion.png', 'Key.png'],
 
-    _items_area1: ['potion'],
+    _items_area1: ['potion', 'key'],
 
     /**
      * Choose a random item from a pool, based on the level given
@@ -32,6 +32,9 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
         var itemName = this._pickItem(level);
         if (itemName === 'potion'){
           return this.potion(x, y);
+        }
+        if (itemName ==='Wooden Armor'){
+          return this.wood_armor(x, y);
         }
     },
 
@@ -73,6 +76,26 @@ define(['ROT', 'Phaser'], function(ROT, Phaser) {
      */
     potion: function(x, y){
       return this._generic('Health Potion', 'potion', 1, 0, 0, x, y);
+    },
+
+    /**
+     * creates a key item
+     * @param  {number} x the x position of the item in the dungeon
+     * @param  {nubmer} y the y position of the item in the dungeon
+     * @return {item}   returns the item to the caller
+     */
+    key: function(x, y){
+      return this._generic('Key', 'key', 1, 0, 0, x, y);
+    },
+
+    /**
+     * creates a wooden armor item
+     * @param  {number} x the x position of the item in the dungeon
+     * @param  {nubmer} y the y position of the item in the dungeon
+     * @return {item}   returns the item to the caller
+     */
+    wood_armor: function(x, y){
+      return this._generic('Wooden Armor', 'armor', 1, 0, 1, x, y);
     }
   };
 });

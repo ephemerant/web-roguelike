@@ -171,7 +171,8 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                 charClass: Class, //The class of the character 'rogue, warrior etc'
                 isDead: 0, //Not sure if necessary
                 inventory: ['none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none'],
-
+                armor: items.potion(),
+                weapon: items.potion(),
                 /**
                  * The playerattacks the creature that is passed to it. Calculations are made to determine damage given.
                  * @param  {creature} creature        The creature that is being attacked
