@@ -494,9 +494,47 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
                             // TODO: Swap stairs out with a portal?
                             is_pathing = false;
+
                             SND_teleport.play();
+
                             dungeon.level += 1;
+
+                            //
+
                             Game.createDungeon();
+
+                            // Display level pop-up
+
+                            var level_text = Game.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, 'LEVEL ' + dungeon.level, {
+                                font: 'bold 32pt Monospace',
+                                fill: 'white',
+                                align: 'center'
+                            });
+
+                            level_text.stroke = "#000";
+                            level_text.strokeThickness = 6;
+
+                            level_text.fixedToCamera = true;
+
+                            level_text.anchor.setTo(0.5);
+
+                            level_text.alpha = 0;
+
+                            // Fade text in, wait, fade it out, delete it
+                            Game.add.tween(level_text).to({
+                                alpha: 1
+                            }, 750, 'Linear', true).onComplete.add(function() {
+                                setTimeout(function() {
+                                    Game.add.tween(level_text).to({
+                                        alpha: 0
+                                    }, 250, 'Linear', true).onComplete.add(function() {
+                                        level_text.destroy();
+                                    });
+                                }, 500);
+                            });
+
+                            //
+
                             if (dungeon.level >= 1 && dungeon.level <= 5) {
                                 if (MUS_dungeon1.isPlaying === false) {
                                     MUS_dungeon2.stop();
