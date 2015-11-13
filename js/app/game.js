@@ -503,12 +503,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                             }
                         }
 
-                        // Tween text
-                        // Game.add.tween(Epic_Text).to({
-                        //     x: dungeon.player.x * TILE_SIZE - SCREEN_WIDTH / 2,
-                        //     y: dungeon.player.y * TILE_SIZE - SCREEN_HEIGHT / 2
-                        // }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
-
                         // Slide the player to their new position
                         Game.add.tween(dungeon.player.sprite).to({
                             x: dungeon.player.x * TILE_SIZE,
@@ -570,6 +564,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
             },
 
+            gameOver: function () {
+                if (MUS_dungeon1.isPlaying === true) {
+                    MUS_dungeon1.stop();
+                } else {
+                    MUS_dungeon2.stop();
+                }
+                dungeon.playerStats.hp = dungeon.playerStats.max_hp;
+                this.state.start('Game_Over');
+            },
+
             /**
              * Handle input / animations
              * @function update
@@ -602,6 +606,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                     if (!dungeon.player.isMoving) {
                         dungeon.player.sprite.animations.stop();
                     }
+                }
+
+                if (dungeon.playerStats.hp === 0) {
+                    this.gameOver();
                 }
             },
 
