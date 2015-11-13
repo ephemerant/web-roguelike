@@ -452,6 +452,52 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 loot = {};
             },
 
+            displayText: function(value, x, y, style, fixed, speed, rise) {
+
+                if (speed === undefined)
+                    speed = 1;
+
+                var text = Game.add.text(x, y, value, style);
+
+                text.stroke = "#000";
+                text.strokeThickness = 6;
+
+                if (fixed === true) {
+                    text.fixedToCamera = true;
+                }
+
+                text.anchor.setTo(0.5);
+
+                text.alpha = 0;
+
+                // Fade text in, wait, fade it out, delete it
+                Game.add.tween(text).to({
+                    alpha: 1
+                }, 750 * speed, 'Linear', true).onComplete.add(function() {
+                    setTimeout(function() {
+                        Game.add.tween(text).to({
+                            alpha: 0
+                        }, 1000 * speed, 'Linear', true).onComplete.add(function() {
+                            text.destroy();
+                        });
+                    }, 500 * speed);
+                });
+
+                if (rise === true) {
+                    if (fixed === true) {
+                        Game.add.tween(text.cameraOffset).to({
+                            y: text.cameraOffset.y - 20
+                        }, 750 * speed, 'Linear', true);
+                    } else {
+                        Game.add.tween(text).to({
+                            y: text.y - 20
+                        }, 750 * speed, 'Linear', true);
+                    }
+                }
+
+                //
+            },
+
             /**
              * Add (x, y) to the player's position if it is a valid move
              * @function movePlayer
@@ -489,7 +535,18 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                     // The player moved
                     if (result.moved) {
                         dungeon.player.isMoving = true;
-                        dungeon.playerStats.turnTick();
+
+                        var turn = dungeon.playerStats.turnTick();
+
+                        if (turn.poison) {
+                            // Display poison damage
+                            Game.displayText(turn.poison, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                                font: 'bold 18pt Monospace',
+                                fill: '#0f2',
+                                align: 'center'
+                            }, true, 0.5, true);
+                        }
+
                         // Entering stairs
                         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
                             // TODO: Swap stairs out with a portal?
@@ -503,37 +560,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                             Game.createDungeon();
 
-                            // Display level pop-up
-
-                            var level_text = Game.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, 'LEVEL ' + dungeon.level, {
-                                font: 'bold 32pt Monospace',
+                            Game.displayText('LEVEL ' + dungeon.level, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, {
+                                font: 'bold 36pt Monospace',
                                 fill: 'white',
                                 align: 'center'
-                            });
-
-                            level_text.stroke = "#000";
-                            level_text.strokeThickness = 6;
-
-                            level_text.fixedToCamera = true;
-
-                            level_text.anchor.setTo(0.5);
-
-                            level_text.alpha = 0;
-
-                            // Fade text in, wait, fade it out, delete it
-                            Game.add.tween(level_text).to({
-                                alpha: 1
-                            }, 750, 'Linear', true).onComplete.add(function() {
-                                setTimeout(function() {
-                                    Game.add.tween(level_text).to({
-                                        alpha: 0
-                                    }, 250, 'Linear', true).onComplete.add(function() {
-                                        level_text.destroy();
-                                    });
-                                }, 500);
-                            });
-
-                            //
+                            }, true);
 
                             if (dungeon.level >= 1 && dungeon.level <= 5) {
                                 if (MUS_dungeon1.isPlaying === false) {
@@ -575,19 +606,35 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         SND_hit.play();
                         is_pathing = false;
 
-                        // Was a monster killed?
-                        if (result.kill) {
-                            // Remove its sprite - can add a special condition for skeletons
-                            result.kill.sprite.destroy();
+                        if (result.monster !== undefined) {
+                            // Display damage to monster
+                            Game.displayText(result.damageToMonster, result.monster.x * TILE_SIZE + 15, result.monster.y * TILE_SIZE, {
+                                font: 'bold 18pt Monospace',
+                                fill: '#f20',
+                                align: 'center'
+                            }, false, 0.5, true);
+                            // Was the monster killed?
+                            if (result.kill) {
+                                // Remove its sprite - can add a special condition for skeletons
+                                result.monster.sprite.destroy();
 
-                            // Add bones                            
-                            var kill_key = result.kill.x + ',' + result.kill.y;
+                                // Add bones                            
+                                var kill_key = result.monster.x + ',' + result.monster.y;
 
-                            if (bones[kill_key] === undefined) {
-                                bones[kill_key] = Game.add.sprite(result.kill.x * TILE_SIZE, result.kill.y * TILE_SIZE, 'objects', 24);
-                                dungeon.player.sprite.bringToTop();
+                                if (bones[kill_key] === undefined) {
+                                    bones[kill_key] = Game.add.sprite(result.monster.x * TILE_SIZE, result.monster.y * TILE_SIZE, 'objects', 24);
+                                    dungeon.player.sprite.bringToTop();
+                                }
                             }
                         }
+
+                        // Display damage to player
+                        Game.displayText(result.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                            font: 'bold 18pt Monospace',
+                            fill: '#ff0',
+                            align: 'center'
+                        }, true, 0.5, true);
+
                         // Add delay for next attack
 
                         dungeon.player.isMoving = true;
@@ -596,6 +643,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             dungeon.player.isMoving = false;
                             resolve();
                         }, INPUT_DELAY);
+
                     } else {
                         is_pathing = false;
                         resolve();

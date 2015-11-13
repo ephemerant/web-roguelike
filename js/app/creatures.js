@@ -118,6 +118,7 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                  * The creature attacks the creature that is passed to it. Calculations are made to determine damage given.
                  *
                  * @param  {creature} creature      The creature that is being attacked
+                 * @return {number} How much damage was done
                  */
                 attack: function(creature) {
                     //This is called when the creature attacks
@@ -143,6 +144,7 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                         creature.isDead = 1;
                         creature.frame = 0;
                     }
+                    return damage;
                 }
             };
         },
@@ -177,6 +179,7 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                 /**
                  * The playerattacks the creature that is passed to it. Calculations are made to determine damage given.
                  * @param  {creature} creature        The creature that is being attacked
+                 * @return {number} How much damage was done
                  */
                 attack: function(creature) {
                     var damage = this.str;
@@ -203,15 +206,19 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                             this.hp += 3;
                         }
                     }
+                    return damage;
                 },
                 /**
                  * This is called every turn, used for poison and other checks
                  * that must be performed every turn
                  */
                 turnTick: function() {
-                    if (this.poisonTimer >= 1) {
+                    var result = {};
+
+                    if (this.poisonTimer >= 1) {                        
                         this.poisonTimer -= 1;
                         this.hp -= 1;
+                        result.poison = 1;
                         console.log('Player suffers from poison' + ' hp now ' + this.hp);
                         if (this.poisonTimer === 0) {
                             this.isPoisoned = 0;
@@ -221,8 +228,10 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                     if (this.hp <= 0) {
                         this.hp = 0;
                         this.poisonTimer = 0;
-                        this.isDead = 1;                        
+                        this.isDead = 1;
                     }
+
+                    return result;
                 },
 
                 /**

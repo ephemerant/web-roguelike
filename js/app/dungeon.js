@@ -269,7 +269,8 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
         var outcome = {
             moved: false,
             door: false,
-            combat: false
+            combat: false,
+            kill: false
           },
 
           newX = creature.x + x,
@@ -294,13 +295,13 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
         // Combat
         else if (this._hasMonster(newX, newY)) {
           monster = this._getMonster(newX, newY);
-
+          outcome.monster = monster;
           if (monster.isDead === 0) {
-            this.playerStats.attack(monster);
+            outcome.damageToMonster = this.playerStats.attack(monster);
             if (monster.isDead === 0) {
-              monster.attack(this.playerStats);
+              outcome.damageToPlayer = monster.attack(this.playerStats);
             } else {
-              outcome.kill = monster;
+              outcome.kill = true;
               // Remove the monster from the dictionary - can add a special condition for skeletons
               delete dungeon.monsters[key];
             }
