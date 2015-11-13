@@ -83,12 +83,6 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                         this.x += _x;
                         this.y += _y;
                     }
-                    if (this.name === 'Skeleton' && this.isDead === 1) { //Skeletons may revive each turn
-                        var revive = Math.floor(Math.random() * 10);
-                        if (revive === 1) {
-                            this.isDead = 0;
-                        }
-                    }
                 },
                 /**
                  * Performs any action that must be done upon death (ex. item drop)
@@ -100,6 +94,19 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                 interact: function () {
                     //This function is for if the player runs into the creature without intent to attack.
                 },
+
+                /**
+                 * For anything that needs to be called every turn
+                 */
+                turnTick: function () {
+                  if (this.name === 'Skeleton' && this.isDead === 1) { //Skeletons may revive each turn
+                      var revive = Math.floor(Math.random() * 10);
+                      if (revive === 1) {
+                          this.isDead = 0;
+                      }
+                  }
+                },
+
                 /**
                  * Perform a special creature specific action that isnt an attack. (ex. fairy teleport)
                  */
@@ -164,7 +171,8 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                 charClass: Class, //The class of the character 'rogue, warrior etc'
                 isDead: 0, //Not sure if necessary
                 inventory: ['none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none'],
-
+                armor: items.potion(),
+                weapon: items.potion(),
                 /**
                  * The playerattacks the creature that is passed to it. Calculations are made to determine damage given.
                  * @param  {creature} creature        The creature that is being attacked
