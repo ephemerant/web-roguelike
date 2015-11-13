@@ -108,7 +108,11 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
 
                 tiles = calculateTiles(TILE_UNIT * 3 * area);
 
-                crosses = [tiles.wall_cross_bottom, tiles.wall_cross_top, tiles.wall_cross_left, tiles.wall_cross_right, tiles.wall_cross];
+                crosses = [tiles.wall_cross_bottom,
+                           tiles.wall_cross_top,
+                           tiles.wall_cross_left,
+                           tiles.wall_cross_right,
+                           tiles.wall_cross];
 
                 ROT.RNG.setSeed(ROT.RNG.getUniform());
 
@@ -247,7 +251,9 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
              * @return {boolean}
              */
             _isAvailable: function (x, y) {
-                return !(this.player.x === x && this.player.y === y) && this._validTile(x, y) && !this._hasMonster(x, y) && !this._hasDoor(x, y) && !this._hasItem(x, y);
+                return !(this.player.x === x && this.player.y === y) &&
+                    this._validTile(x, y) && !this._hasMonster(x, y) &&
+                    !this._hasDoor(x, y) && !this._hasItem(x, y);
             },
 
             /**
@@ -255,7 +261,8 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
              * @param  {object} creature
              * @param  {number} x
              * @param  {number} y
-             * @return {object} Object containing the following boolean value: moved (did the creature move?), door (did they open a door?), combat (did they engage in combat?)
+             * @return {object} Object containing the following boolean value:
+             * moved (did the creature move?), door (did they open a door?), combat (did they engage in combat?)
              */
             _moveCreature: function (creature, x, y) {
                 var outcome = {
@@ -476,7 +483,8 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                     });
 
                     // Crosses
-                    if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) && _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
+                    if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) &&
+                            _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
                         walls[key] = tiles.wall_cross;
                     } else if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, right) && _.contains(nearbyWalls, up)) {
                         walls[key] = tiles.wall_cross_bottom;

@@ -1,6 +1,6 @@
 /*globals define*/
 
-define(['Phaser', 'preload', 'start', 'game'], function (Phaser, Preload, Start, Game) {
+define(['Phaser', 'preload', 'start', 'game', 'game_over'], function (Phaser, Preload, Start, Game, Game_Over) {
     'use strict';
 
     var SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio,
@@ -11,6 +11,7 @@ define(['Phaser', 'preload', 'start', 'game'], function (Phaser, Preload, Start,
     game.state.add('Preload', Preload);
     game.state.add('Start', Start);
     game.state.add('Game', Game);
+    game.state.add('Game_Over', Game_Over);
 
     game.state.start('Preload');
 

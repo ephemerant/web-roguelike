@@ -1,7 +1,7 @@
 /*globals define*/
 /*jslint nomen: true */
 
-define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
+define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
     'use strict';
     var creatures = dungeon.creatures,
         items = dungeon.items,
@@ -16,6 +16,7 @@ define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
                 // TODO: Loading screen?
                 vm.load.image('splash', 'assets/splash.png');
                 vm.load.image('play', 'assets/play.png');
+                vm.load.image('gameover', 'assets/gameover.png');
                 vm.load.image('fullscreen', 'assets/fs.png');
                 vm.load.image('dungeon', 'assets/Wall.png');
                 vm.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
