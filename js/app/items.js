@@ -9,7 +9,7 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          */
 
         //array of spritesheets
-        _sprites: ['Armor.png', 'Potion.png'],
+        _sprites: ['Armor.png', 'Potion.png', 'LongWep.png'],
 
         _items_area1: ['potion'],
 
@@ -39,6 +39,14 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
             }
         },
 
+        spawnDrop: function(name, dropchance, level){
+            if (Math.floor(Math.random() * dropchance)=== 1){
+                return this._putItem(level, 0, 0);
+            } else {
+                return 'nothing';
+            }
+        },
+
         /**
          * An item creation factory
          * @param  {string} name   name of the item
@@ -55,6 +63,8 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
                 name: name,
                 sprite: sprite,
                 frame: frame,
+                str: str,
+                def: def,
                 x: x,
                 y: y,
 
@@ -77,6 +87,26 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          */
         potion: function (x, y) {
             return this._generic('Health Potion', 'potion', 1, 0, 0, x, y);
+        },
+
+        /**
+         * creates a wood armor item
+         * @param  {number} x the x position of the item in the dungeon
+         * @param  {nubmer} y the y position of the item in the dungeon
+         * @return {item}   returns the item to the caller
+         */
+        woodArmor: function (x, y){
+            return this._generic('Wooden Armor', 'armor', 0, 0, 1, x, y);
+        },
+
+        /**
+         * creates a stone spear item
+         * @param  {number} x the x position of the item in the dungeon
+         * @param  {nubmer} y the y position of the item in the dungeon
+         * @return {item}   returns the item to the caller
+         */
+        stoneSpear: function (x, y){
+          return this._generic('Stone Spear', 'longwep', 1, 1, 0, x, y);
         }
     };
 });
