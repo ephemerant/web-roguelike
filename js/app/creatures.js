@@ -212,19 +212,10 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                  * This is called every turn, used for poison and other checks
                  * that must be performed every turn
                  */
-<<<<<<< HEAD
-<<<<<<< HEAD
                 turnTick: function() {
                     var result = {};
 
-                    if (this.poisonTimer >= 1) {                        
-=======
-                turnTick: function () {
-=======
-                turnTick: function() {
->>>>>>> origin/master
                     if (this.poisonTimer >= 1) {
->>>>>>> origin/master
                         this.poisonTimer -= 1;
                         this.hp -= 1;
                         result.poison = 1;
@@ -237,7 +228,7 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                     if (this.hp <= 0) {
                         this.hp = 0;
                         this.poisonTimer = 0;
-                        this.isDead = 1;                        
+                        this.isDead = 1;
                     }
 
                     return result;

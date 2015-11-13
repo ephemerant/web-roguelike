@@ -195,10 +195,6 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             if (item.x === x && item.y === y) {
               hasItem = true;
             }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> origin/master
           });
         }
         return hasItem;
@@ -273,12 +269,8 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
         var outcome = {
             moved: false,
             door: false,
-<<<<<<< HEAD
             combat: false,
             kill: false
-=======
-            combat: false
->>>>>>> origin/master
           },
 
           newX = creature.x + x,
@@ -303,7 +295,6 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
         // Combat
         else if (this._hasMonster(newX, newY)) {
           monster = this._getMonster(newX, newY);
-<<<<<<< HEAD
           outcome.monster = monster;
           if (monster.isDead === 0) {
             outcome.damageToMonster = this.playerStats.attack(monster);
@@ -311,15 +302,6 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
               outcome.damageToPlayer = monster.attack(this.playerStats);
             } else {
               outcome.kill = true;
-=======
-
-          if (monster.isDead === 0) {
-            this.playerStats.attack(monster);
-            if (monster.isDead === 0) {
-              monster.attack(this.playerStats);
-            } else {
-              outcome.kill = monster;
->>>>>>> origin/master
               // Remove the monster from the dictionary - can add a special condition for skeletons
               delete dungeon.monsters[key];
             }
@@ -389,11 +371,6 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
         this.stairs = {
           x: this.rooms[this.rooms.length - 1]._x2,
           y: this.rooms[this.rooms.length - 1]._y2
-<<<<<<< HEAD
-=======
->>>>>>> origin/master
-=======
->>>>>>> origin/master
         };
       },
 
