@@ -1,7 +1,7 @@
 /*globals define*/
 /*jslint nomen: true */
 
-define(['Phaser', 'dungeon'], function(Phaser, dungeon) {
+define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
     'use strict';
     var creatures = dungeon.creatures,
         items = dungeon.items,
@@ -10,7 +10,7 @@ define(['Phaser', 'dungeon'], function(Phaser, dungeon) {
         classes = ['Warrior', 'Engineer', 'Mage', 'Paladin', 'Rogue'],
         Preload = {
             // Import assets
-            preload: function() {
+            preload: function () {
                 // Used to avoid conflicts
                 var vm = this;
                 // TODO: Loading screen?
@@ -19,22 +19,22 @@ define(['Phaser', 'dungeon'], function(Phaser, dungeon) {
                 vm.load.image('gameover', 'assets/gameover.png');
                 vm.load.image('fullscreen', 'assets/fs.png');
                 vm.load.image('dungeon', 'assets/Wall.png');
-                
+
                 vm.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
                 vm.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
                 vm.load.spritesheet('objects', 'assets/Objects.png', TILE_SIZE, TILE_SIZE);
 
                 // Load player sprites
-                classes.forEach(function(name) {
+                classes.forEach(function (name) {
                     vm.load.spritesheet(name.toLowerCase(), 'assets/' + name + '.png', TILE_SIZE, TILE_SIZE);
                 });
                 // Load monster sprites
-                creatures._sprites.forEach(function(sprite) {
+                creatures._sprites.forEach(function (sprite) {
                     Preload.load.spritesheet(sprite.toLowerCase().replace('.png', ''), 'assets/monsters/' + sprite, TILE_SIZE, TILE_SIZE);
                 });
 
                 // Load item sprites
-                items._sprites.forEach(function(sprite) {
+                items._sprites.forEach(function (sprite) {
                     Preload.load.spritesheet(sprite.toLowerCase().replace('.png', ''), 'assets/items/' + sprite, TILE_SIZE, TILE_SIZE);
                 });
 
@@ -48,7 +48,7 @@ define(['Phaser', 'dungeon'], function(Phaser, dungeon) {
                 vm.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
             },
 
-            create: function() {
+            create: function () {
                 this.state.start('Start');
             }
         };
