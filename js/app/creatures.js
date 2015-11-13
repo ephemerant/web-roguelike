@@ -99,12 +99,12 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                  * For anything that needs to be called every turn
                  */
                 turnTick: function () {
-                  if (this.name === 'Skeleton' && this.isDead === 1) { //Skeletons may revive each turn
-                      var revive = Math.floor(Math.random() * 10);
-                      if (revive === 1) {
-                          this.isDead = 0;
-                      }
-                  }
+                    if (this.name === 'Skeleton' && this.isDead === 1) { //Skeletons may revive each turn
+                        var revive = Math.floor(Math.random() * 10);
+                        if (revive === 1) {
+                            this.isDead = 0;
+                        }
+                    }
                 },
 
                 /**
@@ -243,13 +243,13 @@ define(['ROT', 'Phaser', 'items'], function (ROT, Phaser, items) {
                  * @param  {item} item    the item to be picked up
                  * @return {number}      1 if the item was gotten, 0 if not
                  */
-                pickup: function(item){
-                  var freespot = this.checkInventorySpace();
-                  if (freespot !== -1){
-                    this.inventory[freespot] = item;
-                    return 1;
-                  }
-                  return 0;
+                pickup: function (item) {
+                    var freespot = this.checkInventorySpace();
+                    if (freespot !== -1) {
+                        this.inventory[freespot] = item;
+                        return 1;
+                    }
+                    return 0;
                 }
             };
         },

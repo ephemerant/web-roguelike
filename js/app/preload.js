@@ -4,7 +4,7 @@
 define(['Phaser', 'game', 'dungeon'], function (Phaser, Game, dungeon) {
     'use strict';
     var creatures = dungeon.creatures,
-    items = dungeon.items,
+        items = dungeon.items,
         TILE_SIZE = dungeon.TILE_SIZE,
         // TODO: Move this list to a player.js file or something of the sort
         classes = ['Warrior', 'Engineer', 'Mage', 'Paladin', 'Rogue'],
