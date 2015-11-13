@@ -20,9 +20,9 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
          */
         _pickCreature: function(level) {
             if (level >= 1 && level <= 5) { //pick a random creature from section 1
-                return this._creatures_area1[Math.floor(Math.random() * 2)];
+                return this._creatures_area1[Math.floor(Math.random() * 3)];
             }
-            return (this._creatures_area1[Math.floor(Math.random() * 2)]); //If calculation breaks then just return area1
+            return (this._creatures_area1[Math.floor(Math.random() * 3)]); //If calculation breaks then just return area1
         },
 
         /**
@@ -37,11 +37,11 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
         _putCreature: function(level, x, y) {
             var creatureName = this._pickCreature(level);
             if (creatureName === 'skeleton') {
-                return this.skeleton(x, y);
+                return this.skeleton(x, y, level);
             } else if (creatureName === 'fairy') {
-                return this.fairy(x, y);
+                return this.fairy(x, y, level);
             } else {
-                return this.snake(x, y); //If all else fails put snake
+                return this.snake(x, y, level); //If all else fails put snake
             }
         },
         /**
@@ -55,11 +55,13 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
          * @param  {number} expgain Experience point gain
          * @param  {string} sprite  Sprite sheet name
          * @param  {number} frame   What frame from the spritesheet to use
+         * @param  {number} dropchance       the chance that this creature will have an item. 1/dropchance.
          * @param  {number} x       X coordinate of where the sprite is located in the dungeon
          * @param  {number} y       Y coordinate of where the sprite is located in the dungeon
+         * @param  {number} level       current dungeon floor
          * @return {creature}       The created creature object is returned to the caller
          */
-        _generic: function(name, hp, str, def, crit, expgain, sprite, frame, x, y) {
+        _generic: function(name, hp, str, def, crit, expgain, sprite, frame, dropchance, x, y, level) {
             return {
                 name: name,
                 hp: hp,
@@ -70,6 +72,8 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                 expgain: expgain,
                 sprite: sprite,
                 frame: frame,
+                dropchance: dropchance,
+                droppedItem: items.spawnDrop(name, dropchance, level),
                 x: x,
                 y: y,
                 isDead: 0,
@@ -133,7 +137,8 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                         creature.poisonTimer = 10;
                         console.log('Player poisoned');
                     }
-                    damage -= creature.def;
+                    damage -= creature.def; //remove player defense
+                    damage -= creature.armor.def; // remove player armor from damage
                     creature.hp -= damage;
 
                     console.log('Creature did ' + damage + ' damage');
@@ -174,8 +179,8 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                 charClass: Class, //The class of the character 'rogue, warrior etc'
                 isDead: 0, //Not sure if necessary
                 inventory: ['none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none'],
-                armor: items.potion(),
-                weapon: items.potion(),
+                armor: items.woodArmor(),
+                weapon: items.stoneSpear(),
                 /**
                  * The playerattacks the creature that is passed to it. Calculations are made to determine damage given.
                  * @param  {creature} creature        The creature that is being attacked
@@ -186,7 +191,8 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                     if (Math.floor(Math.random() * this.crit) === 1) {
                         damage *= 2; // Critical Hit double the damage.
                     }
-                    damage -= creature.def;
+                    damage += this.weapon.str; //increase damage by weapon
+                    damage -= creature.def; // decrease damage by creature defense
                     creature.hp -= damage;
 
                     console.log('Player did ' + damage + ' damage');
@@ -271,8 +277,8 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
          * @param  {number} y
          * @return {creature}
          */
-        snake: function(x, y) {
-            return this._generic('Snake', 8, 5, 1, 20, 10, 'reptile0', 43, x, y);
+        snake: function(x, y, level) {
+            return this._generic('Snake', 8, 5, 1, 20, 10, 'reptile0', 43, 2, x, y, level);
         },
 
         /**
@@ -281,8 +287,8 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
          * @param  {number} y
          * @return {creature}
          */
-        skeleton: function(x, y) {
-            return this._generic('Skeleton', 15, 4, 0, 20, 10, 'undead0', 24, x, y);
+        skeleton: function(x, y, level) {
+            return this._generic('Skeleton', 15, 4, 0, 20, 10, 'undead0', 24, 2, x, y, level);
         },
 
         /**
@@ -291,8 +297,8 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
          * @param  {number} y
          * @return {creature}
          */
-        fairy: function(x, y) {
-            return this._generic('Fairy', 25, 4, 0, 20, 10, 'humanoid0', 34, x, y);
+        fairy: function(x, y, level) {
+            return this._generic('Fairy', 25, 4, 0, 20, 10, 'humanoid0', 34, 2, x, y, level);
         },
 
         /**
