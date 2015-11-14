@@ -15,6 +15,7 @@ requirejs.config({
 		dungeon: '../app/dungeon',
         game: '../app/game',
         start: '../app/start',
+        loading: '../app/loading',
         preload: '../app/preload',
         game_over: '../app/game_over',
         player: '../app/player'
