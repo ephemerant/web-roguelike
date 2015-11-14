@@ -137,7 +137,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
           return distance(a, playerRoom) - distance(b, playerRoom);
         });
 
-        vm._spawnPlayer(playerRoom._x1, playerRoom._y1);
+        vm._spawnPlayer(_.random(playerRoom._x1, playerRoom._x2), _.random(playerRoom._y1, playerRoom._y2));
 
         vm._spawnStairs();
 
@@ -307,7 +307,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             } else {
               outcome.kill = true;
               // Remove the monster from the dictionary - can add a special condition for skeletons
-              if (monster.droppedItem !== 'nothing'){
+              if (monster.droppedItem !== 'nothing') {
                 outcome.drop = true;
                 monster.droppedItem.x = newX;
                 monster.droppedItem.y = newY;
@@ -315,8 +315,8 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
                 this.loot.push(outcome.droppedItem);
               }
               var i = this.monsters.indexOf(monster);
-              if(i != -1) {
-	             this.monsters.splice(i, 1);
+              if (i != -1) {
+                this.monsters.splice(i, 1);
               }
             }
             outcome.combat = true;
@@ -380,9 +380,12 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
        */
       _spawnStairs: function() {
         // Put stairs in the farthest room away
+
+        var room = this.rooms[this.rooms.length - 1];
+
         this.stairs = {
-          x: this.rooms[this.rooms.length - 1]._x2,
-          y: this.rooms[this.rooms.length - 1]._y2
+          x: _.random(room._x1, room._x2),
+          y: _.random(room._y1, room._y2),
         };
       },
 
@@ -396,10 +399,24 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
 
         // Spawn monsters
         vm.rooms.forEach(function(room) {
-          var x = Math.round((room._x1 + room._x2) / 2),
-            y = Math.round((room._y1 + room._y2) / 2);
-          if (vm._isAvailable(x, y)) {
-            vm.monsters.push(creatures._putCreature(dungeon.level, x, y));
+          var w = room._x2 - room._x1,
+            h = room._y2 - room._y1,
+            area = w * h,
+            chances = 1;
+
+          // Larger rooms can spawn multiple monsters
+          while (area > 12) {
+            chances += 1;
+            area -= 12;
+          }
+
+          while (chances-- > 0) {
+            var x = _.random(room._x1, room._x2),
+              y = _.random(room._y1, room._y2);
+            if (vm._isAvailable(x, y) && Math.random() > 0.4) {
+              // 60% chance to spawn
+              vm.monsters.push(creatures._putCreature(dungeon.level, x, y));
+            }
           }
         });
       },
@@ -413,10 +430,11 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
 
         // place items
         vm.rooms.forEach(function(room) {
-          var x = Math.round((room._x1 + room._x2) / 2),
-            y = Math.round((room._y1 + room._y2) / 2);
-          if (vm._isAvailable(x + 1, y)) {
-            vm.loot.push(items._putItem(dungeon.level, x + 1, y));
+          var x = _.random(room._x1, room._x2),
+            y = _.random(room._y1, room._y2);
+          if (vm._isAvailable(x, y) && Math.random() > 0.9) {
+            // 10% chance to spawn in a given room
+            vm.loot.push(items._putItem(dungeon.level, x, y));
           }
         });
       },
