@@ -502,174 +502,166 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
              * @param  {number} y
              * @return {promise}
              */
-             movePlayer: function(x, y) {
-                 return new Promise(function(resolve, reject) {
-                     if (dungeon.player.isMoving || (x === 0 && y === 0)) {
-                         resolve();
-                         return;
-                     }
+            movePlayer: function (x, y) {
+                return new Promise(function (resolve, reject) {
+                    if (dungeon.player.isMoving || (x === 0 && y === 0)) {
+                        resolve();
+                        return;
+                    }
 
-                     var newX = dungeon.player.x + x,
-                         newY = dungeon.player.y + y,
-                         key = newX + ',' + newY,
-                         result,
-                         door,
-                         remitem;
+                    var newX = dungeon.player.x + x,
+                        newY = dungeon.player.y + y,
+                        key = newX + ',' + newY,
+                        result = dungeon._moveCreature(dungeon.player, x, y),
+                        door,
+                        remitem;
 
-                     if (x === 1) {
-                         dungeon.player.sprite.play('right');
-                     } else if (x === -1) {
-                         dungeon.player.sprite.play('left');
-                     }
-                     if (y === 1) {
-                         dungeon.player.sprite.play('down');
-                     } else if (y === -1) {
-                         dungeon.player.sprite.play('up');
-                     }
+                    if (x === 1) {
+                        dungeon.player.sprite.play('right');
+                    } else if (x === -1) {
+                        dungeon.player.sprite.play('left');
+                    }
+                    if (y === 1) {
+                        dungeon.player.sprite.play('down');
+                    } else if (y === -1) {
+                        dungeon.player.sprite.play('up');
+                    }
 
-                     result = dungeon._moveCreature(dungeon.player, x, y);
+                    // The player moved
+                    if (result.moved) {
+                        dungeon.player.isMoving = true;
 
-                     // The player moved
-                     if (result.moved) {
-                         dungeon.player.isMoving = true;
+                        var turn = dungeon.playerStats.turnTick();
 
-                         var turn = dungeon.playerStats.turnTick();
+                        if (turn.poison) {
+                            // Display poison damage
+                            Game.displayText(turn.poison, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                                font: 'bold 18pt Monospace',
+                                fill: '#0f2',
+                                align: 'center'
+                            }, true, 0.5, true);
+                        }
 
-                         if (turn.poison) {
-                             // Display poison damage
-                             Game.displayText(turn.poison, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
-                                 font: 'bold 18pt Monospace',
-                                 fill: '#0f2',
-                                 align: 'center'
-                             }, true, 0.5, true);
-                         }
+                        // Entering stairs
+                        if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
+                            // TODO: Swap stairs out with a portal?
+                            is_pathing = false;
+                            SND_teleport.play();
+                            dungeon.level += 1;
+                            Game.createDungeon();
+                            Game.displayText('LEVEL ' + dungeon.level, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, {
+                                font: 'bold 36pt Monospace',
+                                fill: 'white',
+                                align: 'center'
+                            }, true);
+                            if (dungeon.level >= 1 && dungeon.level <= 5) {
+                                if (MUS_dungeon1.isPlaying === false) {
+                                    MUS_dungeon2.stop();
+                                    MUS_dungeon1.play();
+                                }
+                            }
+                            if (dungeon.level > 5) {
+                                if (MUS_dungeon2.isPlaying === false) {
+                                    MUS_dungeon1.stop();
+                                    MUS_dungeon2.play();
+                                }
+                            }
+                        }
 
-                         // Entering stairs
-                         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
-                             // TODO: Swap stairs out with a portal?
-                             is_pathing = false;
+                        // Slide the player to their new position
+                        Game.add.tween(dungeon.player.sprite).to({
+                            x: dungeon.player.x * TILE_SIZE,
+                            y: dungeon.player.y * TILE_SIZE
+                        }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function () {
+                            dungeon.player.isMoving = false;
+                            resolve();
+                        }, this);
+                        // The player opened a door
+                    } else if (result.door) {
+                        dungeon.player.isMoving = true;
+                        // Change door's appearance to open
+                        door = doors[key];
+                        door.loadTexture('door_open', door.frame);
+                        // Play a sound effect
+                        SND_door_open.play();
+                        // Add delay until the next action
+                        setTimeout(function () {
+                            dungeon.player.isMoving = false;
+                            resolve();
+                        }, INPUT_DELAY);
+                        // Combat occurred
+                    } else {
+                        is_pathing = false;
+                        resolve();
+                    }
 
-                             SND_teleport.play();
+                    if (result.combat) {
+                        SND_hit.play();
+                        is_pathing = false;
 
-                             dungeon.level += 1;
+                        if (result.monster !== undefined) {
+                            // Display damage to monster
+                            Game.displayText(result.damageToMonster, result.monster.x * TILE_SIZE + 15, result.monster.y * TILE_SIZE, {
+                                font: 'bold 18pt Monospace',
+                                fill: '#f20',
+                                align: 'center'
+                            }, false, 0.5, true);
+                            // Was the monster killed?
+                            if (result.kill) {
+                                // Remove its sprite - can add a special condition for skeletons
 
-                             //
+                                result.monster.sprite.destroy();
 
-                             Game.createDungeon();
+                                // Add bones
+                                var kill_key = result.monster.x + ',' + result.monster.y;
 
-                             Game.displayText('LEVEL ' + dungeon.level, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, {
-                                 font: 'bold 36pt Monospace',
-                                 fill: 'white',
-                                 align: 'center'
-                             }, true);
+                                if (bones[kill_key] === undefined) {
+                                    bones[kill_key] = Game.add.sprite(result.monster.x *
+                                                                      TILE_SIZE, result.monster.y *
+                                                                      TILE_SIZE, 'objects', 24);
+                                    dungeon.player.sprite.bringToTop();
+                                }
+                            }
+                        }
 
-                             if (dungeon.level >= 1 && dungeon.level <= 5) {
-                                 if (MUS_dungeon1.isPlaying === false) {
-                                     MUS_dungeon2.stop();
-                                     MUS_dungeon1.play();
-                                 }
-                             }
-                             if (dungeon.level > 5) {
-                                 if (MUS_dungeon2.isPlaying === false) {
-                                     MUS_dungeon1.stop();
-                                     MUS_dungeon2.play();
-                                 }
-                             }
-                         }
+                        // Display damage to player
+                        Game.displayText(result.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                            font: 'bold 18pt Monospace',
+                            fill: '#ff0',
+                            align: 'center'
+                        }, true, 0.5, true);
 
-                         // Slide the player to their new position
-                         Game.add.tween(dungeon.player.sprite).to({
-                             x: dungeon.player.x * TILE_SIZE,
-                             y: dungeon.player.y * TILE_SIZE
-                         }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function() {
-                             dungeon.player.isMoving = false;
-                             resolve();
-                         }, this);
-                         // The player opened a door
-                     } else if (result.door) {
-                         dungeon.player.isMoving = true;
-                         // Change door's appearance to open
-                         door = doors[key];
-                         door.loadTexture('door_open', door.frame);
-                         // Play a sound effect
-                         SND_door_open.play();
-                         // Add delay until the next action
-                         setTimeout(function() {
-                             dungeon.player.isMoving = false;
-                             resolve();
-                         }, INPUT_DELAY);
-                         // Combat occurred
-                     } else {
-                         is_pathing = false;
-                         resolve();
-                     }
+                        // Add delay for next attack - longer than movement delay to avoid accidental attacks
+                        dungeon.player.isMoving = true;
 
-                     if (result.combat) {
-                         SND_hit.play();
-                         is_pathing = false;
+                        setTimeout(function () {
+                            dungeon.player.isMoving = false;
+                            resolve();
+                        }, INPUT_DELAY * 4);
 
-                         if (result.monster !== undefined) {
-                             // Display damage to monster
-                             Game.displayText(result.damageToMonster, result.monster.x * TILE_SIZE + 15, result.monster.y * TILE_SIZE, {
-                                 font: 'bold 18pt Monospace',
-                                 fill: '#f20',
-                                 align: 'center'
-                             }, false, 0.5, true);
-                             // Was the monster killed?
-                             if (result.kill) {
-                                 // Remove its sprite - can add a special condition for skeletons
+                    }
 
-                                 result.monster.sprite.destroy();
+                    if (result.drop === true) {
+                        var tempItem = Game.add.sprite(newX * TILE_SIZE,
+                            newY * TILE_SIZE,
+                            result.droppedItem.sprite,
+                            result.droppedItem.frame);
+                        loot[key] = tempItem;
+                    }
 
-                                 // Add bones
-                                 var kill_key = result.monster.x + ',' + result.monster.y;
-
-                                 if (bones[kill_key] === undefined) {
-                                     bones[kill_key] = Game.add.sprite(result.monster.x * TILE_SIZE, result.monster.y * TILE_SIZE, 'objects', 24);
-                                     dungeon.player.sprite.bringToTop();
-                                 }
-                             }
-                         }
-
-                         // Display damage to player
-                         Game.displayText(result.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
-                             font: 'bold 18pt Monospace',
-                             fill: '#ff0',
-                             align: 'center'
-                         }, true, 0.5, true);
-
-                         // Add delay for next attack
-
-                         dungeon.player.isMoving = true;
-
-                         setTimeout(function() {
-                             dungeon.player.isMoving = false;
-                             resolve();
-                         }, INPUT_DELAY);
-
-                     }
-
-                     if (result.drop === true){
-                         var tempItem = Game.add.sprite(newX * TILE_SIZE,
-                             newY * TILE_SIZE,
-                             result.droppedItem.sprite,
-                             result.droppedItem.frame);
-                         loot[key] = tempItem;
-                     }
-
-                     if (result.item) {
-                         SND_item.play();
-                         remitem = loot[key];
-                         remitem.destroy();
-                         // Display item found
-                         Game.displayText(dungeon.playerStats.inventory[0].name, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                    if (result.item) {
+                        SND_item.play();
+                        remitem = loot[key];
+                        remitem.destroy();
+                        // Display item found
+                        Game.displayText(result.gotitem.name, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
                             font: 'bold 18pt Monospace',
                             fill: 'green',
                             align: 'center'
                         }, true, 0.5, true);
-                     }
-                 });
-             },
+                    }
+                });
+            },
 
             /**
              * View inventory
