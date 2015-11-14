@@ -396,8 +396,8 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                         x,
                         y;
 
-                    // Larger rooms can spawn multiple monsters
-                    while (area > 12) {
+                    // Larger rooms can spawn multiple monsters - additional chance to spawn per 12 units of area
+                    while (area > 0) {
                         x = _.random(room._x1, room._x2);
                         y = _.random(room._y1, room._y2);
                         if (vm._isAvailable(x, y) && Math.random() > 0.4) {
