@@ -67,9 +67,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
         //Music
         MUS_dungeon1,
         MUS_dungeon2,
-        //
+        // UI
         text_health,
         text_mana,
+        menu = [],
+        menuIsOpen,
 
         Game = {
 
@@ -168,6 +170,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
                 fullscreen_button = Game.add.button(SCREEN_WIDTH - 64, 0, 'fullscreen', this.gofull, this);
                 fullscreen_button.fixedToCamera = true;
+                menuIsOpen = false;
             },
 
             /**
@@ -514,7 +517,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                         key = newX + ',' + newY,
                         result = dungeon._moveCreature(dungeon.player, x, y),
                         door,
-                        remitem;
+                        remitem,
+                        turn,
+                        kill_key;
 
                     if (x === 1) {
                         dungeon.player.sprite.play('right');
@@ -530,9 +535,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                     // The player moved
                     if (result.moved) {
                         dungeon.player.isMoving = true;
-
-                        var turn = dungeon.playerStats.turnTick();
-
+                        turn = dungeon.playerStats.turnTick();
                         if (turn.poison) {
                             // Display poison damage
                             Game.displayText(turn.poison, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
@@ -613,12 +616,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                                 result.monster.sprite.destroy();
 
                                 // Add bones
-                                var kill_key = result.monster.x + ',' + result.monster.y;
+                                kill_key = result.monster.x + ',' + result.monster.y;
 
                                 if (bones[kill_key] === undefined) {
                                     bones[kill_key] = Game.add.sprite(result.monster.x *
-                                                                      TILE_SIZE, result.monster.y *
-                                                                      TILE_SIZE, 'objects', 24);
+                                        TILE_SIZE, result.monster.y *
+                                        TILE_SIZE, 'objects', 24);
                                     dungeon.player.sprite.bringToTop();
                                 }
                             }
@@ -642,11 +645,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                     }
 
                     if (result.drop === true) {
-                        var tempItem = Game.add.sprite(newX * TILE_SIZE,
+                        loot[key] = Game.add.sprite(newX * TILE_SIZE,
                             newY * TILE_SIZE,
                             result.droppedItem.sprite,
                             result.droppedItem.frame);
-                        loot[key] = tempItem;
                     }
 
                     if (result.item) {
@@ -668,13 +670,26 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
              * @function openInventory
              */
             openInventory: function () {
-                var i;
-                for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
-                    Game.displayText(dungeon.playerStats.inventory[i].name, 100, SCREEN_HEIGHT - (i * 20), {
-                        font: 'bold 12pt Monospace',
-                        fill: 'white',
-                        align: 'center'
-                    }, true, 0.5, true);
+                var i, x, y;
+                if (menuIsOpen) {
+                    for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
+                        menu[i].destroy();
+                    }
+                    menuIsOpen = false;
+                } else {
+                    for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
+                        if (i < 5) {
+                            x = 200 + (i * 100);
+                            y = 400;
+                        } else {
+                            x = 200 + ((i - 5) * 100);
+                            y = 500;
+                        }
+                        menu[i] = this.add.button(x, y, 'inventoryTile');
+                        menu[i].anchor.setTo(0.5, 0.5);
+                        menu[i].fixedToCamera = true;
+                        menuIsOpen = true;
+                    }
                 }
             },
 

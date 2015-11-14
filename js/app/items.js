@@ -39,8 +39,8 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
             }
         },
 
-        spawnDrop: function(name, dropchance, level){
-            if (Math.floor(Math.random() * dropchance)=== 1){
+        spawnDrop: function (name, dropchance, level) {
+            if (Math.floor(Math.random() * dropchance) === 1) {
                 return this._putItem(level, 0, 0);
             } else {
                 return 'nothing';
@@ -95,7 +95,7 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          * @param  {nubmer} y the y position of the item in the dungeon
          * @return {item}   returns the item to the caller
          */
-        woodArmor: function (x, y){
+        woodArmor: function (x, y) {
             return this._generic('Wooden Armor', 'armor', 0, 0, 1, x, y);
         },
 
@@ -105,8 +105,8 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          * @param  {nubmer} y the y position of the item in the dungeon
          * @return {item}   returns the item to the caller
          */
-        stoneSpear: function (x, y){
-          return this._generic('Stone Spear', 'longwep', 1, 1, 0, x, y);
+        stoneSpear: function (x, y) {
+            return this._generic('Stone Spear', 'longwep', 1, 1, 0, x, y);
         }
     };
 });
