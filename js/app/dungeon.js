@@ -393,23 +393,18 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                     var w = room._x2 - room._x1,
                         h = room._y2 - room._y1,
                         area = w * h,
-                        chances = 1,
                         x,
                         y;
 
                     // Larger rooms can spawn multiple monsters
                     while (area > 12) {
-                        chances += 1;
-                        area -= 12;
-                    }
-
-                    while ((chances -= 1) > 0) {
                         x = _.random(room._x1, room._x2);
                         y = _.random(room._y1, room._y2);
                         if (vm._isAvailable(x, y) && Math.random() > 0.4) {
                             // 60% chance to spawn
                             vm.monsters.push(creatures._putCreature(dungeon.level, x, y));
                         }
+                        area -= 12;
                     }
                 });
             },
