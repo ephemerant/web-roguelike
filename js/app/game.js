@@ -175,6 +175,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
                 fullscreen_button = Game.add.button(SCREEN_WIDTH - 64, 0, 'fullscreen', this.gofull, this);
                 fullscreen_button.fixedToCamera = true;
+                
             },
 
             /**
@@ -198,7 +199,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                     x,
                     y;
                 // Cancel current path, if there is one
-                if (is_pathing) {
+                if (is_pathing || inventory.menuIsOpen) {
                     is_pathing = false;
                     return;
                 }
@@ -767,29 +768,25 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
             update: function () {
                 // Used to avoid conflicts
                 var vm = this;
-
-                // Check keyboard input
-                if (cursors.left.isDown) {
+                // Check keyboard input and if Inventory is open
+                if (cursors.left.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(-1, 0);
-                } else if (cursors.right.isDown) {
+                } else if (cursors.right.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(1, 0);
-                } else if (cursors.up.isDown) {
+                } else if (cursors.up.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(0, -1);
-                } else if (cursors.down.isDown) {
+                } else if (cursors.down.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(0, 1);
-                } else if (autopilot_key.isDown) {
+                } else if (autopilot_key.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.autoPilot();
-                } else {
-                    if (!dungeon.player.isMoving) {
-                        dungeon.player.sprite.animations.stop();
-                    }
+                } else if (!dungeon.player.isMoving) {
+                    dungeon.player.sprite.animations.stop();
                 }
-
                 if (dungeon.playerStats.hp === 0) {
                     this.gameOver();
                 }
