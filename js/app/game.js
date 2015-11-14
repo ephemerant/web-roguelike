@@ -70,8 +70,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
         // UI
         text_health,
         text_mana,
-        menu = [],
-        menuIsOpen,
+        
+        inventory = {
+            item: [],
+            inventoryTiles: [],
+            label: [],
+            menuIsOpen: false
+        },
 
         Game = {
 
@@ -170,7 +175,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
                 fullscreen_button = Game.add.button(SCREEN_WIDTH - 64, 0, 'fullscreen', this.gofull, this);
                 fullscreen_button.fixedToCamera = true;
-                menuIsOpen = false;
             },
 
             /**
@@ -666,16 +670,28 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
             },
 
             /**
+             * called by inventory button to use selected item if possible
+             * @function useItem
+             */
+            useItem: function () {
+
+            },
+
+            /**
              * View inventory
              * @function openInventory
              */
             openInventory: function () {
-                var i, x, y;
-                if (menuIsOpen) {
+                var i, x, y, tempItem, style;
+                // Close inventory if it is open, otherwise close it
+                if (inventory.menuIsOpen) {
                     for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
-                        menu[i].destroy();
+                        inventory.label[i].destroy();
+                        inventory.item[i].destroy();
+                        inventory.inventoryTiles[i].destroy();
                     }
-                    menuIsOpen = false;
+                    // Menu is closed
+                    inventory.menuIsOpen = false;
                 } else {
                     for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
                         if (i < 5) {
@@ -685,10 +701,28 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                             x = 200 + ((i - 5) * 100);
                             y = 500;
                         }
-                        menu[i] = this.add.button(x, y, 'inventoryTile');
-                        menu[i].anchor.setTo(0.5, 0.5);
-                        menu[i].fixedToCamera = true;
-                        menuIsOpen = true;
+                        // Inventory backdrop
+                        inventory.inventoryTiles[i] = this.add.sprite(x, y, 'inventoryTile');
+                        inventory.inventoryTiles[i].anchor.setTo(0.5, 0.5);
+                        inventory.inventoryTiles[i].fixedToCamera = true;
+                        // item Buttons
+                        tempItem = dungeon.playerStats.inventory[i];
+                        inventory.item[i] = this.add.button(x, y - 10, tempItem.sprite, this.useItem, this);
+                        inventory.item[i].anchor.setTo(0.5, 0.5);
+                        inventory.item[i].fixedToCamera = true;
+                        // Item Labels
+                        style = {
+                            font: 'bold 8pt Monospace',
+                            fill: 'white',
+                            align: 'center'
+                        };
+                        inventory.label[i] = Game.add.text(x, y + 10, tempItem.name, style);
+                        inventory.label[i].stroke = "black";
+                        inventory.label[i].strokeThickness = 2;
+                        inventory.label[i].fixedToCamera = true;
+                        inventory.label[i].anchor.setTo(0.5);
+                        // Menu is open
+                        inventory.menuIsOpen = true;
                     }
                 }
             },
