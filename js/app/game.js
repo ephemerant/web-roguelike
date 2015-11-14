@@ -638,14 +638,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                              align: 'center'
                          }, true, 0.5, true);
 
-                         // Add delay for next attack
-
+                         // Add delay for next attack - longer than movement delay to avoid accidental attacks
                          dungeon.player.isMoving = true;
 
                          setTimeout(function() {
                              dungeon.player.isMoving = false;
                              resolve();
-                         }, INPUT_DELAY);
+                         }, INPUT_DELAY * 4);
 
                      }
 
