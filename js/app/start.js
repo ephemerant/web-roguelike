@@ -1,6 +1,6 @@
 /*globals define*/
 
-define(['Phaser', 'game'], function (Phaser, Game) {
+define(['Phaser'], function (Phaser) {
     'use strict';
 
     var width = (800) / 2 - 150,

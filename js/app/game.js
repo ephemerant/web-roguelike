@@ -1,7 +1,7 @@
 /*globals define, Promise*/
 /*jslint nomen: true */
 
-define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT) {
+define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT) {
 
     'use strict';
 
@@ -18,8 +18,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
         // Width / height of the actual window
         // TODO: Completely fill window with game screen?
-        SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio,
-        SCREEN_HEIGHT = window.innerHeight * window.devicePixelRatio,
+        SCREEN_WIDTH = 800,
+        SCREEN_HEIGHT = 600,
 
         DUNGEON_WIDTH = dungeon.width * TILE_SIZE,
         DUNGEON_HEIGHT = dungeon.width * TILE_SIZE,
@@ -32,6 +32,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         // TODO: Use multiple layers for tiles, objects, and creatures
         layer,
 
+        // Keys
         // Arrow keys
         cursors,
         // Key to start a new game [R]
@@ -40,17 +41,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         autopilot_key,
         // Key to go fullscreen
         fullscreen_key,
+        // Key to open inventory
+        inventory_key,
+
+        fullscreen_button,
         // Square that follows mouse
         marker,
-
         // TODO: Make a player/creature variable
         // Currently automatically moving?
         is_pathing = false,
-
         // Dictionary of door sprites by (x,y)
         doors = {},
-        monsters = [],
-        loot = [],
+        bones = {},
+        loot = {},
 
         //These variables are for volume control.
         //TODO: Allow user to choose volume.
@@ -60,23 +63,35 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         SND_door_open,
         SND_teleport,
         SND_hit,
+        SND_item,
         //Music
         MUS_dungeon1,
         MUS_dungeon2,
+        // UI
+        text_health,
+        text_mana,
+        
+        inventory = {
+            item: [],
+            inventoryTiles: [],
+            label: [],
+            menuIsOpen: false
+        },
 
         Game = {
 
             /**
              * @module  game
              */
-            
+
             /**
              * Initialize the phaser game
              * @function create
              */
-            create: function() {
+            create: function () {
                 // Used to avoid conflicts
-                var vm = this;
+                var vm = this,
+                    style;
                 // Increase bounds so camera can move outside the map boundaries
                 vm.world.setBounds(-DUNGEON_WIDTH, -DUNGEON_HEIGHT,
                     DUNGEON_WIDTH * 3,
@@ -107,16 +122,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 vm.createWorld();
 
+                // Set Keys
                 cursors = vm.input.keyboard.createCursorKeys();
-
                 autopilot_key = vm.input.keyboard.addKey(Phaser.Keyboard.A);
-
                 reset_key = vm.input.keyboard.addKey(Phaser.Keyboard.R);
                 reset_key.onDown.add(vm.createWorld, this);
-
                 fullscreen_key = vm.input.keyboard.addKey(Phaser.Keyboard.F);
                 fullscreen_key.onDown.add(vm.gofull, this);
                 vm.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+                inventory_key = vm.input.keyboard.addKey(Phaser.Keyboard.I);
+                inventory_key.onDown.add(vm.openInventory, this);
 
                 // Our painting marker
                 marker = vm.add.graphics();
@@ -129,17 +144,44 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 // Create Sounds
                 SND_door_open = vm.add.audio('SND_door_open');
                 SND_teleport = vm.add.audio('SND_teleport');
-                SND_teleport.volume = SND_door_open.volume = sound_volume;
                 SND_hit = vm.add.audio('SND_hit');
+                SND_item = vm.add.audio('SND_item');
                 SND_hit.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
 
+                // Text
+                style = {
+                    font: 'bold 16pt "Lucida Sans Typewriter"',
+                    fill: 'white',
+                    align: 'left'
+                };
+
+                // Health
+                text_health = Game.add.text(5, 5, '', style);
+                text_health.stroke = "#000";
+                text_health.strokeThickness = 6;
+                // Make text starting at index 3 red
+                text_health.addColor('#f20', 3);
+                // Move text with camera
+                text_health.fixedToCamera = true;
+
+                // Mana
+                text_mana = Game.add.text(5, 25, '', style);
+                text_mana.stroke = "#000";
+                text_mana.strokeThickness = 6;
+                // Make text starting at index 3 blue
+                text_mana.addColor('#08f', 3);
+                // Move text with camera
+                text_mana.fixedToCamera = true;
+
+                fullscreen_button = Game.add.button(SCREEN_WIDTH - 64, 0, 'fullscreen', this.gofull, this);
+                fullscreen_button.fixedToCamera = true;
             },
 
             /**
              * Move the black marker box to the mouse's position in the map
              * @function updateMarker
              */
-            updateMarker: function() {
+            updateMarker: function () {
                 // Used to avoid conflicts
                 var vm = this;
                 marker.x = layer.getTileX(vm.input.activePointer.worldX) * 32;
@@ -150,13 +192,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * Take action on a tile, or cancel the current action
              * @function mouseClicked
              */
-            mouseClicked: function() {
+            mouseClicked: function () {
                 // Used to avoid conflicts
                 var vm = this,
                     x,
                     y;
                 // Cancel current path, if there is one
-                if (is_pathing) {
+                if (is_pathing || inventory.menuIsOpen) {
                     is_pathing = false;
                     return;
                 }
@@ -175,19 +217,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * @param  {number} x
              * @param  {number} y
              */
-            moveToTile: function(x, y) {
+            moveToTile: function (x, y) {
                 // Used to avoid conflicts
                 var vm = this;
                 if (dungeon.player.isMoving ||
-                    (dungeon.player.x === x && dungeon.player.y === y) ||
-                    dungeon.tiles[x + ',' + y] === undefined ||
-                    is_pathing === false) {
+                        (dungeon.player.x === x && dungeon.player.y === y) ||
+                        dungeon.tiles[x + ',' + y] === undefined ||
+                        is_pathing === false) {
                     is_pathing = false;
                     return;
                 }
 
                 // Recursively move towards the tile
-                vm.moveTowardsTile(x, y).then(function() {
+                vm.moveTowardsTile(x, y).then(function () {
                     Game.moveToTile(x, y);
                 });
             },
@@ -198,16 +240,16 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * @param  {number} x
              * @param  {number} y
              */
-            moveTowardsTile: function(x, y) {
-                return new Promise(function(resolve, reject) {
+            moveTowardsTile: function (x, y) {
+                return new Promise(function (resolve, reject) {
                     if (dungeon.player.isMoving ||
-                        dungeon.tiles[x + ',' + y] === undefined) {
+                            dungeon.tiles[x + ',' + y] === undefined) {
                         resolve();
                         return;
                     }
 
                     // Input callback informs about map structure
-                    var passableCallback = function(x, y) {
+                    var passableCallback = function (x, y) {
                             return (dungeon.tiles[x + "," + y] !== undefined);
                         },
 
@@ -219,14 +261,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         count = 0;
 
                     // Compute from player
-                    astar.compute(dungeon.player.x, dungeon.player.y, function($x, $y) {
+                    astar.compute(dungeon.player.x, dungeon.player.y, function ($x, $y) {
                         count += 1;
                         // Only move once
                         if (count === 2) {
                             var _x = $x - dungeon.player.x,
                                 _y = $y - dungeon.player.y;
 
-                            Game.movePlayer(_x, _y).then(function() {
+                            Game.movePlayer(_x, _y).then(function () {
                                 // If we bumped the goal tile, stop
                                 // (e.g. bump to open a door, but don't walk into it after)
                                 // This will be very useful to avoid
@@ -246,7 +288,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * Move player one step towards the stairs (used to test pathing)
              * @function autoPilot
              */
-            autoPilot: function() {
+            autoPilot: function () {
                 // Used to avoid conflicts
                 var vm = this;
                 vm.moveTowardsTile(dungeon.stairs.x, dungeon.stairs.y);
@@ -256,18 +298,22 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * Create the dungeon and player
              * @function createWorld
              */
-            createWorld: function() {
+            createWorld: function () {
                 // Used to avoid conflicts
                 var vm = this;
                 dungeon.level = 1;
                 MUS_dungeon2.stop();
                 MUS_dungeon1.play();
+
                 if (dungeon.player !== undefined) {
                     dungeon.player.sprite.destroy();
                 }
 
                 vm.createDungeon();
                 vm.createPlayer();
+
+                // Recreate player
+                dungeon.playerStats = creatures.player();
             },
 
             /**
@@ -275,7 +321,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * i.e. place tiles, walls, doors, monsters, items, stairs
              * @function createDungeon
              */
-            createDungeon: function() {
+            createDungeon: function () {
                 // Used to avoid conflicts
                 var vm = this;
 
@@ -286,19 +332,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 dungeon._init();
 
                 // Place tiles
-                _.each(dungeon.tiles, function(tile, key) {
+                _.each(dungeon.tiles, function (tile, key) {
                     var xy = key.split(',');
                     Game.placeTile(tile, xy[0], xy[1]);
                 });
 
                 // Place walls
-                _.each(dungeon.walls, function(tile, key) {
+                _.each(dungeon.walls, function (tile, key) {
                     var xy = key.split(',');
                     Game.placeTile(tile, xy[0], xy[1]);
                 });
 
                 // Place doors
-                _.each(dungeon.doors, function(key) {
+                _.each(dungeon.doors, function (key) {
                     var xy = key.split(','),
                         door = Game.add.sprite(xy[0] *
                             TILE_SIZE, xy[1] *
@@ -306,14 +352,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                     // Door of a vertical wall?
                     if (dungeon.tiles[(+xy[0] + 1) + ',' + (+xy[1])] !== undefined &&
-                        dungeon.tiles[(+xy[0] - 1) + ',' + (+xy[1])] !== undefined) {
+                            dungeon.tiles[(+xy[0] - 1) + ',' + (+xy[1])] !== undefined) {
                         door.frame = 1;
                     }
                     doors[key] = door;
                 });
 
                 // Place monsters
-                dungeon.monsters.forEach(function(monster) {
+                dungeon.monsters.forEach(function (monster) {
                     monster.sprite = Game.add.sprite(monster.x * TILE_SIZE,
                         monster.y * TILE_SIZE,
                         monster.sprite,
@@ -321,11 +367,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 });
 
                 // Place items
-                dungeon.loot.forEach(function(item) {
-                    item.sprite = Game.add.sprite(item.x * TILE_SIZE,
-                        item.y * TILE_SIZE,
-                        item.sprite,
-                        item.frame);
+                dungeon.loot.forEach(function (item) {
+                    var key = item.x + ',' + item.y,
+                        sprite = Game.add.sprite(item.x * TILE_SIZE,
+                            item.y * TILE_SIZE,
+                            item.sprite,
+                            item.frame);
+
+                    loot[key] = sprite;
                 });
 
                 // Place stairs
@@ -336,7 +385,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * Create the player and place its sprite, and attach the camera to it
              * @function createPlayer
              */
-            createPlayer: function() {
+            createPlayer: function () {
                 // Used to avoid conflicts
                 var vm = this,
 
@@ -361,7 +410,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * @param  {[type]} x
              * @param  {[type]} y
              */
-            placeTile: function(tile, x, y) {
+            placeTile: function (tile, x, y) {
                 map.putTile(tile, x, y, layer);
             },
 
@@ -369,41 +418,88 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * Remove all tiles / sprites
              * @function removeTiles
              */
-            removeTiles: function() {
+            removeTiles: function () {
                 // Tiles
-                _.each(dungeon.tiles, function(tile, key) {
+                _.each(dungeon.tiles, function (tile, key) {
                     var xy = key.split(',');
                     map.removeTile(xy[0], xy[1], layer);
                 });
 
                 // Walls
-                _.each(dungeon.walls, function(tile, key) {
+                _.each(dungeon.walls, function (tile, key) {
                     var xy = key.split(',');
                     map.removeTile(xy[0], xy[1], layer);
                 });
 
+                // Monsters
+                _.each(dungeon.monsters, function (monster, key) {
+                    monster.sprite.destroy();
+                });
+
                 // Doors
-                _.each(doors, function(sprite, key) {
+                _.each(doors, function (sprite) {
                     sprite.destroy();
                 });
 
-                // Monsters
-                if (dungeon.monsters) {
-                    dungeon.monsters.forEach(function(monster) {
-                        monster.sprite.destroy();
-                    });
-                }
+                // Bones
+                _.each(bones, function (sprite) {
+                    sprite.destroy();
+                });
 
                 //items
-                if (dungeon.loot) {
-                    dungeon.loot.forEach(function(item) {
-                        item.sprite.destroy();
-                    });
-                }
+                _.each(loot, function (sprite) {
+                    sprite.destroy();
+                });
 
                 doors = {};
-                monsters = [];
-                loot = [];
+                bones = {};
+                loot = {};
+            },
+
+            displayText: function (value, x, y, style, fixed, speed, rise) {
+
+                if (speed === undefined) {
+                    speed = 1;
+                }
+
+                var text = Game.add.text(x, y, value, style);
+                text.stroke = "#000";
+                text.strokeThickness = 6;
+
+                if (fixed === true) {
+                    text.fixedToCamera = true;
+                }
+
+                text.anchor.setTo(0.5);
+
+                text.alpha = 0;
+
+                // Fade text in, wait, fade it out, delete it
+                Game.add.tween(text).to({
+                    alpha: 1
+                }, 750 * speed, 'Linear', true).onComplete.add(function () {
+                    setTimeout(function () {
+                        Game.add.tween(text).to({
+                            alpha: 0
+                        }, 1000 * speed, 'Linear', true).onComplete.add(function () {
+                            text.destroy();
+                        });
+                    }, 500 * speed);
+                });
+
+                if (rise === true) {
+                    if (fixed === true) {
+                        Game.add.tween(text.cameraOffset).to({
+                            y: text.cameraOffset.y - 20
+                        }, 750 * speed, 'Linear', true);
+                    } else {
+                        Game.add.tween(text).to({
+                            y: text.y - 20
+                        }, 750 * speed, 'Linear', true);
+                    }
+                }
+
+                //
             },
 
             /**
@@ -413,8 +509,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * @param  {number} y
              * @return {promise}
              */
-            movePlayer: function(x, y) {
-                return new Promise(function(resolve, reject) {
+            movePlayer: function (x, y) {
+                return new Promise(function (resolve, reject) {
                     if (dungeon.player.isMoving || (x === 0 && y === 0)) {
                         resolve();
                         return;
@@ -422,10 +518,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                     var newX = dungeon.player.x + x,
                         newY = dungeon.player.y + y,
-
                         key = newX + ',' + newY,
-                        result,
-                        door;
+                        result = dungeon._moveCreature(dungeon.player, x, y),
+                        door,
+                        remitem,
+                        turn,
+                        kill_key;
 
                     if (x === 1) {
                         dungeon.player.sprite.play('right');
@@ -438,12 +536,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         dungeon.player.sprite.play('up');
                     }
 
-                    result = dungeon._moveCreature(dungeon.player, x, y);
-
                     // The player moved
                     if (result.moved) {
                         dungeon.player.isMoving = true;
-                        dungeon.playerStats.turnTick();
+                        turn = dungeon.playerStats.turnTick();
+                        if (turn.poison) {
+                            // Display poison damage
+                            Game.displayText(turn.poison, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                                font: 'bold 18pt "Lucida Sans Typewriter"',
+                                fill: '#0f2',
+                                align: 'center'
+                            }, true, 0.5, true);
+                        }
+
                         // Entering stairs
                         if (dungeon.player.x === dungeon.stairs.x && dungeon.player.y === dungeon.stairs.y) {
                             // TODO: Swap stairs out with a portal?
@@ -451,6 +556,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             SND_teleport.play();
                             dungeon.level += 1;
                             Game.createDungeon();
+                            Game.displayText('LEVEL ' + dungeon.level, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, {
+                                font: 'bold 36pt "Lucida Sans Typewriter"',
+                                fill: 'white',
+                                align: 'center'
+                            }, true);
                             if (dungeon.level >= 1 && dungeon.level <= 5) {
                                 if (MUS_dungeon1.isPlaying === false) {
                                     MUS_dungeon2.stop();
@@ -469,7 +579,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         Game.add.tween(dungeon.player.sprite).to({
                             x: dungeon.player.x * TILE_SIZE,
                             y: dungeon.player.y * TILE_SIZE
-                        }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function() {
+                        }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true).onComplete.add(function () {
                             dungeon.player.isMoving = false;
                             resolve();
                         }, this);
@@ -482,35 +592,146 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         // Play a sound effect
                         SND_door_open.play();
                         // Add delay until the next action
-                        setTimeout(function() {
+                        setTimeout(function () {
                             dungeon.player.isMoving = false;
                             resolve();
                         }, INPUT_DELAY);
                         // Combat occurred
-                    } else if (result.combat) {
-                        SND_hit.play();
-                        is_pathing = false;
-
-                        // Add delay for next attack
-
-                        dungeon.player.isMoving = true;
-
-                        setTimeout(function() {
-                            dungeon.player.isMoving = false;
-                            resolve();
-                        }, INPUT_DELAY);
                     } else {
                         is_pathing = false;
                         resolve();
                     }
+
+                    if (result.combat) {
+                        SND_hit.play();
+                        is_pathing = false;
+
+                        if (result.monster !== undefined) {
+                            // Display damage to monster
+                            Game.displayText(result.damageToMonster, result.monster.x * TILE_SIZE + 15, result.monster.y * TILE_SIZE, {
+                                font: 'bold 18pt "Lucida Sans Typewriter"',
+                                fill: '#f20',
+                                align: 'center'
+                            }, false, 0.5, true);
+                            // Was the monster killed?
+                            if (result.kill) {
+                                // Remove its sprite - can add a special condition for skeletons
+
+                                result.monster.sprite.destroy();
+
+                                // Add bones
+                                kill_key = result.monster.x + ',' + result.monster.y;
+
+                                if (bones[kill_key] === undefined) {
+                                    bones[kill_key] = Game.add.sprite(result.monster.x *
+                                        TILE_SIZE, result.monster.y *
+                                        TILE_SIZE, 'objects', 24);
+                                    dungeon.player.sprite.bringToTop();
+                                }
+                            }
+                        }
+
+                        // Display damage to player
+                        Game.displayText(result.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                            font: 'bold 18pt "Lucida Sans Typewriter"',
+                            fill: '#ff0',
+                            align: 'center'
+                        }, true, 0.5, true);
+
+                        // Add delay for next attack - longer than movement delay to avoid accidental attacks
+                        dungeon.player.isMoving = true;
+
+                        setTimeout(function () {
+                            dungeon.player.isMoving = false;
+                            resolve();
+                        }, INPUT_DELAY * 4);
+
+                    }
+
+                    if (result.drop === true) {
+                        loot[key] = Game.add.sprite(newX * TILE_SIZE,
+                            newY * TILE_SIZE,
+                            result.droppedItem.sprite,
+                            result.droppedItem.frame);
+                    }
+
+                    if (result.item) {
+                        SND_item.play();
+                        remitem = loot[key];
+                        remitem.destroy();
+                        // Display item found
+                        Game.displayText(result.gotitem.name, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                            font: 'bold 18pt "Lucida Sans Typewriter"',
+                            fill: '#af0',
+                            align: 'center'
+                        }, true, 0.5, true);
+                    }
                 });
+            },
+
+            /**
+             * called by inventory button to use selected item if possible
+             * @function useItem
+             */
+            useItem: function () {
+
+            },
+
+            /**
+             * View inventory
+             * @function openInventory
+             */
+            openInventory: function () {
+                var i, x, y, tempItem, style;
+                // Close inventory if it is open, otherwise close it
+                if (inventory.menuIsOpen) {
+                    for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
+                        inventory.label[i].destroy();
+                        inventory.item[i].destroy();
+                        inventory.inventoryTiles[i].destroy();
+                    }
+                    // Menu is closed
+                    inventory.menuIsOpen = false;
+                } else {
+                    for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
+                        if (i < 5) {
+                            x = 200 + (i * 100);
+                            y = 400;
+                        } else {
+                            x = 200 + ((i - 5) * 100);
+                            y = 500;
+                        }
+                        // Inventory backdrop
+                        inventory.inventoryTiles[i] = this.add.sprite(x, y, 'inventoryTile');
+                        inventory.inventoryTiles[i].anchor.setTo(0.5, 0.5);
+                        inventory.inventoryTiles[i].fixedToCamera = true;
+                        // item Buttons
+                        tempItem = dungeon.playerStats.inventory[i];
+                        inventory.item[i] = this.add.button(x, y - 10, tempItem.sprite, this.useItem, this);
+                        inventory.item[i].anchor.setTo(0.5, 0.5);
+                        inventory.item[i].fixedToCamera = true;
+                        // Item Labels
+                        style = {
+                            font: 'bold 8pt "Lucida Sans Typewriter"',
+                            fill: 'white',
+                            align: 'center'
+                        };
+                        inventory.label[i] = Game.add.text(x, y + 10, tempItem.name, style);
+                        inventory.label[i].stroke = "black";
+                        inventory.label[i].strokeThickness = 2;
+                        inventory.label[i].fixedToCamera = true;
+                        inventory.label[i].anchor.setTo(0.5);
+                        // Menu is open
+                        inventory.menuIsOpen = true;
+                    }
+                }
             },
 
             /**
              * Full screen
              * @function gofull
              */
-            gofull: function() {
+            gofull: function () {
                 // Used to avoid conflicts
                 var vm = this;
                 if (vm.scale.isFullScreen) {
@@ -522,35 +743,52 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             },
 
             /**
+             * Game Over on player death
+             * @function gameOver
+             */
+            gameOver: function () {
+                if (MUS_dungeon1.isPlaying === true) {
+                    MUS_dungeon1.stop();
+                } else {
+                    MUS_dungeon2.stop();
+                }
+                dungeon.player.isMoving = false;
+
+                // Recreate player
+                dungeon.playerStats = creatures.player();
+
+                this.state.start('Game_Over');
+            },
+
+            /**
              * Handle input / animations
              * @function update
              */
-            update: function() {
+            update: function () {
                 // Used to avoid conflicts
                 var vm = this;
 
-                dungeon.monsters.forEach(function(monster) {
-                    monster.sprite.frame = monster.frame;
-                });
-                if (cursors.left.isDown) {
+                // Check keyboard input and if Inventory is open
+                if (cursors.left.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(-1, 0);
-                } else if (cursors.right.isDown) {
+                } else if (cursors.right.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(1, 0);
-                } else if (cursors.up.isDown) {
+                } else if (cursors.up.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(0, -1);
-                } else if (cursors.down.isDown) {
+                } else if (cursors.down.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.movePlayer(0, 1);
-                } else if (autopilot_key.isDown) {
+                } else if (autopilot_key.isDown && !inventory.menuIsOpen) {
                     is_pathing = false;
                     vm.autoPilot();
-                } else {
-                    if (!dungeon.player.isMoving) {
-                        dungeon.player.sprite.animations.stop();
-                    }
+                } else if (!dungeon.player.isMoving) {
+                    dungeon.player.sprite.animations.stop();
+                }
+                if (dungeon.playerStats.hp === 0) {
+                    this.gameOver();
                 }
             },
 
@@ -558,15 +796,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * Where each frame is rendered
              * @function render
              */
-            render: function() {
-                // Used to avoid conflicts
-                //var vm = this;
-                //vm.debug.text('Level ' + dungeon.level, 16, 30);
-                //this.debug.text('Use the ARROW KEYS to move', 16, this.height - 90);
-                //this.debug.text('Press R to start a new game', 16, this.height - 60);
-                //this.debug.text('Hold A for auto-pilot', 16, this.height - 30);
-                //game.debug.text('Player hp: ' + dungeon.playerStats.hp + ' player is dead? ' +
-                //dungeon.playerStats.isDead, 16, game.height - 120);
+            render: function () {
+                text_health.text = 'HP: ' + dungeon.playerStats.hp + ' / ' + dungeon.playerStats.max_hp;
+                text_health.bringToTop();
+                text_mana.text = 'MP: ' + '10' + ' / ' + '10';
+                fullscreen_button.bringToTop();
             }
         };
 

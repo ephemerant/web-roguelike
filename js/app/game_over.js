@@ -1,6 +1,6 @@
 /*globals define*/
 
-define(['Phaser'], function (Phaser) {
+define(['Phaser', 'game'], function (Phaser, Game) {
     'use strict';
 
     var width = (800) / 2 - 160,
@@ -14,10 +14,11 @@ define(['Phaser'], function (Phaser) {
 
             startGame: function () {
                 // Change the state back to Game.
-                this.state.start('Game');
+                this.state.start('Start');
 
             }
         };
+    
     return Game_Over;
 
 });
