@@ -1,7 +1,7 @@
 /*globals define, console*/
 /*jslint nomen: true */
 
-define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
+define(['ROT', 'Phaser', 'items', 'lodash'], function(ROT, Phaser, items, _) {
     'use strict';
 
     /**
@@ -102,14 +102,39 @@ define(['ROT', 'Phaser', 'items'], function(ROT, Phaser, items) {
                 /**
                  * For anything that needs to be called every turn
                  */
-                turnTick: function() {
-                    if (this.name === 'Skeleton' && this.isDead === 1) {
-                        //Skeletons may revive each turn
-                        var revive = Math.floor(Math.random() * 10);
-                        if (revive === 1) {
-                            this.isDead = 0;
+                turnTick: function(dungeon) {
+                    // if (this.name === 'Skeleton' && this.isDead === 1) {
+                    //     //Skeletons may revive each turn
+                    //     var revive = Math.floor(Math.random() * 10);
+                    //     if (revive === 1) {
+                    //         this.isDead = 0;
+                    //     }
+                    // }
+                    var result = {
+                        moved: false,
+                        damage: 0
+                    };
+
+                    var _x = _.random(-1, 1);
+                    var _y = _.random(-1, 1);
+
+                    // Choose to keep either _x or _y
+                    if (_.random(0, 1)) {
+                        _y = 0;
+                    } else {
+                        _x = 0;
+                    }
+
+                    if (_.random(0, 1)) {
+                        if (dungeon._isAvailable(this.x + _x, this.y + _y)) {
+                            result.moved = true;
+                            this.x += _x;
+                            this.y += _y;
                         }
                     }
+
+                    return result;
+
                 },
 
                 /**
