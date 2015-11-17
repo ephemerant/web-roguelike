@@ -150,7 +150,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
                 // Text
                 style = {
-                    font: 'bold 16pt Monospace',
+                    font: 'bold 16pt "Lucida Sans Typewriter"',
                     fill: 'white',
                     align: 'left'
                 };
@@ -543,7 +543,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                         if (turn.poison) {
                             // Display poison damage
                             Game.displayText(turn.poison, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
-                                font: 'bold 18pt Monospace',
+                                font: 'bold 18pt "Lucida Sans Typewriter"',
                                 fill: '#0f2',
                                 align: 'center'
                             }, true, 0.5, true);
@@ -557,7 +557,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                             dungeon.level += 1;
                             Game.createDungeon();
                             Game.displayText('LEVEL ' + dungeon.level, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, {
-                                font: 'bold 36pt Monospace',
+                                font: 'bold 36pt "Lucida Sans Typewriter"',
                                 fill: 'white',
                                 align: 'center'
                             }, true);
@@ -609,7 +609,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                         if (result.monster !== undefined) {
                             // Display damage to monster
                             Game.displayText(result.damageToMonster, result.monster.x * TILE_SIZE + 15, result.monster.y * TILE_SIZE, {
-                                font: 'bold 18pt Monospace',
+                                font: 'bold 18pt "Lucida Sans Typewriter"',
                                 fill: '#f20',
                                 align: 'center'
                             }, false, 0.5, true);
@@ -633,7 +633,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
 
                         // Display damage to player
                         Game.displayText(result.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
-                            font: 'bold 18pt Monospace',
+                            font: 'bold 18pt "Lucida Sans Typewriter"',
                             fill: '#ff0',
                             align: 'center'
                         }, true, 0.5, true);
@@ -661,8 +661,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                         remitem.destroy();
                         // Display item found
                         Game.displayText(result.gotitem.name, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
-                            font: 'bold 18pt Monospace',
-                            fill: 'green',
+                            font: 'bold 18pt "Lucida Sans Typewriter"',
+                            fill: '#af0',
                             align: 'center'
                         }, true, 0.5, true);
                     }
@@ -712,7 +712,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                         inventory.item[i].fixedToCamera = true;
                         // Item Labels
                         style = {
-                            font: 'bold 8pt Monospace',
+                            font: 'bold 8pt "Lucida Sans Typewriter"',
                             fill: 'white',
                             align: 'center'
                         };
