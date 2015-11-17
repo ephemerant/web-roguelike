@@ -666,6 +666,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function (Phaser, _, Dungeon, ROT
                             align: 'center'
                         }, true, 0.5, true);
                     }
+
+                    if (result.action) {
+                        // TODO: World tick
+                    }
+
                 });
             },
 

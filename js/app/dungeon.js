@@ -273,6 +273,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                         combat: false,
                         kill: false,
                         drop: false,
+                        action: false,
                         droppedItem: ''
                     },
 
@@ -289,12 +290,15 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                     creature.x = newX;
                     creature.y = newY;
                     outcome.moved = true;
+                    outcome.action = true;
                 // "Open" a door, i.e. remove it
                 } else if (this._hasDoor(newX, newY)) {
                     this.doors.splice(this.doors.indexOf(key), 1);
                     // Let phaser know we opened the door
                     outcome.door = true;
+                    outcome.action = true;
                 // Combat
+                // TODO: Place into monster AI
                 } else if (this._hasMonster(newX, newY)) {
                     monster = this._getMonster(newX, newY);
                     outcome.monster = monster;
@@ -318,10 +322,12 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                             }
                         }
                         outcome.combat = true;
+                        outcome.action = true;
                     } else {
                         creature.x = newX;
                         creature.y = newY;
                         outcome.moved = true;
+                        outcome.action = true;
                     }
                 // Pick up item
                 } else if (this._hasItem(newX, newY)) {
@@ -334,11 +340,13 @@ define(['ROT', 'lodash', 'creatures', 'items'], function (ROT, _, creatures, ite
                         this.loot.splice(this.loot.indexOf(gotitem), 1);
                         outcome.moved = true;
                         outcome.item = true;
+                        outcome.action = true;
                     } else {
                         creature.x = newX;
                         creature.y = newY;
                         console.log('No room for item');
                         outcome.moved = true;
+                        outcome.action = true;
                     }
                 }
                 return outcome;
