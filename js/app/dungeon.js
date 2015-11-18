@@ -404,14 +404,64 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
       },
 
       /**
+       * Return (x, y) as a stringified key
+       * @param  {number} x
+       * @param  {number} y
+       * @return {string}
+       */
+      _keyFrom: function(x, y) {
+        return x + ',' + y;
+      },
+
+      /**
+       * Returns all (x, y) keys in a block radius
+       * @param  {number} x The center's x coordinate
+       * @param  {number} y The center's y coordinate
+       * @param  {number} r The amount ("radius") to branch out by
+       * @return {array}    List of keys
+       */
+      _keysInRadius: function(x, y, r) {
+        var keys = [];
+        for (var i = -r; i <= r; i++) {
+          for (var j = -r; j <= r; j++) {
+            keys.push(this._keyFrom(x + i, y + j));
+          }
+        }
+        return keys;
+      },
+
+      /**
        * Spawn the stairs in the room that was sorted to be furthest from the playher
        */
       _spawnStairs: function() {
+
+        var vm = this;
+
         // Put stairs in the farthest room away
-        var room = this.rooms[this.rooms.length - 1];
-        this.stairs = {
-          x: _.random(room._x1, room._x2),
-          y: _.random(room._y1, room._y2)
+        var room = vm.rooms[vm.rooms.length - 1],
+          loop = true,
+          x,
+          y;
+
+        // Avoid spawning next to doors
+        while (loop) {
+          x = _.random(room._x1, room._x2);
+          y = _.random(room._y1, room._y2);
+
+          console.log(room);
+
+          loop = false;
+
+          vm._keysInRadius(x, y, 1).forEach(function(key) {
+            if (room._doors[key]) {
+              loop = true;
+            }
+          });
+        }
+
+        vm.stairs = {
+          x: x,
+          y: y
         };
       },
 
