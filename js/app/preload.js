@@ -15,7 +15,7 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
             preload: function () {
                 // Used to avoid conflicts
                 var vm = this;
-                //vm.load.image('load', 'assets/loading.png');
+                
                 vm.add.sprite(0, 0, 'load');
                 vm.load.image('splash', 'assets/splash.png');
                 vm.load.image('play', 'assets/play.png');
@@ -23,6 +23,7 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
                 vm.load.image('fullscreen', 'assets/fs.png');
                 vm.load.image('dungeon', 'assets/Wall.png');
                 vm.load.image('inventoryTile', 'assets/inventoryTile.png');
+                vm.load.image('shadow', 'assets/shadow.png');
 
                 vm.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
                 vm.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);

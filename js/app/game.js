@@ -78,6 +78,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             menuIsOpen: false
         },
 
+        shadows = [],
+
         Game = {
 
             /**
@@ -379,6 +381,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 // Place stairs
                 vm.placeTile(tiles.stairs, dungeon.stairs.x, dungeon.stairs.y);
+
+                // Place shadows
+                vm.renderShadow();
             },
 
             /**
@@ -608,7 +613,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                         if (result.monster !== undefined) {
                             // Display damage to monster
-                            Game.displayText(result.damageToMonster, result.monster.x * TILE_SIZE + 15, result.monster.y * TILE_SIZE, {
+                            Game.displayText(result.damageToMonster,
+                                             result.monster.x * TILE_SIZE + 15,
+                                             result.monster.y * TILE_SIZE, {
                                 font: 'bold 18pt "Lucida Sans Typewriter"',
                                 fill: '#f20',
                                 align: 'center'
@@ -677,8 +684,34 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
                         });
                     }
+                    
+                    Game.lightPath();
 
                 });
+            },
+
+            renderShadow: function() {
+                var x, y;
+
+                for (x = 0; x < DUNGEON_WIDTH; x += TILE_SIZE) {
+                    for (y = 0; y < DUNGEON_HEIGHT; y += TILE_SIZE) {
+                        shadows[dungeon._keyFrom(x, y)] = this.add.sprite(x, y, 'shadow');
+                    }
+                }
+            },
+
+            lightPath: function() {
+                var x, y, alpha,
+                    vision = 5 * TILE_SIZE;
+                
+                for (x = 0; x < DUNGEON_WIDTH; x += TILE_SIZE) {
+                    for (y = 0; y < DUNGEON_HEIGHT; y += TILE_SIZE) {
+                        alpha = Math.sqrt(Math.pow(x - dungeon.player.x * TILE_SIZE, 2) +
+                                          Math.pow(y - dungeon.player.y * TILE_SIZE, 2))/300;
+                        shadows[dungeon._keyFrom(x, y)].alpha = alpha;
+                    }
+                }
+                
             },
 
             /**
