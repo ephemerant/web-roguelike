@@ -746,22 +746,24 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             x = 200 + ((i - 5) * 100);
                             y = 500;
                         }
-                        // Inventory backdrop
-                        inventory.inventoryTiles[i] = this.add.sprite(x, y, 'inventoryTile');
+                        // Inventory buttons
+                        inventory.inventoryTiles[i] = this.add.button(x, y, 'inventoryTile', this.useItem, this);
                         inventory.inventoryTiles[i].anchor.setTo(0.5, 0.5);
                         inventory.inventoryTiles[i].fixedToCamera = true;
-                        // item Buttons
+                        // item sprites
                         tempItem = dungeon.playerStats.inventory[i];
-                        inventory.item[i] = this.add.button(x, y - 10, tempItem.sprite, this.useItem, this);
+                        inventory.item[i] = this.add.sprite(x, y - 15, tempItem.sprite, tempItem.frame);
                         inventory.item[i].anchor.setTo(0.5, 0.5);
                         inventory.item[i].fixedToCamera = true;
                         // Item Labels
                         style = {
-                            font: 'bold 8pt "Lucida Sans Typewriter"',
+                            font: 'bold 12pt "Lucida Sans Typewriter"',
                             fill: 'white',
-                            align: 'center'
+                            align: 'center',
+                            wordWrap: true
                         };
-                        inventory.label[i] = Game.add.text(x, y + 10, tempItem.name, style);
+                        inventory.label[i] = Game.add.text(x, y + 15, tempItem.name, style);
+                        inventory.label[i] .lineSpacing = -10;
                         inventory.label[i].stroke = "black";
                         inventory.label[i].strokeThickness = 2;
                         inventory.label[i].fixedToCamera = true;
