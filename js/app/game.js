@@ -689,7 +689,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 });
             },
-
+            
+            /**
+             * adds black tiles over entire dungeon 
+             * @function renderShadow
+             */
             renderShadow: function() {
                 var x, y;
 
@@ -699,19 +703,23 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                     }
                 }
             },
-
+            
+            /**
+             * lights dungeon around player
+             * @function lightPath
+             */
             lightPath: function() {
                 var x, y, alpha,
-                    vision = 5 * TILE_SIZE;
-                
-                for (x = 0; x < DUNGEON_WIDTH; x += TILE_SIZE) {
-                    for (y = 0; y < DUNGEON_HEIGHT; y += TILE_SIZE) {
+                    vision = 10 * TILE_SIZE;
+                // calculate tiles within players visible range    
+                for (x = dungeon.player.x * TILE_SIZE - vision; x < dungeon.player.x * TILE_SIZE + vision; x += TILE_SIZE) {
+                    for (y = dungeon.player.y * TILE_SIZE - vision; y < dungeon.player.y * TILE_SIZE + vision; y += TILE_SIZE) {
+                        // alpha equals the distance of tile from player, divided by their vision
                         alpha = Math.sqrt(Math.pow(x - dungeon.player.x * TILE_SIZE, 2) +
-                                          Math.pow(y - dungeon.player.y * TILE_SIZE, 2))/300;
+                                          Math.pow(y - dungeon.player.y * TILE_SIZE, 2))/vision;
                         shadows[dungeon._keyFrom(x, y)].alpha = alpha;
                     }
                 }
-                
             },
 
             /**
