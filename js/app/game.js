@@ -313,7 +313,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 vm.createDungeon();
                 vm.createPlayer();
-
+                vm.lightPath();
                 // Recreate player
                 dungeon.playerStats = creatures.player();
             },
