@@ -392,14 +392,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              */
             createPlayer: function() {
                 // Used to avoid conflicts
-                var vm = this,
-
-                    // TODO: Fully implement class system
-                    playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
+                var vm = this;
 
                 dungeon.player.sprite = vm.add.sprite(dungeon.player.x * TILE_SIZE,
                     dungeon.player.y * TILE_SIZE,
-                    playerClass, 0);
+                    dungeon.playerStats.charClass, 0);
+
                 dungeon.player.sprite.animations.add('left', [4, 5, 6, 7], 10, true);
                 dungeon.player.sprite.animations.add('right', [8, 9, 10, 11], 10, true);
                 dungeon.player.sprite.animations.add('up', [12, 13, 14, 15], 10, true);
@@ -710,7 +708,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              */
             lightPath: function() {
                 var x, y, alpha,
-                    vision = 10 * TILE_SIZE;
+                    vision = 8 * TILE_SIZE;
                 // calculate tiles within players visible range    
                 for (x = dungeon.player.x * TILE_SIZE - vision; x < dungeon.player.x * TILE_SIZE + vision; x += TILE_SIZE) {
                     for (y = dungeon.player.y * TILE_SIZE - vision; y < dungeon.player.y * TILE_SIZE + vision; y += TILE_SIZE) {

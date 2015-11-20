@@ -448,8 +448,6 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
           x = _.random(room._x1, room._x2);
           y = _.random(room._y1, room._y2);
 
-          console.log(room);
-
           loop = false;
 
           vm._keysInRadius(x, y, 1).forEach(function(key) {
