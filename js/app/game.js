@@ -78,6 +78,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             menuIsOpen: false
         },
 
+        shadows = [],
+
         Game = {
 
             /**
@@ -311,7 +313,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 vm.createDungeon();
                 vm.createPlayer();
-
+                vm.lightPath();
                 // Recreate player
                 dungeon.playerStats = creatures.player();
             },
@@ -379,6 +381,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 // Place stairs
                 vm.placeTile(tiles.stairs, dungeon.stairs.x, dungeon.stairs.y);
+
+                // Place shadows
+                vm.renderShadow();
             },
 
             /**
@@ -387,14 +392,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              */
             createPlayer: function() {
                 // Used to avoid conflicts
-                var vm = this,
-
-                    // TODO: Fully implement class system
-                    playerClass = ['warrior', 'engineer', 'mage', 'paladin', 'rogue'][_.random(4)];
+                var vm = this;
 
                 dungeon.player.sprite = vm.add.sprite(dungeon.player.x * TILE_SIZE,
                     dungeon.player.y * TILE_SIZE,
-                    playerClass, 0);
+                    dungeon.playerStats.charClass, 0);
+
                 dungeon.player.sprite.animations.add('left', [4, 5, 6, 7], 10, true);
                 dungeon.player.sprite.animations.add('right', [8, 9, 10, 11], 10, true);
                 dungeon.player.sprite.animations.add('up', [12, 13, 14, 15], 10, true);
@@ -608,7 +611,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                         if (result.monster !== undefined) {
                             // Display damage to monster
-                            Game.displayText(result.damageToMonster, result.monster.x * TILE_SIZE + 15, result.monster.y * TILE_SIZE, {
+                            Game.displayText(result.damageToMonster,
+                                             result.monster.x * TILE_SIZE + 15,
+                                             result.monster.y * TILE_SIZE, {
                                 font: 'bold 18pt "Lucida Sans Typewriter"',
                                 fill: '#f20',
                                 align: 'center'
@@ -677,8 +682,42 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
                         });
                     }
+                    
+                    Game.lightPath();
 
                 });
+            },
+            
+            /**
+             * adds black tiles over entire dungeon 
+             * @function renderShadow
+             */
+            renderShadow: function() {
+                var x, y;
+
+                for (x = 0; x < DUNGEON_WIDTH; x += TILE_SIZE) {
+                    for (y = 0; y < DUNGEON_HEIGHT; y += TILE_SIZE) {
+                        shadows[dungeon._keyFrom(x, y)] = this.add.sprite(x, y, 'shadow');
+                    }
+                }
+            },
+            
+            /**
+             * lights dungeon around player
+             * @function lightPath
+             */
+            lightPath: function() {
+                var x, y, alpha,
+                    vision = 8 * TILE_SIZE;
+                // calculate tiles within players visible range    
+                for (x = dungeon.player.x * TILE_SIZE - vision; x < dungeon.player.x * TILE_SIZE + vision; x += TILE_SIZE) {
+                    for (y = dungeon.player.y * TILE_SIZE - vision; y < dungeon.player.y * TILE_SIZE + vision; y += TILE_SIZE) {
+                        // alpha equals the distance of tile from player, divided by their vision
+                        alpha = Math.sqrt(Math.pow(x - dungeon.player.x * TILE_SIZE, 2) +
+                                          Math.pow(y - dungeon.player.y * TILE_SIZE, 2))/vision;
+                        shadows[dungeon._keyFrom(x, y)].alpha = alpha;
+                    }
+                }
             },
 
             /**
@@ -713,22 +752,24 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             x = 200 + ((i - 5) * 100);
                             y = 500;
                         }
-                        // Inventory backdrop
-                        inventory.inventoryTiles[i] = this.add.sprite(x, y, 'inventoryTile');
+                        // Inventory buttons
+                        inventory.inventoryTiles[i] = this.add.button(x, y, 'inventoryTile', this.useItem, this);
                         inventory.inventoryTiles[i].anchor.setTo(0.5, 0.5);
                         inventory.inventoryTiles[i].fixedToCamera = true;
-                        // item Buttons
+                        // item sprites
                         tempItem = dungeon.playerStats.inventory[i];
-                        inventory.item[i] = this.add.button(x, y - 10, tempItem.sprite, this.useItem, this);
+                        inventory.item[i] = this.add.sprite(x, y - 15, tempItem.sprite, tempItem.frame);
                         inventory.item[i].anchor.setTo(0.5, 0.5);
                         inventory.item[i].fixedToCamera = true;
                         // Item Labels
                         style = {
-                            font: 'bold 8pt "Lucida Sans Typewriter"',
+                            font: 'bold 12pt "Lucida Sans Typewriter"',
                             fill: 'white',
-                            align: 'center'
+                            align: 'center',
+                            wordWrap: true
                         };
-                        inventory.label[i] = Game.add.text(x, y + 10, tempItem.name, style);
+                        inventory.label[i] = Game.add.text(x, y + 15, tempItem.name, style);
+                        inventory.label[i] .lineSpacing = -10;
                         inventory.label[i].stroke = "black";
                         inventory.label[i].strokeThickness = 2;
                         inventory.label[i].fixedToCamera = true;

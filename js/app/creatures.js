@@ -331,7 +331,7 @@ define(['ROT', 'Phaser', 'items', 'lodash'], function(ROT, Phaser, items, _) {
          * @return {player}
          */
         player: function() {
-            return this._makePlayer('Player', 30, 5, 1, 20, 'Warrior');
+            return this._makePlayer('Player', 30, 5, 1, 20, 'warrior');
         }
     };
 });
