@@ -704,11 +704,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             
             /**
              * lights dungeon around player
+             * @param  {number} emiterX           The x location of the emiter
+             * @param  {number} emiterY           The y location of the emiter
+             * @param  {number} range             The radius of the light emited
              * @function lightPath
              */
             lightPath: function(emiterX, emiterY, range) {
                 var x, y, alpha;
-                    //vision = 8 * TILE_SIZE;
+                
                 // calculate tiles within players visible range    
                 for (x = emiterX * TILE_SIZE - range; x < emiterX * TILE_SIZE + range; x += TILE_SIZE) {
                     for (y = emiterY * TILE_SIZE - range; y < emiterY * TILE_SIZE + range; y += TILE_SIZE) {
