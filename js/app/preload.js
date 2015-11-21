@@ -9,17 +9,20 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
         //loadingscreen = this.load.image('load', 'assets/loading.png'),
         // TODO: Move this list to a player.js file or something of the sort
         classes = ['Warrior', 'Engineer', 'Mage', 'Paladin', 'Rogue'],
-        
+
         Preload = {
             // Import assets
             preload: function () {
                 // Used to avoid conflicts
                 var vm = this;
+                // Add loading text for player to wait
+                vm.add.text(800 / 2, 600 / 2, 'Loading . . .', {
+                    font: 'bold 20pt "Lucida Sans Typewriter"',
+                    fill: 'white',
+                    align: 'center'
+                }).anchor.setTo(0.5);
                 
-                vm.add.sprite(0, 0, 'load');
                 vm.load.image('splash', 'assets/splash.png');
-                vm.load.image('play', 'assets/play.png');
-                vm.load.image('gameover', 'assets/gameover.png');
                 vm.load.image('fullscreen', 'assets/fs.png');
                 vm.load.image('dungeon', 'assets/Wall.png');
                 vm.load.image('inventoryTile', 'assets/inventoryTile.png');
@@ -55,10 +58,9 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
             },
 
             create: function () {
-                this.add.sprite(0, 0, 'load');
                 this.state.start('Start');
             }
         };
     return Preload;
-        
+
 });

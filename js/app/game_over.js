@@ -3,22 +3,40 @@
 define(['Phaser', 'game'], function (Phaser, Game) {
     'use strict';
 
-    var width = (800) / 2 - 160,
-        height = (600) / 2 - 50,
+    var Game_Over = {
         
-        Game_Over = {
-            create: function () {
-                // Create button to start game like in Menu.
-                this.add.button(width, height, 'gameover', this.startGame, this);
-            },
+        create: function () {
+            var width = (800) / 2,
+                height = (600) / 2,
 
-            startGame: function () {
-                // Change the state back to Game.
-                this.state.start('Start');
+                retry_button = this.add.text(width, height, 'Retry', {
+                    font: 'bold 30pt "Lucida Sans Typewriter"',
+                    fill: 'white',
+                    align: 'center'
+                });
 
-            }
-        };
-    
+            retry_button.inputEnabled = true;
+            retry_button.events.onInputUp.add(this.startGame, this);
+            retry_button.anchor.setTo(0.5);
+
+            this.add.text(width, height - 100, 'GAME OVER', {
+                font: 'bold 50pt "Lucida Sans Typewriter"',
+                fill: 'red',
+                align: 'center'
+            }).anchor.setTo(0.5);
+        },
+
+        /**
+         * changes the game to the Start state
+         * @function startGame
+         */
+        startGame: function () {
+            // Change the state back to Start.
+            this.state.start('Start');
+
+        }
+    };
+
     return Game_Over;
 
 });
