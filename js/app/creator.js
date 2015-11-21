@@ -51,6 +51,7 @@ define(['Phaser'], function (Phaser) {
             str: '',
             def: '',
             crit: '',
+            vision: '',
             class: ''
         },
 
@@ -64,6 +65,7 @@ define(['Phaser'], function (Phaser) {
             this.player.str = 3;
             this.player.def = 1;
             this.player.crit = 50;
+            this.player.vision = 10;
             this.player.class = 'rogue';
 
             this.startGame();
@@ -79,6 +81,7 @@ define(['Phaser'], function (Phaser) {
             this.player.str = 4;
             this.player.def = 3;
             this.player.crit = 20;
+            this.player.vision = 6;
             this.player.class = 'paladin';
 
             this.startGame();
@@ -94,6 +97,7 @@ define(['Phaser'], function (Phaser) {
             this.player.str = 6;
             this.player.def = 2;
             this.player.crit = 20;
+            this.player.vision = 5;
             this.player.class = 'warrior';
 
             this.startGame();
@@ -109,6 +113,7 @@ define(['Phaser'], function (Phaser) {
             this.player.str = 4;
             this.player.def = 2;
             this.player.crit = 30;
+            this.player.vision = 7;
             this.player.class = 'engineer';
 
             this.startGame();
@@ -124,6 +129,7 @@ define(['Phaser'], function (Phaser) {
             this.player.str = 2;
             this.player.def = 1;
             this.player.crit = 40;
+            this.player.vision = 8;
             this.player.class = 'mage';
 
             this.startGame();
