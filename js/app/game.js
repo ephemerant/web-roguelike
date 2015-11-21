@@ -310,12 +310,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 if (dungeon.player !== undefined) {
                     dungeon.player.sprite.destroy();
                 }
-
-                vm.createDungeon();
-                vm.createPlayer();
-                vm.lightPath();
                 // Recreate player
                 dungeon.playerStats = creatures.player();
+                
+                vm.createDungeon();
+                vm.createPlayer();
+                
+                vm.lightPath();
             },
 
             /**
@@ -396,7 +397,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 dungeon.player.sprite = vm.add.sprite(dungeon.player.x * TILE_SIZE,
                     dungeon.player.y * TILE_SIZE,
-                    'warrior', 0);
+                    dungeon.playerStats.class, 0);
 
                 dungeon.player.sprite.animations.add('left', [4, 5, 6, 7], 10, true);
                 dungeon.player.sprite.animations.add('right', [8, 9, 10, 11], 10, true);
