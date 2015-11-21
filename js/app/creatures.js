@@ -113,22 +113,32 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function(ROT, Phaser, it
                         moved: false,
                         damage: 0
                     };
-
-                    var _x = _.random(-1, 1);
-                    var _y = _.random(-1, 1);
-
-                    // Choose to keep either _x or _y
-                    if (_.random(0, 1)) {
-                        _y = 0;
-                    } else {
-                        _x = 0;
+                    if(Math.sqrt(((dungeon.player.x - this.x)*(dungeon.player.x - this.x)) + ((dungeon.player.y - this.y)*(dungeon.player.y - this.y))) <= 5) { //Replace 5 with view distance of monster
+                        result.moved = true;
+                        if(dungeon._isAvailable(this.x - 1, this.y) && Math.sqrt(((dungeon.player.x - (this.x-1))*(dungeon.player.x - (this.x-1))) + ((dungeon.player.y - this.y)*(dungeon.player.y - this.y))) <= Math.sqrt(((dungeon.player.x - this.x)*(dungeon.player.x - this.x)) + ((dungeon.player.y - this.y)*(dungeon.player.y - this.y))))
+                            this.x -= 1;
+                        else if(dungeon._isAvailable(this.x + 1, this.y) && Math.sqrt(((dungeon.player.x - (this.x+1))*(dungeon.player.x - (this.x+1))) + ((dungeon.player.y - this.y)*(dungeon.player.y - this.y))) <= Math.sqrt(((dungeon.player.x - this.x)*(dungeon.player.x - this.x)) + ((dungeon.player.y - this.y)*(dungeon.player.y - this.y))))
+                            this.x += 1;
+                        else if(dungeon._isAvailable(this.x, this.y - 1) && Math.sqrt(((dungeon.player.x - this.x)*(dungeon.player.x - this.x)) + ((dungeon.player.y - (this.y-1))*(dungeon.player.y - (this.y-1)))) <= Math.sqrt(((dungeon.player.x - this.x)*(dungeon.player.x - this.x)) + ((dungeon.player.y - this.y)*(dungeon.player.y - this.y))))
+                            this.y -= 1;
+                        else if(dungeon._isAvailable(this.x, this.y + 1) && Math.sqrt(((dungeon.player.x - this.x)*(dungeon.player.x - this.x)) + ((dungeon.player.y - (this.y+1))*(dungeon.player.y - (this.y+1)))) <= Math.sqrt(((dungeon.player.x - this.x)*(dungeon.player.x - this.x)) + ((dungeon.player.y - this.y)*(dungeon.player.y - this.y))))
+                            this.y += 1;
                     }
-
-                    if (_.random(0, 1)) {
-                        if (dungeon._isAvailable(this.x + _x, this.y + _y)) {
-                            result.moved = true;
-                            this.x += _x;
-                            this.y += _y;
+                    else{ //wander around
+                        var _x = _.random(-1, 1);
+                        var _y = _.random(-1, 1);
+                        // Choose to keep either _x or _y
+                        if (_.random(0, 1)) {
+                            _y = 0;
+                        } else {
+                            _x = 0;
+                        }
+                        if (_.random(0, 1)) {
+                            if (dungeon._isAvailable(this.x + _x, this.y + _y)) {
+                                result.moved = true;
+                                this.x += _x;
+                                this.y += _y;
+                            }
                         }
                     }
 
