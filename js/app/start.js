@@ -13,7 +13,7 @@ define(['Phaser'], function (Phaser) {
             },
 
             startGame: function () {
-                this.state.start('Game');
+                this.state.start('Creator');
             }
         };
     return Start;

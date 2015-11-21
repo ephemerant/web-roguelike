@@ -18,7 +18,7 @@ requirejs.config({
         loading: '../app/loading',
         preload: '../app/preload',
         game_over: '../app/game_over',
-        player: '../app/player'
+        creator: '../app/creator'
 	}
 });
 

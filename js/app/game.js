@@ -396,7 +396,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 dungeon.player.sprite = vm.add.sprite(dungeon.player.x * TILE_SIZE,
                     dungeon.player.y * TILE_SIZE,
-                    dungeon.playerStats.charClass, 0);
+                    'warrior', 0);
 
                 dungeon.player.sprite.animations.add('left', [4, 5, 6, 7], 10, true);
                 dungeon.player.sprite.animations.add('right', [8, 9, 10, 11], 10, true);
@@ -474,7 +474,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 }
 
                 text.anchor.setTo(0.5);
-
                 text.alpha = 0;
 
                 // Fade text in, wait, fade it out, delete it
@@ -852,7 +851,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             render: function() {
                 text_health.text = 'HP: ' + dungeon.playerStats.hp + ' / ' + dungeon.playerStats.max_hp;
                 text_health.bringToTop();
-                text_mana.text = 'MP: ' + '10' + ' / ' + '10';
+                text_mana.text = 'MP: ' + dungeon.playerStats.mp + ' / ' + dungeon.playerStats.max_mp;
                 fullscreen_button.bringToTop();
             }
         };
