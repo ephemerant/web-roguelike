@@ -42,8 +42,7 @@ define(['Phaser'], function (Phaser) {
         },
 
         /**
-         * Get ROT's current seed
-         * @return {boolean}
+         * the player object with paramaters needed to call _makePlayer in creatures.js
          */
         player: {
             name: 'Player',
@@ -55,6 +54,10 @@ define(['Phaser'], function (Phaser) {
             class: ''
         },
 
+        /**
+         * the Rouge Class
+         * features lower health and defense, average health, magic, and strength, and high critical chance
+         */
         createRogue: function () {
             this.player.hp = 20;
             this.player.mp = 20;
@@ -65,29 +68,41 @@ define(['Phaser'], function (Phaser) {
 
             this.startGame();
         },
-
+        
+        /**
+         * the Paladin Class
+         * features lower critical chance, average magic and strength, and high health and defense
+         */
         createPaladin: function () {
             this.player.hp = 30;
             this.player.mp = 15;
-            this.player.str = 5;
+            this.player.str = 4;
             this.player.def = 3;
             this.player.crit = 20;
             this.player.class = 'paladin';
 
             this.startGame();
         },
-
+        
+        /**
+         * the Warrior Class
+         * features lower magic and critical chance, average defense, and high health and strength. 
+         */
         createWarrior: function () {
             this.player.hp = 28;
             this.player.mp = 10;
             this.player.str = 6;
-            this.player.def = 3;
+            this.player.def = 2;
             this.player.crit = 20;
             this.player.class = 'warrior';
 
             this.startGame();
         },
-
+        
+        /**
+         * the Engineer Class
+         * features average health, magic, strength, defense, and critical chance
+         */
         createEngineer: function () {
             this.player.hp = 25;
             this.player.mp = 20;
@@ -98,7 +113,11 @@ define(['Phaser'], function (Phaser) {
 
             this.startGame();
         },
-
+        
+        /**
+         * the Mage Class
+         * features lower health, strength, and defense, high magic and critical chance
+         */
         createMage: function () {
             this.player.hp = 20;
             this.player.mp = 30;
@@ -109,7 +128,11 @@ define(['Phaser'], function (Phaser) {
 
             this.startGame();
         },
-
+        
+        /**
+         * changes the game to the Game state
+         * @function startGame
+         */
         startGame: function () {
             this.state.start('Game');
         }

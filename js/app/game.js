@@ -99,7 +99,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                     DUNGEON_WIDTH * 3,
                     DUNGEON_HEIGHT * 3);
 
-                vm.stage.backgroundColor = '#050505';
+                vm.stage.backgroundColor = 'black';
 
                 // Creates a blank tilemap
                 map = vm.add.tilemap(null, TILE_SIZE, TILE_SIZE);
@@ -137,7 +137,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 // Our painting marker
                 marker = vm.add.graphics();
-                marker.lineStyle(2, '#050505', 1);
+                marker.lineStyle(2, 'black', 1);
                 marker.drawRect(0, 0, 32, 32);
 
                 vm.input.addMoveCallback(vm.updateMarker, this);
@@ -159,19 +159,19 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 // Health
                 text_health = Game.add.text(5, 5, '', style);
-                text_health.stroke = "#000";
+                text_health.stroke = "black";
                 text_health.strokeThickness = 6;
                 // Make text starting at index 3 red
-                text_health.addColor('#f20', 3);
+                text_health.addColor('red', 3);
                 // Move text with camera
                 text_health.fixedToCamera = true;
 
                 // Mana
                 text_mana = Game.add.text(5, 25, '', style);
-                text_mana.stroke = "#000";
+                text_mana.stroke = "black";
                 text_mana.strokeThickness = 6;
                 // Make text starting at index 3 blue
-                text_mana.addColor('#08f', 3);
+                text_mana.addColor('blue', 3);
                 // Move text with camera
                 text_mana.fixedToCamera = true;
 
@@ -467,7 +467,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 }
 
                 var text = Game.add.text(x, y, value, style);
-                text.stroke = "#000";
+                text.stroke = "black";
                 text.strokeThickness = 6;
 
                 if (fixed === true) {
@@ -547,7 +547,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             // Display poison damage
                             Game.displayText(turn.poison, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
                                 font: 'bold 18pt "Lucida Sans Typewriter"',
-                                fill: '#0f2',
+                                fill: 'green',
                                 align: 'center'
                             }, true, 0.5, true);
                         }
@@ -615,7 +615,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                                              result.monster.x * TILE_SIZE + 15,
                                              result.monster.y * TILE_SIZE, {
                                 font: 'bold 18pt "Lucida Sans Typewriter"',
-                                fill: '#f20',
+                                fill: 'red',
                                 align: 'center'
                             }, false, 0.5, true);
                             // Was the monster killed?
@@ -639,7 +639,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         // Display damage to player
                         Game.displayText(result.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
                             font: 'bold 18pt "Lucida Sans Typewriter"',
-                            fill: '#ff0',
+                            fill: 'yellow',
                             align: 'center'
                         }, true, 0.5, true);
 
@@ -667,7 +667,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         // Display item found
                         Game.displayText(result.gotitem.name, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
                             font: 'bold 18pt "Lucida Sans Typewriter"',
-                            fill: '#af0',
+                            fill: 'yellowgreen',
                             align: 'center'
                         }, true, 0.5, true);
                     }
