@@ -1,13 +1,12 @@
 /*globals define, console*/
 /*jslint nomen: true */
 
-define(['ROT', 'Phaser', 'items', 'lodash'], function(ROT, Phaser, items, _) {
+define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function(ROT, Phaser, items, _, creator) {
     'use strict';
 
     /**
      * @module creatures
      */
-
     return {
         _sprites: ['Reptile0.png', 'Reptile1.png', 'Undead0.png', 'Undead1.png', 'Humanoid0.png', 'Humanoid1.png'],
         _creatures_area1: ['skeleton', 'snake', 'fairy'], //Creature pool for area 1
@@ -189,19 +188,21 @@ define(['ROT', 'Phaser', 'items', 'lodash'], function(ROT, Phaser, items, _) {
          * @param  {string} Class       Name of the class the player is
          * @return {creature}           Returns the created player to the caller
          */
-        _makePlayer: function(name, hp, str, def, crit, Class) {
+        _makePlayer: function(name, hp, mp, str, def, crit, charClass) {
             return {
                 name: name,
                 level: 1,
                 exp: 0,
                 hp: hp,
                 max_hp: hp,
+                mp: mp,
+                max_mp: mp,
                 str: str,
                 def: def,
                 crit: crit, //The lower this value is the higher the chance of a critical hit
                 isPoisoned: 0,
                 poisonTimer: 0,
-                charClass: Class, //The class of the character 'rogue, warrior etc'
+                class: charClass, //The class of the character 'rogue, warrior etc'
                 isDead: 0, //Not sure if necessary
                 inventory: ['none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none'],
                 armor: items.woodArmor(),
@@ -325,13 +326,14 @@ define(['ROT', 'Phaser', 'items', 'lodash'], function(ROT, Phaser, items, _) {
         fairy: function(x, y, level) {
             return this._generic('Fairy', 25, 4, 0, 20, 10, 'humanoid0', 34, 2, x, y, level);
         },
-
+        
         /**
          * Create the player
          * @return {player}
          */
         player: function() {
-            return this._makePlayer('Player', 30, 5, 1, 20, 'warrior');
+            return this._makePlayer(creator.player.name, creator.player.hp, creator.player.mp, creator.player.str,
+                                    creator.player.def, creator.player.crit, creator.player.class);
         }
     };
 });
