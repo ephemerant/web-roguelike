@@ -6,39 +6,13 @@ define(['Phaser'], function (Phaser) {
     var Creator = {
 
         create: function () {
-            var sprites = this.add.sprite(0, 50, 'spriteCard'),
-
-                style = {
-                    font: 'bold 20pt "Lucida Sans Typewriter"',
-                    fill: 'white',
-                    align: 'center'
-                },
-                // Create a label to use as a button
-                rogue_button = this.add.text(80, 50, 'Rogue', style),
-                paladin_button = this.add.text(240, 50, 'Paladin', style),
-                warrior_button = this.add.text(400, 50, 'Warrior', style),
-                engineer_button = this.add.text(560, 50, 'Engineer', style),
-                mage_button = this.add.text(720, 50, 'Mage', style);
-
-            rogue_button.inputEnabled = true;
-            rogue_button.events.onInputUp.add(this.createRogue, this);
-            rogue_button.anchor.setTo(0.5);
-
-            paladin_button.inputEnabled = true;
-            paladin_button.events.onInputUp.add(this.createPaladin, this);
-            paladin_button.anchor.setTo(0.5);
-
-            warrior_button.inputEnabled = true;
-            warrior_button.events.onInputUp.add(this.createWarrior, this);
-            warrior_button.anchor.setTo(0.5);
-
-            engineer_button.inputEnabled = true;
-            engineer_button.events.onInputUp.add(this.createEngineer, this);
-            engineer_button.anchor.setTo(0.5);
-
-            mage_button.inputEnabled = true;
-            mage_button.events.onInputUp.add(this.createMage, this);
-            mage_button.anchor.setTo(0.5);
+            this.add.button(0, 0, 'scroll', this.createRogue, this);
+            this.add.button(160, 0, 'scroll', this.createPaladin, this);
+            this.add.button(320, 0, 'scroll', this.createWarrior, this);
+            this.add.button(480, 0, 'scroll', this.createEngineer, this);
+            this.add.button(640, 0, 'scroll', this.createMage, this);
+                
+            this.add.sprite(0, 50, 'spriteCard');
         },
 
         /**

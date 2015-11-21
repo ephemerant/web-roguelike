@@ -28,6 +28,7 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
                 vm.load.image('inventoryTile', 'assets/inventoryTile.png');
                 vm.load.image('shadow', 'assets/shadow.png');
                 vm.load.image('spriteCard', 'assets/spriteCard.png');
+                vm.load.image('scroll', 'assets/scroll.png');
 
                 vm.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
                 vm.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
