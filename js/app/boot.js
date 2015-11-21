@@ -1,7 +1,7 @@
 /*globals define*/
 
-define(['Phaser', 'preload', 'start', 'game', 'game_over', 'loading', 'creator'],
-    function (Phaser, Preload, Start, Game, Game_Over, Loading, Creator) {
+define(['Phaser', 'preload', 'start', 'game', 'game_over', 'creator'],
+    function (Phaser, Preload, Start, Game, Game_Over, Creator) {
         'use strict';
 
         var SCREEN_WIDTH = window.innerWidth * window.devicePixelRatio,
