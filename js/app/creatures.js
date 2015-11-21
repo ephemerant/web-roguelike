@@ -160,18 +160,21 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                 attack: function (creature) {
                     //This is called when the creature attacks
                     var damage = this.str;
-                    if (Math.floor(Math.random() * this.crit) === 1) {
+                    if (Math.random() * 10 < this.crit) {
                         damage *= 2; // Critical Hit double the damage.
-
                         console.log('CRITICAL HIT!');
-                    }
-                    if (this.name === 'Snake' && Math.floor(Math.random() * 5) === 1) {
-                        creature.isPoisoned = 1;
-                        creature.poisonTimer = 10;
-                        console.log('Player poisoned');
+                        if (this.name === 'Snake') {
+                            creature.isPoisoned = 1;
+                            creature.poisonTimer = 10;
+                            console.log('Player poisoned');
+                        }
                     }
                     damage -= creature.def; //remove player defense
                     damage -= creature.armor.def; // remove player armor from damage
+                    // Ensure player always takes damage
+                    if (damage < 1) {
+                        damage = 1;
+                    }
                     creature.hp -= damage;
 
                     console.log('Creature did ' + damage + ' damage');
@@ -225,8 +228,12 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                  */
                 attack: function (creature) {
                     var damage = this.str;
-                    if (Math.floor(Math.random() * this.crit) === 1) {
+                    if (Math.random() * 10 < this.crit) {
                         damage *= 2; // Critical Hit double the damage.
+                        console.log('PLAYER CRITICAL HIT!');
+                        if (creature.name === 'Skeleton') {
+                            creature.hp = 0;
+                        }
                     }
                     damage += this.weapon.str; //increase damage by weapon
                     damage -= creature.def; // decrease damage by creature defense
@@ -315,7 +322,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         snake: function (x, y, level) {
-            return this._generic('Snake', 8, 5, 1, 20, 10, 'reptile0', 43, 2, x, y, level);
+            return this._generic('Snake', 10, 3, 1, 3, 10, 'reptile0', 43, 2, x, y, level);
         },
 
         /**
@@ -325,7 +332,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         skeleton: function (x, y, level) {
-            return this._generic('Skeleton', 15, 4, 0, 20, 10, 'undead0', 24, 2, x, y, level);
+            return this._generic('Skeleton', 15, 4, 2, 2, 10, 'undead0', 24, 2, x, y, level);
         },
 
         /**
@@ -335,7 +342,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         fairy: function (x, y, level) {
-            return this._generic('Fairy', 25, 4, 0, 20, 10, 'humanoid0', 34, 2, x, y, level);
+            return this._generic('Fairy', 20, 2, 0, 3, 10, 'humanoid0', 34, 2, x, y, level);
         },
 
         /**
