@@ -316,7 +316,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 vm.createDungeon();
                 vm.createPlayer();
                 
-                vm.lightPath();
+                vm.lightPath(dungeon.player.x, dungeon.player.y, dungeon.playerStats.vision * TILE_SIZE);
             },
 
             /**
@@ -683,7 +683,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         });
                     }
                     
-                    Game.lightPath();
+                    Game.lightPath(dungeon.player.x, dungeon.player.y, dungeon.playerStats.vision * TILE_SIZE);
 
                 });
             },
@@ -706,15 +706,15 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * lights dungeon around player
              * @function lightPath
              */
-            lightPath: function() {
-                var x, y, alpha,
-                    vision = 8 * TILE_SIZE;
+            lightPath: function(emiterX, emiterY, range) {
+                var x, y, alpha;
+                    //vision = 8 * TILE_SIZE;
                 // calculate tiles within players visible range    
-                for (x = dungeon.player.x * TILE_SIZE - vision; x < dungeon.player.x * TILE_SIZE + vision; x += TILE_SIZE) {
-                    for (y = dungeon.player.y * TILE_SIZE - vision; y < dungeon.player.y * TILE_SIZE + vision; y += TILE_SIZE) {
+                for (x = emiterX * TILE_SIZE - range; x < emiterX * TILE_SIZE + range; x += TILE_SIZE) {
+                    for (y = emiterY * TILE_SIZE - range; y < emiterY * TILE_SIZE + range; y += TILE_SIZE) {
                         // alpha equals the distance of tile from player, divided by their vision
-                        alpha = Math.sqrt(Math.pow(x - dungeon.player.x * TILE_SIZE, 2) +
-                                          Math.pow(y - dungeon.player.y * TILE_SIZE, 2))/vision;
+                        alpha = Math.sqrt(Math.pow(x - emiterX * TILE_SIZE, 2) +
+                                          Math.pow(y - emiterY * TILE_SIZE, 2))/range;
                         shadows[dungeon._keyFrom(x, y)].alpha = alpha;
                     }
                 }
