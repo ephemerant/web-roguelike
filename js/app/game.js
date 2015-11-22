@@ -733,16 +733,22 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             lightPath: function(emiterX, emiterY, range) {
                 var x, y, alpha;
                 
+                // Array of tiles in player's actual FOV
+                var canSee = dungeon._fovFrom(emiterX, emiterY, range / TILE_SIZE);
+
                 // calculate tiles within player's visible range    
+                // TODO: This can be made more efficient
                 for (x = emiterX * TILE_SIZE - range; x < emiterX * TILE_SIZE + range; x += TILE_SIZE) {
                     for (y = emiterY * TILE_SIZE - range; y < emiterY * TILE_SIZE + range; y += TILE_SIZE) {
-                        // alpha equals the distance of tile from player, divided by their vision
-                        alpha = Math.sqrt(Math.pow(x - emiterX * TILE_SIZE, 2) +
-                                          Math.pow(y - emiterY * TILE_SIZE, 2))/range;
-                        // In case a shadow somehow hasn't been created yet, create it
-                        shadows[dungeon._keyFrom(x, y)] = shadows[dungeon._keyFrom(x, y)] || this.add.sprite(x, y, 'shadow');
-                        // Set alpha based on distance from player
-                        shadows[dungeon._keyFrom(x, y)].alpha = Math.min(alpha, shadows[dungeon._keyFrom(x, y)].alpha);
+                        if (_.contains(canSee, dungeon._keyFrom(x / TILE_SIZE, y / TILE_SIZE))) {
+                            // alpha equals the distance of tile from player, divided by their vision
+                            alpha = Math.sqrt(Math.pow(x - emiterX * TILE_SIZE, 2) +
+                                              Math.pow(y - emiterY * TILE_SIZE, 2))/range;
+                            // In case a shadow somehow hasn't been created yet, create it
+                            shadows[dungeon._keyFrom(x, y)] = shadows[dungeon._keyFrom(x, y)] || this.add.sprite(x, y, 'shadow');
+                            // Set alpha based on distance from player
+                            shadows[dungeon._keyFrom(x, y)].alpha = Math.min(alpha, shadows[dungeon._keyFrom(x, y)].alpha);
+                        }
                     }
                 }
             },
