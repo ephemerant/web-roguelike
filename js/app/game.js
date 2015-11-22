@@ -78,7 +78,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             menuIsOpen: false
         },
 
-        shadows = [],
+        shadows = {},
 
         Game = {
 
@@ -697,7 +697,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
 
                 for (x = 0; x < DUNGEON_WIDTH; x += TILE_SIZE) {
                     for (y = 0; y < DUNGEON_HEIGHT; y += TILE_SIZE) {
-                        shadows[dungeon._keyFrom(x, y)] = this.add.sprite(x, y, 'shadow');
+                        // No point in creating duplicate sprites
+                        shadows[dungeon._keyFrom(x, y)] = shadows[dungeon._keyFrom(x, y)] || this.add.sprite(x, y, 'shadow');
+                        // Reset shadows on floor changes
+                        shadows[dungeon._keyFrom(x, y)].bringToTop();
+                        shadows[dungeon._keyFrom(x, y)].alpha = 1;
                     }
                 }
             },
@@ -712,12 +716,15 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             lightPath: function(emiterX, emiterY, range) {
                 var x, y, alpha;
                 
-                // calculate tiles within players visible range    
+                // calculate tiles within player's visible range    
                 for (x = emiterX * TILE_SIZE - range; x < emiterX * TILE_SIZE + range; x += TILE_SIZE) {
                     for (y = emiterY * TILE_SIZE - range; y < emiterY * TILE_SIZE + range; y += TILE_SIZE) {
                         // alpha equals the distance of tile from player, divided by their vision
                         alpha = Math.sqrt(Math.pow(x - emiterX * TILE_SIZE, 2) +
                                           Math.pow(y - emiterY * TILE_SIZE, 2))/range;
+                        // In case a shadow somehow hasn't been created yet, create it
+                        shadows[dungeon._keyFrom(x, y)] = shadows[dungeon._keyFrom(x, y)] || this.add.sprite(x, y, 'shadow');
+                        // Set alpha based on distance from player
                         shadows[dungeon._keyFrom(x, y)].alpha = alpha;
                     }
                 }
@@ -856,6 +863,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 text_health.text = 'HP: ' + dungeon.playerStats.hp + ' / ' + dungeon.playerStats.max_hp;
                 text_health.bringToTop();
                 text_mana.text = 'MP: ' + dungeon.playerStats.mp + ' / ' + dungeon.playerStats.max_mp;
+                text_mana.bringToTop();
                 fullscreen_button.bringToTop();
             }
         };
