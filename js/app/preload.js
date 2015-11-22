@@ -56,6 +56,10 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
                 // Load Music
                 vm.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
                 vm.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
+                
+                // Fonts
+                vm.load.bitmapFont('wingsofDarkness', 'assets/Fonts/Wings_of_Darkness.png', 'assets/Fonts/Wings_of_Darkness.fnt');
+                vm.load.bitmapFont('fleshWound', 'assets/Fonts/Flesh Wound.png', 'assets/Fonts/Flesh Wound.fnt');
             },
 
             create: function () {

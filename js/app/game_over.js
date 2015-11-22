@@ -10,7 +10,7 @@ define(['Phaser', 'game'], function (Phaser, Game) {
                 height = (600) / 2,
 
                 retry_button = this.add.text(width, height, 'Retry', {
-                    font: 'bold 30pt "Lucida Sans Typewriter"',
+                    font: '30pt wingsofDarkness',
                     fill: 'white',
                     align: 'center'
                 });
@@ -20,7 +20,7 @@ define(['Phaser', 'game'], function (Phaser, Game) {
             retry_button.anchor.setTo(0.5);
 
             this.add.text(width, height - 100, 'GAME OVER', {
-                font: 'bold 50pt "Lucida Sans Typewriter"',
+                font: '50pt wingsofDarkness',
                 fill: 'red',
                 align: 'center'
             }).anchor.setTo(0.5);

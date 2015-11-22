@@ -13,8 +13,8 @@ define(['Phaser'], function (Phaser) {
 
                 // Add Start text to use as button
                 play_button = this.add.text(width, height - 20, 'Start', {
-                    font: 'bold 40pt "Lucida Sans Typewriter"',
-                    fill: 'white',
+                    font: '50pt wingsofDarkness',
+                    fill: 'black',
                     align: 'center'
                 });
 
@@ -24,8 +24,8 @@ define(['Phaser'], function (Phaser) {
 
             // Add Game Title
             this.add.text(width, height - 150, 'The Legend of Cheryl', {
-                font: 'bold 50pt "Lucida Sans Typewriter"',
-                fill: 'green',
+                font: '50pt wingsofDarkness',
+                fill: 'darkgreen',
                 align: 'center'
             }).anchor.setTo(0.5);
         },
