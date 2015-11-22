@@ -146,6 +146,27 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
         vm._spawnItems();
       },
 
+      _fovFrom: function(x, y, r) {
+        var vm = this;
+        /* input callback */
+        var lightPasses = function(_x, _y) {
+          var key = vm._keyFrom(_x, _y);
+          return (key in vm.tiles && !_.contains(vm.doors, key));
+        };
+
+        var fov = new ROT.FOV.PreciseShadowcasting(lightPasses);
+
+        var canSee = [];
+
+        /* output callback */
+        fov.compute(x, y, r, function(_x, _y) {
+          canSee.push(vm._keyFrom(_x, _y));
+        });
+
+        return canSee;
+
+      },
+
       /**
        * Get ROT's current seed
        * @return {boolean}
@@ -316,14 +337,14 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
           creature.y = newY;
           outcome.moved = true;
           outcome.action = true;
-          // "Open" a door, i.e. remove it
+        // "Open" a door, i.e. remove it
         } else if (this._hasDoor(newX, newY)) {
           this.doors.splice(this.doors.indexOf(key), 1);
           // Let phaser know we opened the door
           outcome.door = true;
           outcome.action = true;
-          // Combat
-          // TODO: Place into monster AI
+        // Combat
+        // TODO: Place into monster AI
         } else if (this._hasMonster(newX, newY)) {
           monster = this._getMonster(newX, newY);
           outcome.monster = monster;
@@ -354,7 +375,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             outcome.moved = true;
             outcome.action = true;
           }
-          // Pick up item
+        // Pick up item
         } else if (this._hasItem(newX, newY)) {
           gotitem = this._getItem(newX, newY);
           outcome.gotitem = gotitem;
@@ -603,7 +624,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             walls[key] = tiles.wall_cross_left;
           } else if (_.contains(nearbyWalls, left) && _.contains(nearbyWalls, up) && _.contains(nearbyWalls, down)) {
             walls[key] = tiles.wall_cross_right;
-            // Corners
+          // Corners
           } else if (_.contains(nearbyWalls, down) && _.contains(nearbyWalls, right)) {
             walls[key] = tiles.wall_top_left;
           } else if (_.contains(nearbyWalls, down) && _.contains(nearbyWalls, left)) {
@@ -612,7 +633,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             walls[key] = tiles.wall_bottom_left;
           } else if (_.contains(nearbyWalls, up) && _.contains(nearbyWalls, left)) {
             walls[key] = tiles.wall_bottom_right;
-            // Horizontal / Vertical
+          // Horizontal / Vertical
           } else if (_.contains(nearbyWalls, up) || _.contains(nearbyWalls, down)) {
             walls[key] = tiles.wall_vertical;
           } else if (_.contains(nearbyWalls, left) || _.contains(nearbyWalls, right)) {
@@ -638,7 +659,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             } else if (tile === tiles.wall_cross_right && walls[left] === tiles.wall_cross_left) {
               walls[key] = tiles.wall_vertical;
               walls[left] = tiles.wall_vertical;
-              // Decompose full crosses
+            // Decompose full crosses
             } else if (tile === tiles.wall_cross_right && walls[left] === tiles.wall_cross) {
               walls[key] = tiles.wall_vertical;
               walls[left] = tiles.wall_cross_right;
