@@ -631,7 +631,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                                     bones[kill_key] = Game.add.sprite(result.monster.x *
                                         TILE_SIZE, result.monster.y *
                                         TILE_SIZE, 'objects', 24);
-                                    dungeon.player.sprite.bringToTop();
+                                    bones[kill_key].sendToBack();
+                                    bones[kill_key].moveUp();
                                 }
                             }
                         }
@@ -654,16 +655,22 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                     }
 
                     if (result.drop === true) {
+                        // Monster dropped an item
                         loot[key] = Game.add.sprite(newX * TILE_SIZE,
                             newY * TILE_SIZE,
                             result.droppedItem.sprite,
                             result.droppedItem.frame);
+                        loot[key].sendToBack();
+                        loot[key].moveUp();
                     }
 
                     if (result.item) {
+                        // Picked up an item
                         SND_item.play();
                         remitem = loot[key];
-                        remitem.destroy();
+                        if (remitem) {
+                            remitem.destroy();
+                        }
                         // Display item found
                         Game.displayText(result.gotitem.name, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
                             font: 'bold 18pt "Lucida Sans Typewriter"',
@@ -707,7 +714,17 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             },
             
             /**
-             * lights dungeon around player
+             * Clear all shadow sprites, called on game over
+             */
+            clearShadows: function() {
+                for (var i in shadows) {
+                    shadows[i].destroy();
+                }
+                shadows = {};
+            },
+
+            /**
+             * lights dungeon around player, called after movement
              * @param  {number} emiterX           The x location of the emiter
              * @param  {number} emiterY           The y location of the emiter
              * @param  {number} range             The radius of the light emited
@@ -821,6 +838,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 dungeon.playerStats = creatures.player();
 
                 this.state.start('Game_Over');
+                Game.clearShadows();
             },
 
             /**
