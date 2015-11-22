@@ -43,6 +43,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                 return this.snake(x, y, level); //If all else fails put snake
             }
         },
+
         /**
          * A factory that creates an enemy based upon the given data
          *
@@ -51,6 +52,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @param  {number} str     Strength
          * @param  {number} def     Defense
          * @param  {number} crit    Critical hit ratio
+         * @param  {number} vision  View distance of creature
          * @param  {number} expgain Experience point gain
          * @param  {string} sprite  Sprite sheet name
          * @param  {number} frame   What frame from the spritesheet to use
@@ -60,14 +62,15 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @param  {number} level       current dungeon floor
          * @return {creature}       The created creature object is returned to the caller
          */
-        _generic: function (name, hp, str, def, crit, expgain, sprite, frame, dropchance, x, y, level) {
+        _generic: function (name, hp, str, def, crit, vision, expgain, sprite, frame, dropchance, x, y, level) {
             return {
                 name: name,
                 hp: hp,
                 max_hp: hp,
                 str: str,
                 def: def,
-                crit: crit, //The lower this value is the higher the chance of a critical hit
+                crit: crit,
+                vision: vision,
                 expgain: expgain,
                 sprite: sprite,
                 frame: frame,
@@ -99,6 +102,17 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                 },
 
                 /**
+                 * Basic distance formula between two creatures
+                 * @function tileDistance
+                 * @param  {number} a
+                 * @param  {number} b
+                 * @return {number} distance
+                 */
+                distance: function (charX, charY, targetX, targetY) {
+                    return Math.sqrt(Math.pow(charX - targetX, 2) + Math.pow(charY - targetY, 2));
+                },
+
+                /**
                  * For anything that needs to be called every turn
                  */
                 turnTick: function (dungeon) {
@@ -113,19 +127,33 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                         moved: false,
                         damage: 0
                     };
-                    if (Math.sqrt(((dungeon.player.x - this.x) * (dungeon.player.x - this.x)) + ((dungeon.player.y - this.y) * (dungeon.player.y - this.y))) <= 5) { //Replace 5 with view distance of monster
+                    // Check for player nearby 
+                    if (this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y) <= vision) {
                         result.moved = true;
-                        if (dungeon._isAvailable(this.x - 1, this.y) && Math.sqrt(((dungeon.player.x - (this.x - 1)) * (dungeon.player.x - (this.x - 1))) + ((dungeon.player.y - this.y) * (dungeon.player.y - this.y))) <= Math.sqrt(((dungeon.player.x - this.x) * (dungeon.player.x - this.x)) + ((dungeon.player.y - this.y) * (dungeon.player.y - this.y))))
+                        // Move Left
+                        if (dungeon._isAvailable(this.x - 1, this.y) &&
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x - 1, this.y) <=
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y)) {
                             this.x -= 1;
-                        else if (dungeon._isAvailable(this.x + 1, this.y) && Math.sqrt(((dungeon.player.x - (this.x + 1)) * (dungeon.player.x - (this.x + 1))) + ((dungeon.player.y - this.y) * (dungeon.player.y - this.y))) <= Math.sqrt(((dungeon.player.x - this.x) * (dungeon.player.x - this.x)) + ((dungeon.player.y - this.y) * (dungeon.player.y - this.y))))
+                        // Move Right
+                        } else if (dungeon._isAvailable(this.x + 1, this.y) &&
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x + 1, this.y) <=
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y)) {
                             this.x += 1;
-                        else if (dungeon._isAvailable(this.x, this.y - 1) && Math.sqrt(((dungeon.player.x - this.x) * (dungeon.player.x - this.x)) + ((dungeon.player.y - (this.y - 1)) * (dungeon.player.y - (this.y - 1)))) <= Math.sqrt(((dungeon.player.x - this.x) * (dungeon.player.x - this.x)) + ((dungeon.player.y - this.y) * (dungeon.player.y - this.y))))
+                        // Move Up
+                        } else if (dungeon._isAvailable(this.x, this.y - 1) &&
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y - 1) <=
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y)) {
                             this.y -= 1;
-                        else if (dungeon._isAvailable(this.x, this.y + 1) && Math.sqrt(((dungeon.player.x - this.x) * (dungeon.player.x - this.x)) + ((dungeon.player.y - (this.y + 1)) * (dungeon.player.y - (this.y + 1)))) <= Math.sqrt(((dungeon.player.x - this.x) * (dungeon.player.x - this.x)) + ((dungeon.player.y - this.y) * (dungeon.player.y - this.y))))
+                        // Move Down
+                        } else if (dungeon._isAvailable(this.x, this.y + 1) &&
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y + 1) <=
+                            this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y)) {
                             this.y += 1;
+                        }
                     } else { //wander around
-                        var _x = _.random(-1, 1);
-                        var _y = _.random(-1, 1);
+                        var _x = _.random(-1, 1),
+                            _y = _.random(-1, 1);
                         // Choose to keep either _x or _y
                         if (_.random(0, 1)) {
                             _y = 0;
@@ -165,7 +193,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                         console.log('CRITICAL HIT!');
                         if (this.name === 'Snake') {
                             creature.isPoisoned = 1;
-                            creature.poisonTimer = 10;
+                            creature.poisonTimer = 5;
                             console.log('Player poisoned');
                         }
                     }
@@ -212,7 +240,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                 max_mp: mp,
                 str: str,
                 def: def,
-                crit: crit, //The lower this value is the higher the chance of a critical hit
+                crit: crit,
                 vision: vision,
                 class: charClass, //The class of the character 'rogue, warrior etc'
                 isPoisoned: 0,
@@ -322,7 +350,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         snake: function (x, y, level) {
-            return this._generic('Snake', 10, 3, 1, 3, 10, 'reptile0', 43, 2, x, y, level);
+            return this._generic('Snake', 10, 3, 1, 3, 3, 10, 'reptile0', 43, 2, x, y, level);
         },
 
         /**
@@ -332,7 +360,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         skeleton: function (x, y, level) {
-            return this._generic('Skeleton', 15, 4, 2, 2, 10, 'undead0', 24, 2, x, y, level);
+            return this._generic('Skeleton', 15, 4, 2, 2, 4, 10, 'undead0', 24, 2, x, y, level);
         },
 
         /**
@@ -342,7 +370,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         fairy: function (x, y, level) {
-            return this._generic('Fairy', 20, 2, 0, 3, 10, 'humanoid0', 34, 2, x, y, level);
+            return this._generic('Fairy', 20, 2, 0, 3, 5, 10, 'humanoid0', 34, 2, x, y, level);
         },
 
         /**
