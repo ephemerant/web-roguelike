@@ -742,7 +742,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         // In case a shadow somehow hasn't been created yet, create it
                         shadows[dungeon._keyFrom(x, y)] = shadows[dungeon._keyFrom(x, y)] || this.add.sprite(x, y, 'shadow');
                         // Set alpha based on distance from player
-                        shadows[dungeon._keyFrom(x, y)].alpha = alpha;
+                        shadows[dungeon._keyFrom(x, y)].alpha = Math.min(alpha, shadows[dungeon._keyFrom(x, y)].alpha);
                     }
                 }
             },
