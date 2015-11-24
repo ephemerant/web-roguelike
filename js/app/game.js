@@ -312,10 +312,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 }
                 // Recreate player
                 dungeon.playerStats = creatures.player();
-                
+
                 vm.createDungeon();
                 vm.createPlayer();
-                
+
                 vm.lightPath(dungeon.player.x, dungeon.player.y, dungeon.playerStats.vision * TILE_SIZE);
             },
 
@@ -689,14 +689,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
                         });
                     }
-                    
+
                     Game.lightPath(dungeon.player.x, dungeon.player.y, dungeon.playerStats.vision * TILE_SIZE);
 
                 });
             },
-            
+
             /**
-             * adds black tiles over entire dungeon 
+             * adds black tiles over entire dungeon
              * @function renderShadow
              */
             renderShadow: function() {
@@ -712,7 +712,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                     }
                 }
             },
-            
+
             /**
              * Clear all shadow sprites, called on game over
              */
@@ -732,11 +732,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              */
             lightPath: function(emiterX, emiterY, range) {
                 var x, y, alpha;
-                
+
                 // Array of tiles in player's actual FOV
                 var canSee = dungeon._fovFrom(emiterX, emiterY, range / TILE_SIZE);
 
-                // calculate tiles within player's visible range    
+                // calculate tiles within player's visible range
                 // TODO: This can be made more efficient
                 for (x = emiterX * TILE_SIZE - range; x < emiterX * TILE_SIZE + range; x += TILE_SIZE) {
                     for (y = emiterY * TILE_SIZE - range; y < emiterY * TILE_SIZE + range; y += TILE_SIZE) {
@@ -757,8 +757,15 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * called by inventory button to use selected item if possible
              * @function useItem
              */
-            useItem: function() {
-
+            useItem: function(index) {
+              /*
+              if(inventory.useItem() === 1){
+                return 1;
+              }
+              else {
+                return 0;
+              }
+              */
             },
 
             /**
@@ -786,7 +793,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             y = 500;
                         }
                         // Inventory buttons
-                        inventory.inventoryTiles[i] = this.add.button(x, y, 'inventoryTile', this.useItem, this);
+                        inventory.inventoryTiles[i] = this.add.button(x, y, 'inventoryTile');
                         inventory.inventoryTiles[i].anchor.setTo(0.5, 0.5);
                         inventory.inventoryTiles[i].fixedToCamera = true;
                         // item sprites
@@ -873,6 +880,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                     vm.autoPilot();
                 } else if (!dungeon.player.isMoving) {
                     dungeon.player.sprite.animations.stop();
+                }
+
+                if (inventory.menuIsOpen === true){
+                  //inventory.inventoryTiles[i]
+                  inventory.inventoryTiles.forEach(function(item) {
+                      //console.log(item.name);
+                  });
                 }
                 if (dungeon.playerStats.hp === 0) {
                     this.gameOver();

@@ -74,7 +74,14 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
                  * @return {number}        1 if item used, 0 if item unused (or unusable);
                  */
                 use: function (player) {
-
+                  if (this.name === 'potion'){
+                    player.hp+= 15;
+                    if (player.hp > player.max_hp){
+                      player.hp = player.max_hp;
+                    }
+                    return 1;
+                  }
+                  return 0;
                 }
             };
         },
