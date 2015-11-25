@@ -13,8 +13,8 @@ define(['Phaser'], function (Phaser) {
 
                 // Add Start text to use as button
                 play_button = this.add.text(width, height - 20, 'Start', {
-                    font: '50pt wingsofDarkness',
-                    fill: 'black',
+                    font: '46pt wingsofDarkness',
+                    fill: 'white',
                     align: 'center'
                 });
 
@@ -22,12 +22,43 @@ define(['Phaser'], function (Phaser) {
             play_button.events.onInputUp.add(this.startCreator, this);
             play_button.anchor.setTo(0.5);
 
+            play_button.stroke = 'black';
+            play_button.strokeThickness = 4;
+            play_button.setShadow(2, 2, "#000", 2, true, true);
+
             // Add Game Title
-            this.add.text(width, height - 150, 'The Legend of Cheryl', {
+            var title = this.add.text(width, height - 150, 'The Legend of Cheryl', {
                 font: '50pt wingsofDarkness',
-                fill: 'darkgreen',
+                fill: '#fff',
                 align: 'center'
-            }).anchor.setTo(0.5);
+            });
+
+            title.anchor.setTo(0.5);
+
+            title.stroke = 'black';
+            title.strokeThickness = 4;
+            title.setShadow(2, 2, "#000", 2, true, true);
+
+            // Add color gradient to text
+
+            var grd = play_button.context.createLinearGradient(0, 0, 0, play_button.height);
+
+            //  Add in 2 color stops
+            grd.addColorStop(0, '#fff');   
+            grd.addColorStop(1, '#338');
+
+            //  And apply to the Text
+            play_button.fill = grd;
+
+            grd = title.context.createLinearGradient(0, 0, 0, title.height);
+
+            //  Add in 2 color stops
+            grd.addColorStop(0, '#5f5');   
+            grd.addColorStop(1, '#050');
+
+            //  And apply to the Text
+            title.fill = grd;
+
         },
 
         /**
