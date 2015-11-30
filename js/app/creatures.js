@@ -112,6 +112,10 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                     return Math.sqrt(Math.pow(charX - targetX, 2) + Math.pow(charY - targetY, 2));
                 },
 
+                nextToPlayer: function(dungeon) {
+                    return (Math.abs(this.x - dungeon.player.x) == 1 && (this.y - dungeon.player.y) === 0) || (Math.abs(this.y - dungeon.player.y) == 1 && (this.x - dungeon.player.x) === 0);
+                },
+
                 /**
                  * For anything that needs to be called every turn
                  */
@@ -127,8 +131,12 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                         moved: false,
                         damage: 0
                     };
+                    // Attack the player if it's in an adjacent square
+                    if (this.nextToPlayer(dungeon)) {
+                        result.damage = this.attack(dungeon.playerStats);
+                    }
                     // Check for player nearby 
-                    if (this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y) <= vision) {
+                    else if (this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y) <= vision) {
                         result.moved = true;
                         // Move Left
                         if (dungeon._isAvailable(this.x - 1, this.y) &&
