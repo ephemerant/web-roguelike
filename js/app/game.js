@@ -637,13 +637,6 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             }
                         }
 
-                        // Display damage to player
-                        Game.displayText(result.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
-                            font: 'bold 18pt "Lucida Sans Typewriter"',
-                            fill: 'yellow',
-                            align: 'center'
-                        }, true, 0.5, true);
-
                         // Add delay for next attack - longer than movement delay to avoid accidental attacks
                         dungeon.player.isMoving = true;
 
@@ -688,6 +681,15 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                                 y: monster.y * TILE_SIZE
                             }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
                         });
+
+                        if (tick.damageToPlayer > 0) {
+                            Game.displayText(tick.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
+                                font: 'bold 18pt "Lucida Sans Typewriter"',
+                                fill: 'yellow',
+                                align: 'center'
+                            }, true, 0.5, true);
+                        }
+
                     }
 
                     Game.lightPath(dungeon.player.x, dungeon.player.y, dungeon.playerStats.vision * TILE_SIZE);

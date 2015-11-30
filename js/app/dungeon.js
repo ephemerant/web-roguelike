@@ -350,9 +350,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
           outcome.monster = monster;
           if (monster.isDead === 0) {
             outcome.damageToMonster = this.playerStats.attack(monster);
-            if (monster.isDead === 0) {
-              outcome.damageToPlayer = monster.attack(this.playerStats);
-            } else {
+            if (monster.isDead === 1) {
               outcome.kill = true;
               // Remove the monster from the dictionary - can add a special condition for skeletons
               if (monster.droppedItem !== 'nothing') {
