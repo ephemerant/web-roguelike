@@ -682,7 +682,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
                         });
 
-                        if (tick.damageToPlayer > 0) {
+                        if (tick.damageToPlayer > 0) {                            
+                            SND_hit.play();
+                            // Display total damage given to player by monsters during the turn
                             Game.displayText(tick.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
                                 font: 'bold 18pt "Lucida Sans Typewriter"',
                                 fill: 'yellow',
