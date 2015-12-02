@@ -15,7 +15,8 @@ require.config({
         'preload': '../app/preload',
         'start': '../app/start',
         'boot': '../app/boot',
-        'gameover': '../app/game_over'
+        'gameover': '../app/game_over',
+        'creator': '../app/creator'
     },
     // shim: makes external libraries compatible with requirejs (AMD)
     shim: {
