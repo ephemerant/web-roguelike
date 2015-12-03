@@ -28,15 +28,44 @@
 * Engineer
 * Mage
 
-## Monster Types
+## Monsters
+Undead
+---
+___
+![Skeleton](Bestiary/Skeleton.png)
+Skeleton
+---
+* HP: 10
+* Strength: 4
+* Special notes: Can never truly die.
 
-| Name     | HP  | Strength | Defense | Crit | Exp | Abilities | Gold | Loot |
-| ---      | --- | ---      | ---     | ---  | --- | ---       | ---  | ---  |
-| Snake    | 8   | 5        | 1       | 20   | 10  | Poison    |      |      |
-| Skeleton | 15  | 4        | 0       | 20   | 10  |           |      |      |
-| Fairy    | 25  | 4        | 0       | 20   | 10  |           |      |      |
+These are the remains of previous adventurers. Reanimated by dark magic, they are cursed to forever roam the depths.
 
-## Boss Monsters
+Reptiles
+---
+___
+![Snake](Bestiary/Snake.png)
+Snake
+---
+
+* HP: 15
+* Strength: 5
+* Special notes: Beware their poisonous bite.
+
+They slide along the ground looking for food. Their bite, while not deadly, is harmful. Proper armor is recommended.
+
+Fey
+---
+___
+![Fairy](Bestiary/Fairy.png)
+Fairy
+---
+* HP: 25
+* Strength: 5
+* Special notes: Teleport around the dungeon
+
+Don't be fooled by their dainty appearance. These magical creatures are masters of magic and can warp space to their will.
+
 
 ## Items
 

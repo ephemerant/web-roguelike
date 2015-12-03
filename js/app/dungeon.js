@@ -107,7 +107,9 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
           area = 8;
         }
 
-        tiles = calculateTiles(TILE_UNIT * 3 * area);
+        // Using this for the demo, to show off different environments:
+        tiles = calculateTiles(TILE_UNIT * 3 * _.random(1, 8));
+        // tiles = calculateTiles(TILE_UNIT * 3 * area);
 
         crosses = [tiles.wall_cross_bottom,
           tiles.wall_cross_top,

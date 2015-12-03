@@ -171,7 +171,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 text_mana.stroke = "black";
                 text_mana.strokeThickness = 6;
                 // Make text starting at index 3 blue
-                text_mana.addColor('blue', 3);
+                text_mana.addColor('#59f', 3);
                 // Move text with camera
                 text_mana.fixedToCamera = true;
 
