@@ -201,7 +201,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                         console.log('CRITICAL HIT!');
                         if (this.name === 'Snake') {
                             creature.isPoisoned = 1;
-                            creature.poisonTimer = 5;
+                            creature.poisonTimer = 3;
                             console.log('Player poisoned');
                         }
                     }
