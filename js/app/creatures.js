@@ -255,8 +255,8 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                 poisonTimer: 0,
                 isDead: 0, //Not sure if necessary
                 inventory: ['none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none'],
-                armor: items.woodArmor(),
-                weapon: items.stoneSpear(),
+                armor: items.WoodArmor(),
+                weapon: items.StoneSpear(),
                 /**
                  * The playerattacks the creature that is passed to it. Calculations are made to determine damage given.
                  * @param  {creature} creature        The creature that is being attacked

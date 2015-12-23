@@ -23,12 +23,16 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
                 }).anchor.setTo(0.5);
 
                 vm.load.image('splash', 'assets/splash.png');
+                vm.load.spritesheet('removeItem', 'assets/removeItem.png', 24, 24);
                 vm.load.image('fullscreen', 'assets/fs.png');
                 vm.load.image('dungeon', 'assets/Wall.png');
                 vm.load.image('inventoryTile', 'assets/inventoryTile.png');
                 vm.load.image('shadow', 'assets/shadow.png');
                 vm.load.image('spriteCard', 'assets/spriteCard.png');
                 vm.load.image('scroll', 'assets/Scroll.png');
+
+                //status effects
+                vm.load.image('STAT_poison', 'assets/GUI/poison.png');
 
                 vm.load.spritesheet('door', 'assets/Door.png', TILE_SIZE, TILE_SIZE);
                 vm.load.spritesheet('door_open', 'assets/Door_Open.png', TILE_SIZE, TILE_SIZE);
@@ -54,6 +58,7 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
                 vm.load.audio('SND_teleport', ['assets/sounds/Teleport.ogg', 'assets/sounds/Teleport.wav']);
                 vm.load.audio('SND_item', 'assets/sounds/Item.wav');
                 vm.load.audio('SND_potion', 'assets/sounds/Potion.wav');
+                vm.load.audio('SND_click', 'assets/sounds/Click.wav');
                 // Load Music
                 vm.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
                 vm.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
