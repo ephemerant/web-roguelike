@@ -135,7 +135,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                     if (this.nextToPlayer(dungeon)) {
                         result.damage = this.attack(dungeon.playerStats);
                     }
-                    // Check for player nearby 
+                    // Check for player nearby
                     else if (this.distance(dungeon.player.x, dungeon.player.y, this.x, this.y) <= vision) {
                         result.moved = true;
                         // Move Left
@@ -255,8 +255,8 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
                 poisonTimer: 0,
                 isDead: 0, //Not sure if necessary
                 inventory: ['none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none'],
-                armor: items.woodArmor(),
-                weapon: items.stoneSpear(),
+                armor: items.WoodArmor(),
+                weapon: items.StoneSpear(),
                 /**
                  * The playerattacks the creature that is passed to it. Calculations are made to determine damage given.
                  * @param  {creature} creature        The creature that is being attacked
@@ -358,7 +358,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         snake: function (x, y, level) {
-            return this._generic('Snake', 10, 3, 1, 3, 3, 10, 'reptile0', 43, 2, x, y, level);
+            return this._generic('Snake', 10, 3, 1, 3, 3, 10, 'reptile0', 43, 5, x, y, level);
         },
 
         /**
@@ -368,7 +368,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         skeleton: function (x, y, level) {
-            return this._generic('Skeleton', 15, 4, 2, 2, 4, 10, 'undead0', 24, 2, x, y, level);
+            return this._generic('Skeleton', 15, 4, 2, 2, 4, 10, 'undead0', 24, 20, x, y, level);
         },
 
         /**
@@ -378,7 +378,7 @@ define(['ROT', 'Phaser', 'items', 'lodash', 'creator'], function (ROT, Phaser, i
          * @return {creature}
          */
         fairy: function (x, y, level) {
-            return this._generic('Fairy', 20, 2, 0, 3, 5, 10, 'humanoid0', 34, 2, x, y, level);
+            return this._generic('Fairy', 20, 2, 0, 3, 5, 10, 'humanoid0', 34, 3, x, y, level);
         },
 
         /**

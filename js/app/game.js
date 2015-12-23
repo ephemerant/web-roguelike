@@ -44,6 +44,11 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         // Key to open inventory
         inventory_key,
 
+        //status effects
+        STATUS_poison,
+
+        removeItem_button,
+
         fullscreen_button,
         // Square that follows mouse
         marker,
@@ -55,6 +60,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         bones = {},
         loot = {},
 
+        //whether the inventory is in remove mode or not
+        removing = false,
+
         //These variables are for volume control.
         //TODO: Allow user to choose volume.
         sound_volume = 0.4,
@@ -64,6 +72,8 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         SND_teleport,
         SND_hit,
         SND_item,
+        SND_potion,
+        SND_click,
         //Music
         MUS_dungeon1,
         MUS_dungeon2,
@@ -148,7 +158,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 SND_teleport = vm.add.audio('SND_teleport');
                 SND_hit = vm.add.audio('SND_hit');
                 SND_item = vm.add.audio('SND_item');
-                SND_hit.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
+                SND_potion = vm.add.audio('SND_potion');
+                SND_click = vm.add.audio('SND_click');
+                SND_hit.volume = SND_click.volume = SND_potion.volume = SND_teleport.volume = SND_door_open.volume = sound_volume;
 
                 // Text
                 style = {
@@ -175,8 +187,13 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 // Move text with camera
                 text_mana.fixedToCamera = true;
 
-                fullscreen_button = Game.add.button(SCREEN_WIDTH - 64, 0, 'fullscreen', this.gofull, this);
+                fullscreen_button = vm.add.button(SCREEN_WIDTH - 64, 0, 'fullscreen', this.gofull, this);
                 fullscreen_button.fixedToCamera = true;
+
+                //status effects
+                STATUS_poison = vm.add.sprite(10, 50, 'STAT_poison',0);
+                STATUS_poison.fixedToCamera = true;
+                STATUS_poison.visible = false;
             },
 
             /**
@@ -682,7 +699,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             }, INPUT_DELAY, Phaser.Easing.Quadratic.InOut, true);
                         });
 
-                        if (tick.damageToPlayer > 0) {                            
+                        if (tick.damageToPlayer > 0) {
                             SND_hit.play();
                             // Display total damage given to player by monsters during the turn
                             Game.displayText(tick.damageToPlayer, SCREEN_WIDTH / 2 + 15, SCREEN_HEIGHT / 2, {
@@ -760,16 +777,52 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             /**
              * called by inventory button to use selected item if possible
              * @function useItem
+             * @param {item} the item to be used
+             * @return {Number} 0 or 1. Returns 1 if sucessful. Returns 0 if something goes wrong
              */
             useItem: function(index) {
-              /*
-              if(inventory.useItem() === 1){
-                return 1;
+              if(dungeon.playerStats.inventory[index.invNum] !== 'none'){
+                //check to see if remove mode is set
+                if(removing === true){
+                  inventory.label[index.invNum].destroy();
+                  inventory.item[index.invNum].destroy();
+                  dungeon.playerStats.inventory[index.invNum] = 'none';
+                  return 1;
+                }
+                else{
+                  var result = dungeon.playerStats.inventory[index.invNum].use(dungeon.playerStats);
+                  if(result.success === 1){
+                    if(result.playSound=== 'potion'){
+                      SND_potion.play();
+                    }
+
+                    if(result.removeType === 0 ){
+                      inventory.label[index.invNum].destroy();
+                      inventory.item[index.invNum].destroy();
+                      dungeon.playerStats.inventory[index.invNum] = 'none';
+                      return 1;
+                    }
+                  }
+                  else{
+                    console.log(result.explainFail);
+                    return 0;
+                  }
+                }
               }
-              else {
-                return 0;
+              return 0;
+            },
+
+            setRemove: function(){
+              if (removing === false){
+                removing = true;
+                SND_click.play();
+                removeItem_button.frame = 1;
               }
-              */
+              else{
+                removing = false;
+                SND_click.play();
+                removeItem_button.frame = 0;
+              }
             },
 
             /**
@@ -784,8 +837,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         inventory.label[i].destroy();
                         inventory.item[i].destroy();
                         inventory.inventoryTiles[i].destroy();
+
                     }
                     // Menu is closed
+                    removeItem_button.destroy();
+
+                    removing = false;
                     inventory.menuIsOpen = false;
                 } else {
                     for (i = 0; i < dungeon.playerStats.inventory.length; i += 1) {
@@ -800,6 +857,10 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         inventory.inventoryTiles[i] = this.add.button(x, y, 'inventoryTile');
                         inventory.inventoryTiles[i].anchor.setTo(0.5, 0.5);
                         inventory.inventoryTiles[i].fixedToCamera = true;
+                        inventory.inventoryTiles[i].inputEnabled = true;
+                        this.setInvNum(inventory.inventoryTiles[i], i);
+                        inventory.inventoryTiles[i].events.onInputDown.add(this.useItem, inventory.inventoryTiles[i].invNum);
+
                         // item sprites
                         tempItem = dungeon.playerStats.inventory[i];
                         inventory.item[i] = this.add.sprite(x, y - 15, tempItem.sprite, tempItem.frame);
@@ -818,10 +879,23 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         inventory.label[i].strokeThickness = 2;
                         inventory.label[i].fixedToCamera = true;
                         inventory.label[i].anchor.setTo(0.5);
-                        // Menu is open
-                        inventory.menuIsOpen = true;
                     }
+                    //button to activate remove items
+                    removeItem_button = this.add.button(100, 500, 'removeItem', this.setRemove, this);
+                    removeItem_button.fixedToCamera = true;
+
+                    // Menu is open
+                    inventory.menuIsOpen = true;
                 }
+            },
+
+            /**
+             * This function exists because javascript does cannot set array indexes during loops
+             * It performs 'closure'
+             * @function setInvNum
+             */
+            setInvNum: function(itemToIndex,index){
+              itemToIndex.invNum = index;
             },
 
             /**
@@ -894,6 +968,12 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 }
                 if (dungeon.playerStats.hp === 0) {
                     this.gameOver();
+                }
+                if (dungeon.playerStats.isPoisoned === 1){
+                  STATUS_poison.visible = true;
+                }
+                else{
+                  STATUS_poison.visible = false;
                 }
             },
 

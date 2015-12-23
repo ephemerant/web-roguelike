@@ -11,7 +11,7 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
         //array of spritesheets
         _sprites: ['Armor.png', 'Potion.png', 'LongWep.png'],
 
-        _items_area1: ['potion'],
+        _items_area1: ['Health Potion', 'Antivenom'],
 
         /**
          * Choose a random item from a pool, based on the level given
@@ -20,7 +20,7 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          */
         _pickItem: function (level) {
             if (level >= 1 && level <= 5) { //pick a random item from section 1
-                return this._items_area1[Math.floor(Math.random())];
+                return this._items_area1[Math.floor(Math.random()* this._items_area1.length)];
             }
             return (this._items_area1[Math.floor(Math.random())]); //If calculation breaks then just return area1
         },
@@ -34,8 +34,11 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          */
         _putItem: function (level, x, y) {
             var itemName = this._pickItem(level);
-            if (itemName === 'potion') {
-                return this.potion(x, y);
+            if (itemName === 'Health Potion') {
+                return this.Potion(x, y);
+            }
+            if (itemName === 'Antivenom') {
+              return this.Antivenom(x, y);
             }
         },
 
@@ -71,17 +74,44 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
                 /**
                  * the player tries to use the item
                  * @param  {creature} player the player
-                 * @return {number}        1 if item used, 0 if item unused (or unusable);
+                 * @return {array} returns results of function (each variable is explained in code)
                  */
                 use: function (player) {
-                  if (this.name === 'potion'){
+                  var returnarray = {
+                    success: 0, // 1 if item is used, 0 if item cannot be used
+                    explainFail: '', // if the item cannot be used, this is where the reason is explained
+                    removeType: 0, /*this tells the game how to handle the item after this function is called.
+                                  0: (default) the item will be removed from inventory after use
+                                  1: the item will remain in the inventory after use.
+                                  */
+                    playSound: ''// tells the game what sound should be played (if any)
+                  };
+                  if (this.name === 'Health Potion'){
                     player.hp+= 15;
                     if (player.hp > player.max_hp){
                       player.hp = player.max_hp;
                     }
-                    return 1;
+                    returnarray.success = 1;
+                    returnarray.playSound = 'potion';
+                    return returnarray;
                   }
-                  return 0;
+
+                  if (this.name === 'Antivenom'){
+                    if (player.isPoisoned === 1){
+                      player.isPoisoned = 0;
+                      player.poisonTimer = 0;
+                      returnarray.success = 1;
+                      returnarray.playSound = 'potion';
+                      return returnarray;
+                    }
+                    else{
+                      returnarray.explainFail = 'You are not poisoned.';
+                      return returnarray;
+                    }
+                  }
+
+                  returnarray.explainFail= "Oops we're not certain why you can't use this... sorry (you shouldn't see this message)";
+                  return returnarray;
                 }
             };
         },
@@ -92,8 +122,18 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          * @param  {nubmer} y the y position of the item in the dungeon
          * @return {item}   returns the item to the caller
          */
-        potion: function (x, y) {
+        Potion: function (x, y) {
             return this._generic('Health Potion', 'potion', 1, 0, 0, x, y);
+        },
+
+        /**
+         * creates an antivenom item
+         * @param  {number} x the x position of the item in the dungeon
+         * @param  {nubmer} y the y position of the item in the dungeon
+         * @return {item}   returns the item to the caller
+         */
+        Antivenom: function(x, y){
+          return this._generic('Antivenom', 'potion', 5, 0, 0, x, y);
         },
 
         /**
@@ -102,7 +142,7 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          * @param  {nubmer} y the y position of the item in the dungeon
          * @return {item}   returns the item to the caller
          */
-        woodArmor: function (x, y) {
+        WoodArmor: function (x, y) {
             return this._generic('Wooden Armor', 'armor', 0, 0, 1, x, y);
         },
 
@@ -112,7 +152,7 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          * @param  {nubmer} y the y position of the item in the dungeon
          * @return {item}   returns the item to the caller
          */
-        stoneSpear: function (x, y) {
+        StoneSpear: function (x, y) {
             return this._generic('Stone Spear', 'longwep', 1, 1, 0, x, y);
         }
     };
