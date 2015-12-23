@@ -21,7 +21,7 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
                     fill: 'white',
                     align: 'center'
                 }).anchor.setTo(0.5);
-                
+
                 vm.load.image('splash', 'assets/splash.png');
                 vm.load.image('fullscreen', 'assets/fs.png');
                 vm.load.image('dungeon', 'assets/Wall.png');
@@ -53,10 +53,11 @@ define(['Phaser', 'dungeon'], function (Phaser, dungeon) {
                 vm.load.audio('SND_hit', 'assets/sounds/Hit.wav');
                 vm.load.audio('SND_teleport', ['assets/sounds/Teleport.ogg', 'assets/sounds/Teleport.wav']);
                 vm.load.audio('SND_item', 'assets/sounds/Item.wav');
+                vm.load.audio('SND_potion', 'assets/sounds/Potion.wav');
                 // Load Music
                 vm.load.audio('MUS_dungeon1', ['assets/music/Adventure_Meme.ogg', 'assets/music/Adventure_Meme.mp3']);
                 vm.load.audio('MUS_dungeon2', ['assets/music/Wonderful_Nightmare.ogg', 'assets/music/Wonderful_Nightmare.mp3']);
-                
+
                 // Fonts
                 vm.load.bitmapFont('wingsofDarkness', 'assets/Fonts/Wings_of_Darkness.png', 'assets/Fonts/Wings_of_Darkness.fnt');
                 vm.load.bitmapFont('fleshWound', 'assets/Fonts/Flesh Wound.png', 'assets/Fonts/Flesh Wound.fnt');

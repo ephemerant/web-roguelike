@@ -71,17 +71,30 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
                 /**
                  * the player tries to use the item
                  * @param  {creature} player the player
-                 * @return {number}        1 if item used, 0 if item unused (or unusable);
+                 * @return {array} returns results of function (each variable is explained in code)
                  */
                 use: function (player) {
-                  if (this.name === 'potion'){
+                  var returnarray = {
+                    success: 0, // 1 if item is used, 0 if item cannot be used
+                    explainFail: '', // if the item cannot be used, this is where the reason is explained
+                    removeType: 0, /*this tells the game how to handle the item after this function is called.
+                                  0: (default) the item will be removed from inventory after use
+                                  1: the item will remain in the inventory after use.
+                                  */
+                    playSound: ''// tells the game what sound should be played (if any)
+                  };
+                  if (this.name === 'Health Potion'){
                     player.hp+= 15;
                     if (player.hp > player.max_hp){
                       player.hp = player.max_hp;
                     }
-                    return 1;
+                    returnarray.success = 1;
+                    returnarray.playSound = 'potion';
+                    return returnarray;
                   }
-                  return 0;
+
+                  returnarray.explainfail= "Oops we're not certain you can't use this... sorry (you shouldn't see this message)";
+                  return returnarray;
                 }
             };
         },
