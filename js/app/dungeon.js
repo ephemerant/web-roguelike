@@ -301,7 +301,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
           result.damageToPlayer += action.damage;
         });
 
-        // Apply any effects to the player 
+        // Apply any effects to the player
 
         return result;
       },
@@ -524,7 +524,7 @@ define(['ROT', 'lodash', 'creatures', 'items'], function(ROT, _, creatures, item
             y = _.random(room._y1, room._y2);
           if (vm._isAvailable(x, y) && Math.random() > 0.9) {
             // 10% chance to spawn in a given room
-            vm.loot.push(items._putItem(dungeon.level, x, y));
+            vm.loot.push(items._putItem(dungeon.level, x, y, false));
           }
         });
       },
