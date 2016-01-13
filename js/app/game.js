@@ -89,6 +89,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
         },
 
         shadows = {},
+        shadowscleared = false,
 
         Game = {
 
@@ -574,6 +575,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                             // TODO: Swap stairs out with a portal?
                             is_pathing = false;
                             SND_teleport.play();
+                            shadowscleared = false;
                             dungeon.level += 1;
                             Game.createDungeon();
                             Game.displayText('LEVEL ' + dungeon.level, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3, {
@@ -710,9 +712,9 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                         }
 
                     }
-
-                    Game.lightPath(dungeon.player.x, dungeon.player.y, dungeon.playerStats.vision * TILE_SIZE);
-
+                    if (shadowscleared === false){
+                      Game.lightPath(dungeon.player.x, dungeon.player.y, dungeon.playerStats.vision * TILE_SIZE);
+                    }
                 });
             },
 
@@ -800,6 +802,14 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                       inventory.label[index.invNum].destroy();
                       inventory.item[index.invNum].destroy();
                       dungeon.playerStats.inventory[index.invNum] = 'none';
+                      return 1;
+                    }
+                    else if (result.removeType === 2){
+                      Game.clearShadows();
+                      inventory.label[index.invNum].destroy();
+                      inventory.item[index.invNum].destroy();
+                      dungeon.playerStats.inventory[index.invNum] = 'none';
+                      shadowscleared = true;
                       return 1;
                     }
                   }
@@ -972,7 +982,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
                 if (dungeon.playerStats.isPoisoned === 1){
                   STATUS_poison.visible = true;
                 }
-                else{
+                else if (dungeon.playerStats.isPoisoned === 0){
                   STATUS_poison.visible = false;
                 }
             },
