@@ -9,10 +9,10 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          */
 
         //array of spritesheets
-        _sprites: ['Armor.png', 'Potion.png', 'LongWep.png', 'Map.png', 'Chest.png'],
+        _sprites: ['Armor.png', 'Potion.png', 'LongWep.png', 'Map.png', 'Chest.png', 'Key.png'],
 
         _items_chest1: ['Old Map'],
-        _items_area1: ['Health Potion', 'Antivenom', 'Old Map'],
+        _items_area1: ['Health Potion', 'Antivenom', 'Old Map', 'Key'],
 
         /**
          * Choose a random item from a pool, based on the level given
@@ -64,6 +64,10 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
 
             if (itemName === 'Old Map'){
               return this.OldMap(x, y);
+            }
+
+            if (itemName ==='Key'){
+              return this.Key(x, y);
             }
         },
 
@@ -167,6 +171,11 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
                     returnarray.removeType = 2;
                     return returnarray;
                   }
+                  if (this.name === 'Key'){
+                    returnarray.removeType = 1;
+                    returnarray.explainFail = 'You cannot use a key, simply walk into a lock to use it.';
+                    return returnarray;
+                  }
 
                   returnarray.explainFail= "Oops we're not certain why you can't use this... sorry (you shouldn't see this message)";
                   return returnarray;
@@ -194,6 +203,10 @@ define(['ROT', 'Phaser'], function (ROT, Phaser) {
          */
         Antivenom: function(x, y){
           return this._generic('Antivenom', 'potion', 5, 0, 0, x, y);
+        },
+
+        Key: function(x, y){
+          return this._generic('Key', 'key', 0, 0, 0, x, y);
         },
 // ----------------------------------------------------------------------
 //Special ITEMS

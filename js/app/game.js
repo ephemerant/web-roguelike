@@ -321,6 +321,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
             createWorld: function() {
                 // Used to avoid conflicts
                 var vm = this;
+                shadowscleared = false;
                 dungeon.level = 1;
                 MUS_dungeon2.stop();
                 MUS_dungeon1.play();
@@ -928,6 +929,7 @@ define(['Phaser', 'lodash', 'dungeon', 'ROT'], function(Phaser, _, Dungeon, ROT)
              * @function gameOver
              */
             gameOver: function() {
+                shadowscleared = false;
                 if (MUS_dungeon1.isPlaying === true) {
                     MUS_dungeon1.stop();
                 } else {
