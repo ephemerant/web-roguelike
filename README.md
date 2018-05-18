@@ -2,11 +2,11 @@
 
 A Web-based, JavaScript Roguelike group project created for the Introduction to Software Engineering class at IUS.
 
-* [Playable version](http://ephemerant.github.io/C346-Roguelike/)
-* [Unit tests](http://ephemerant.github.io/C346-Roguelike/index.tests.html)
-* [User Documentation](https://github.com/ephemerant/C346-Roguelike/blob/master/docs/user.md)
-* [API Documentation](http://ephemerant.github.io/C346-Roguelike/out/index.html)
-* [Trello](https://trello.com/b/XISltL05/c346-roguelike)
+* [Playable version](http://ephemerant.github.io/web-roguelike/)
+* [Unit tests](http://ephemerant.github.io/web-roguelike/index.tests.html)
+* [User Documentation](https://github.com/ephemerant/web-roguelike/blob/master/docs/user.md)
+* [API Documentation](http://ephemerant.github.io/web-roguelike/out/index.html)
+* [Trello](https://trello.com/b/XISltL05/web-roguelike)
 
 ### Collaborators:
 * [Clayton McGuire](https://github.com/ephemerant)
